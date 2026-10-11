@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.tv
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -21,15 +21,14 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,13 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.foundation.focusable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -79,6 +75,7 @@ internal val TvFramePadding = PaddingValues(horizontal = 56.dp, vertical = 32.dp
 fun TvHomeScreen(
     onOpenTitle: (mediaType: String, id: Int) -> Unit,
     onResume: (WatchProgress) -> Unit,
+    onProviders: () -> Unit,
     onSearch: () -> Unit,
     onSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -106,7 +103,7 @@ fun TvHomeScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Menu row: brand + search + settings, all D-pad reachable.
+        // Menu row: brand + providers + search + settings, all D-pad reachable.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,6 +118,12 @@ fun TvHomeScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(Modifier.weight(1f))
+            TvMenuChip(
+                icon = Icons.Default.Extension,
+                label = stringResource(R.string.mk_title),
+                onClick = onProviders
+            )
+            Spacer(Modifier.width(16.dp))
             TvMenuChip(
                 icon = Icons.Default.Search,
                 label = stringResource(R.string.nav_search),
@@ -200,14 +203,19 @@ private fun TvMenuChip(
 ) {
     val focused = rememberTvFocused()
     val scale = tvFocusScale(focused.value, rememberTvAnimated())
-    androidx.compose.material3.Surface(
+    Surface(
         onClick = onClick,
         shape = CircleShape,
-        color = if (focused.value) MaterialTheme.colorScheme.secondaryContainer
+        color = if (focused.value) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = if (focused.value) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onSurface,
+        border = if (focused.value) {
+            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+        } else null,
+        shadowElevation = if (focused.value) 8.dp else 0.dp,
         modifier = Modifier
-            .then(Modifier.scale(scale))
-            .focusable()
+            .scale(scale)
             .onFocusChanged { focused.value = it.isFocused }
     ) {
         Row(
@@ -216,7 +224,11 @@ private fun TvMenuChip(
         ) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
             Spacer(Modifier.width(8.dp))
-            Text(text = label, style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = if (focused.value) FontWeight.Bold else FontWeight.Normal
+            )
         }
     }
 }
@@ -282,15 +294,10 @@ private fun TvHero(
             }
             Row(modifier = Modifier.padding(top = 20.dp)) {
                 if (progress != null) {
-                    Button(
+                    TvButton(
                         onClick = onResume,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        ),
-                        modifier = Modifier
-                            .height(60.dp)
-                            .focusRequester(playRequester)
+                        focusRequester = playRequester,
+                        modifier = Modifier.height(60.dp)
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -301,11 +308,10 @@ private fun TvHero(
                     }
                     Spacer(Modifier.width(16.dp))
                 }
-                OutlinedButton(
+                TvOutlinedButton(
                     onClick = onOpenDetails,
-                    modifier = Modifier
-                        .height(60.dp)
-                        .focusRequester(detailsRequester)
+                    focusRequester = detailsRequester,
+                    modifier = Modifier.height(60.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.st_details),
@@ -471,7 +477,7 @@ internal fun TvErrorState(onRetry: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(20.dp))
-        Button(onClick = onRetry, modifier = Modifier.height(56.dp)) {
+        TvButton(onClick = onRetry, modifier = Modifier.height(56.dp)) {
             Text(
                 text = stringResource(R.string.action_try_again),
                 style = MaterialTheme.typography.titleMedium
