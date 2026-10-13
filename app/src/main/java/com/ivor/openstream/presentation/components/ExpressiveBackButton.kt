@@ -1,6 +1,5 @@
 package com.ivor.openstream.presentation.components
 
-import androidx.compose.foundation.shape.CircleShape
 import com.ivor.openstream.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material.icons.Icons
@@ -17,13 +16,12 @@ import androidx.compose.ui.graphics.Color
 fun ExpressiveBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer
 ) {
     FilledTonalIconButton(
         onClick = onClick,
         modifier = modifier,
-        shape = CircleShape,
         colors = IconButtonDefaults.filledTonalIconButtonColors(
             containerColor = containerColor,
             contentColor = contentColor

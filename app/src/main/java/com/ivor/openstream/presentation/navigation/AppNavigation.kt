@@ -59,6 +59,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 import com.ivor.openstream.presentation.player.session.MiniPlayerViewModel
@@ -99,8 +100,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 
 sealed class Screen(
@@ -213,6 +212,8 @@ fun AppNavigation(
     }
     // Tablets keep the rail on every screen but the player; phones only show the toolbar on tabs.
     val showRail = !isCompact && !isOnPlayer
+    // "Remove animations" kills screen transitions as well as in-screen motion.
+    val animatedNav = !com.ivor.openstream.presentation.components.ExpressiveMotion.reducedMotion()
 
     CompositionLocalProvider(LocalWindowWidthClass provides windowSizeClass) {
     Row(modifier = Modifier.fillMaxSize()) {
@@ -234,7 +235,7 @@ fun AppNavigation(
                     val selected = screen.route == lastTabRoute
                     WideNavigationRailItem(
                         selected = selected,
-                        railExpanded = false,
+                        railExpanded = windowSizeClass == WindowWidthSizeClass.Expanded,
                         onClick = {
                             if (selected && screen.route == Screen.Search.route) {
                                 navController.currentBackStackEntry?.savedStateHandle?.set(
@@ -258,10 +259,10 @@ fun AppNavigation(
                 navController = navController,
                 startDestination = Screen.Home.route,
                 modifier = Modifier.fillMaxSize(),
-                enterTransition = NavTransitions.enter,
-                exitTransition = NavTransitions.exit,
-                popEnterTransition = NavTransitions.popEnter,
-                popExitTransition = NavTransitions.popExit
+                enterTransition = { with(NavTransitions) { enter(animatedNav) } },
+                exitTransition = { with(NavTransitions) { exit(animatedNav) } },
+                popEnterTransition = { with(NavTransitions) { popEnter(animatedNav) } },
+                popExitTransition = { with(NavTransitions) { popExit(animatedNav) } }
             ) {
                 composable(Screen.Home.route) {
                     HomeScreen(
@@ -572,9 +573,9 @@ fun AppNavigation(
                     content = {
                         val shownIndex = scrubIndex ?: currentIndex
                         bottomNavItems.forEachIndexed { index, screen ->
-                            val selected = index == shownIndex
+                            val isSelected = index == shownIndex
                             val onClick = {
-                                if (selected && screen.route == Screen.Search.route) {
+                                if (isSelected && screen.route == Screen.Search.route) {
                                     navController.currentBackStackEntry?.savedStateHandle?.set(
                                         "focusSearch",
                                         System.currentTimeMillis()
@@ -582,12 +583,15 @@ fun AppNavigation(
                                 }
                                 openTab(screen)
                             }
-                            if (selected) {
-                                FilledIconButton(onClick = onClick, modifier = Modifier.size(50.dp)) {
+                            // Icon-only tabs: expose which one is active so screen readers
+                            // announce e.g. "Home, selected" instead of five bare buttons.
+                            val tabSemantics = Modifier.semantics { selected = isSelected }
+                            if (isSelected) {
+                                FilledIconButton(onClick = onClick, modifier = Modifier.size(50.dp).then(tabSemantics)) {
                                     Icon(screen.icon!!, contentDescription = screen.labelRes?.let { stringResource(it) } ?: screen.label)
                                 }
                             } else {
-                                IconButton(onClick = onClick, modifier = Modifier.size(50.dp)) {
+                                IconButton(onClick = onClick, modifier = Modifier.size(50.dp).then(tabSemantics)) {
                                     Icon(screen.icon!!, contentDescription = screen.labelRes?.let { stringResource(it) } ?: screen.label)
                                 }
                             }
