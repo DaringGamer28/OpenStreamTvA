@@ -52,9 +52,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Request notification permission for Android 13+
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+
+        // Mirror the saved theme into AppCompat's night mode so the cold-start window
+        // (DayNight theme) matches the Compose theme even with forced light/dark.
+        // Runtime switches stay recompose-only; this is re-applied on every creation.
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+            when (appSettings.current.themeMode) {
+                ThemeMode.LIGHT -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                ThemeMode.DARK -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                ThemeMode.SYSTEM -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
+
+        // First launch only; re-asking on every rotation while the user decides is a bug.
+        if (savedInstanceState == null &&
+            android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
+        ) {
             androidx.core.app.ActivityCompat.requestPermissions(
                 this,
                 arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),

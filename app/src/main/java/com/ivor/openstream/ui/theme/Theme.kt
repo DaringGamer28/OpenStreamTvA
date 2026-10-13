@@ -12,7 +12,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.expressiveLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -80,10 +79,15 @@ fun OpenStreamTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            @Suppress("DEPRECATION")
-            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            // Bars stay transparent for edge-to-edge; only the icon appearance follows the
+            // app's resolved theme (not the system's), so forced dark/light never gets
+            // invisible bar icons. Previously this set an opaque statusBarColor, which
+            // fought enableEdgeToEdge(), and never set the navigation bar appearance.
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            WindowCompat.getInsetsController(window, view).let { controller ->
+                controller.isAppearanceLightStatusBars = !darkTheme
+                controller.isAppearanceLightNavigationBars = !darkTheme
+            }
         }
     }
 
