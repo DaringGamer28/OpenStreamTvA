@@ -400,9 +400,13 @@ class DetailsViewModel @Inject constructor(
         downloadOptionsJob?.cancel()
         val representative = episodes.first()
         val label = when {
-            episodes.size > 1 -> episodes.size.toString()
+            episodes.size > 1 -> null
             mediaType == "movie" -> null
-            else -> "S${representative.seasonNumber} E${representative.episodeNumber}"
+            else -> context.getString(
+                R.string.season_episode_format,
+                representative.seasonNumber,
+                representative.episodeNumber
+            )
         }
         _downloadOptions.value = DownloadOptionsUiState(
             title = details.name,
@@ -437,6 +441,12 @@ class DetailsViewModel @Inject constructor(
     fun closeDownloadOptions() {
         downloadOptionsJob?.cancel()
         _downloadOptions.value = null
+    }
+
+    /** Re-runs source resolution for the picker's episodes (empty-state retry). */
+    fun retryDownloadOptions() {
+        val episodes = _downloadOptions.value?.episodes ?: return
+        openDownloadOptions(episodes)
     }
 
     /** Downloads the picker's episodes from [server] (single) or preferring it (season batch). */

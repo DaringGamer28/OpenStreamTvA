@@ -59,6 +59,7 @@ import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.AlertDialog
@@ -122,10 +123,13 @@ fun DownloadsScreen(
             title = { Text(stringResource(R.string.dl_delete_all_confirm)) },
             text = { Text(stringResource(R.string.dl_delete_all_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmDeleteAll = false
-                    viewModel.removeAll()
-                }) { Text(stringResource(R.string.action_delete_all), color = MaterialTheme.colorScheme.error) }
+                TextButton(
+                    onClick = {
+                        confirmDeleteAll = false
+                        viewModel.removeAll()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete_all)) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeleteAll = false }) { Text(stringResource(R.string.action_cancel)) }
@@ -134,27 +138,60 @@ fun DownloadsScreen(
     }
 
     if (pendingDelete != null) {
-        AlertDialog(
-            onDismissRequest = { pendingDeleteId = null },
-            title = { Text(stringResource(R.string.dl_delete_confirm)) },
-            text = { Text(stringResource(R.string.dl_delete_body, pendingDelete.headline())) },
-            confirmButton = {
-                TextButton(onClick = {
-                    val target = pendingDelete
-                    pendingDeleteId = null
-                    if (target != null) viewModel.remove(target)
-                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
-            }
-        )
+        val cancelling = pendingDelete.status.let { it == DownloadStatus.QUEUED || it == DownloadStatus.RUNNING || it == DownloadStatus.RESOLVING || it == DownloadStatus.PAUSED }
+        if (cancelling) {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteId = null },
+                title = { Text(stringResource(R.string.dl_cancel_confirm)) },
+                text = { Text(stringResource(R.string.dl_cancel_body, pendingDelete.describe())) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val target = pendingDelete
+                            pendingDeleteId = null
+                            if (target != null) viewModel.remove(target)
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.cd_cancel_download)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_keep)) }
+                }
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteId = null },
+                title = { Text(stringResource(R.string.dl_delete_confirm)) },
+                text = { Text(stringResource(R.string.dl_delete_body, pendingDelete.describe())) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val target = pendingDelete
+                            pendingDeleteId = null
+                            if (target != null) viewModel.remove(target)
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.action_delete)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
+                }
+            )
+        }
     }
 
     if (pendingGroup != null) {
         AlertDialog(
             onDismissRequest = { pendingGroupKey = null },
-            title = { Text(stringResource(R.string.dl_delete_group_confirm, pendingGroup.title)) },
+            title = {
+                Text(
+                    pluralStringResource(
+                        R.plurals.dl_delete_episodes,
+                        pendingGroup.items.size,
+                        pendingGroup.items.size
+                    )
+                )
+            },
             text = {
                 Text(
                     stringResource(
@@ -165,11 +202,14 @@ fun DownloadsScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
-                    val group = pendingGroup
-                    pendingGroupKey = null
-                    if (group != null) viewModel.removeGroup(group)
-                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+                TextButton(
+                    onClick = {
+                        val group = pendingGroup
+                        pendingGroupKey = null
+                        if (group != null) viewModel.removeGroup(group)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete)) }
             },
             dismissButton = {
                 TextButton(onClick = { pendingGroupKey = null }) { Text(stringResource(R.string.action_cancel)) }
@@ -707,6 +747,12 @@ private fun EmptyDownloads() {
 
 private fun DownloadEntity.headline(): String =
     if (mediaType == "movie") displayTitle else "$displayTitle · S$season E$episode"
+
+/** Plain words for confirmation dialogs: "Title" or "Title · Season 1, Episode 5". */
+@Composable
+private fun DownloadEntity.describe(): String =
+    if (mediaType == "movie") displayTitle
+    else "$displayTitle · ${stringResource(R.string.season_episode_format, season, episode)}"
 
 @Composable
 private fun statusLine(download: DownloadEntity): String = when (download.status) {

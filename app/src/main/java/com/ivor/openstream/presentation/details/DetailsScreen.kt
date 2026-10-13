@@ -120,6 +120,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
@@ -491,10 +492,11 @@ fun DetailsScreen(
         )
     }
     downloadOptions?.let { options ->
-        DownloadOptionsDialog(
+        DownloadOptionsSheet(
             state = options,
             onDismiss = viewModel::closeDownloadOptions,
-            onDownload = viewModel::downloadFromServer
+            onDownload = viewModel::downloadFromServer,
+            onRetry = viewModel::retryDownloadOptions
         )
     }
 }
@@ -957,7 +959,7 @@ private fun PrimaryActions(
                 busy = activeDownloads > 0,
                 onClick = onDownload,
                 onLongClick = onDownloadLongPress,
-                longClickLabel = stringResource(R.string.dl_hold_options),
+                longClickLabel = if (activeDownloads > 0) null else stringResource(R.string.dl_hold_options),
                 modifier = Modifier.weight(1f)
             )
             if (hasTrailer && trailer != null) {
@@ -968,6 +970,14 @@ private fun PrimaryActions(
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
+        if (activeDownloads == 0) {
+            Text(
+                text = stringResource(R.string.dl_hold_tip),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp, start = 4.dp, end = 4.dp)
+            )
         }
         Row(
             modifier = Modifier
@@ -1047,6 +1057,7 @@ private fun ActionTile(
         contentColor = if (highlighted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
         modifier = modifier
             .heightIn(min = 72.dp)
+            .clip(ExpressiveShapes.medium)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick?.let { action ->
@@ -1055,7 +1066,6 @@ private fun ActionTile(
                         action()
                     }
                 },
-                onClickLabel = label,
                 onLongClickLabel = longClickLabel
             )
     ) {
@@ -1288,6 +1298,7 @@ private fun EpisodeCard(
     val haptics = LocalHapticFeedback.current
     val markWatchedLabel = stringResource(if (watched) R.string.action_mark_unwatched else R.string.action_mark_watched)
     val downloadActionLabel = stringResource(R.string.action_download)
+    val chooseSourceLabel = stringResource(R.string.dl_choose_source)
     val episodeNumberText = stringResource(R.string.misc_episode_number, episode.episodeNumber)
     val meta = listOfNotNull(
         episode.runtime?.takeIf { it > 0 }?.let { formatRuntime(it) },
@@ -1314,7 +1325,8 @@ private fun EpisodeCard(
                     CustomAccessibilityAction(markWatchedLabel) {
                         onSetWatched(!watched); true
                     },
-                    CustomAccessibilityAction(downloadActionLabel) { onDownload(); true }
+                    CustomAccessibilityAction(downloadActionLabel) { onDownload(); true },
+                    CustomAccessibilityAction(chooseSourceLabel) { onDownloadLongPress(); true }
                 )
             }
             .padding(8.dp)
@@ -1385,6 +1397,14 @@ private fun EpisodeCard(
                 onClick = {
                     menuOpen = false
                     onDownload()
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(chooseSourceLabel) },
+                enabled = released,
+                onClick = {
+                    menuOpen = false
+                    onDownloadLongPress()
                 }
             )
         }
@@ -1471,23 +1491,31 @@ private fun EpisodeDownloadAction(
                 strokeWidth = 3.dp
             )
         }
-        else -> IconButton(
-            // Tap and hold are handled by the modifier so both stay on one target.
-            onClick = {},
-            modifier = Modifier.combinedClickable(
-                onClick = onDownload,
-                onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onDownloadLongPress()
-                },
-                onClickLabel = stringResource(R.string.action_download),
-                onLongClickLabel = stringResource(R.string.dl_hold_options)
-            )
-        ) {
-            Icon(
-                if (download?.status == DownloadStatus.FAILED) Icons.Default.Refresh else Icons.Default.Download,
-                contentDescription = if (download?.status == DownloadStatus.FAILED) stringResource(R.string.action_retry_download) else stringResource(R.string.action_download)
-            )
+        else -> {
+            val isRetry = download?.status == DownloadStatus.FAILED
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .combinedClickable(
+                        onClick = onDownload,
+                        onLongClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onDownloadLongPress()
+                        },
+                        onClickLabel = stringResource(
+                            if (isRetry) R.string.action_retry_download else R.string.action_download
+                        ),
+                        onLongClickLabel = stringResource(R.string.dl_hold_options),
+                        role = Role.Button
+                    )
+            ) {
+                Icon(
+                    if (isRetry) Icons.Default.Refresh else Icons.Default.Download,
+                    contentDescription = null
+                )
+            }
         }
     }
 }

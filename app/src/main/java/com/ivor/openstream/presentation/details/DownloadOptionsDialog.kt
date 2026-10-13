@@ -5,15 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
@@ -22,14 +22,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -49,70 +52,100 @@ import com.ivor.openstream.ui.theme.ExpressiveShapes
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun DownloadOptionsDialog(
+fun DownloadOptionsSheet(
     state: DownloadOptionsUiState,
     onDismiss: () -> Unit,
-    onDownload: (VideoServer) -> Unit
+    onDownload: (VideoServer) -> Unit,
+    onRetry: () -> Unit
 ) {
-    var qualityFilter by rememberSaveable { mutableStateOf<String?>(null) }
-    val qualities = state.servers.map { it.quality.filterLabel() }.distinct()
-        .sortedWith(compareByDescending<String> { qualityRank(it) }.thenBy { it })
+    val context = LocalContext.current
+    val episodeKey = state.episodes.firstOrNull()?.id ?: 0
+    var qualityFilter by rememberSaveable(episodeKey) { mutableStateOf<String?>(null) }
+    val qualities = state.servers.map { it.quality }.distinct()
+        .sortedWith(compareByDescending<StreamQuality> { it.rank }.thenBy { it.label })
+    if (qualityFilter != null && qualities.none { it.name == qualityFilter }) {
+        qualityFilter = null
+    }
     val visible = state.servers.filter {
-        qualityFilter == null || it.quality.filterLabel() == qualityFilter
+        qualityFilter == null || it.quality.name == qualityFilter
     }
     val subtitle = when {
-        state.isBatch -> stringResource(R.string.dl_pick_batch_hint)
-        else -> stringResource(R.string.dl_pick_source_hint)
+        state.isBatch -> stringResource(
+            R.string.dl_batch_count,
+            state.episodes.size
+        ).let { "${state.title} · $it" }
+        state.episodeLabel != null -> "${state.title} · ${state.episodeLabel}"
+        else -> state.title
     }
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = {
-            Column {
-                Text(stringResource(R.string.dl_pick_source_title))
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+        ) {
+            item(key = "header") {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.dl_pick_source_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = subtitle,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_close))
+                    }
+                }
+            }
+
+            item(key = "hint") {
                 Text(
-                    text = if (state.episodeLabel != null && !state.isBatch) {
-                        "${state.title} · ${state.episodeLabel}"
-                    } else if (state.isBatch) {
-                        "${state.title} · ${state.episodes.size}"
-                    } else {
-                        state.title
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    text = stringResource(
+                        if (state.isBatch) R.string.dl_pick_batch_hint else R.string.dl_pick_source_hint
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 460.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (state.isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    Text(
-                        text = if (state.totalProviders > 0) {
-                            stringResource(
-                                R.string.src_progress,
-                                state.servers.size,
-                                state.completedProviders,
-                                state.totalProviders
-                            )
-                        } else {
-                            stringResource(R.string.player_checking_sources)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+
+            if (state.isLoading) {
+                item(key = "loading") {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        Text(
+                            text = if (state.totalProviders > 0) {
+                                stringResource(
+                                    R.string.src_progress,
+                                    state.servers.size,
+                                    state.completedProviders,
+                                    state.totalProviders
+                                )
+                            } else {
+                                stringResource(R.string.player_checking_sources)
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-                if (qualities.size > 1) {
+            }
+
+            if (qualities.size > 1) {
+                item(key = "filters") {
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 4.dp)
+                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 4.dp)
                     ) {
                         item {
                             FilterChip(
@@ -122,91 +155,92 @@ fun DownloadOptionsDialog(
                                 shape = ExpressiveShapes.small
                             )
                         }
-                        items(qualities, key = { it }) { quality ->
+                        items(qualities, key = { it.name }) { quality ->
                             FilterChip(
-                                selected = qualityFilter == quality,
-                                onClick = { qualityFilter = quality },
-                                label = { Text(quality) },
+                                selected = qualityFilter == quality.name,
+                                onClick = { qualityFilter = quality.name },
+                                label = {
+                                    Text(
+                                        if (quality == StreamQuality.UNKNOWN) {
+                                            stringResource(R.string.src_adaptive)
+                                        } else {
+                                            quality.label
+                                        }
+                                    )
+                                },
                                 shape = ExpressiveShapes.small
                             )
                         }
                     }
                 }
-                if (visible.isNotEmpty()) {
-                    LazyColumn(
+            }
+
+            if (visible.isNotEmpty()) {
+                itemsIndexed(visible, key = { _, server -> server.id }) { index, server ->
+                    SegmentedListItem(
+                        onClick = { onDownload(server) },
+                        shapes = ListItemDefaults.segmentedShapes(index = index, count = visible.size),
+                        colors = ListItemDefaults.segmentedColors(),
+                        supportingContent = {
+                            Text(
+                                "${server.providerName} · ${server.sourceSummary(context)}",
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.Download,
+                                contentDescription = null
+                            )
+                        }
+                    ) {
+                        Text(
+                            server.name,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            } else if (state.servers.isNotEmpty()) {
+                item(key = "no-quality-match") {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f, fill = false),
-                        verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
+                            .padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        itemsIndexed(visible, key = { _, server -> server.id }) { index, server ->
-                            SegmentedListItem(
-                                onClick = { onDownload(server) },
-                                shapes = ListItemDefaults.segmentedShapes(index = index, count = visible.size),
-                                colors = ListItemDefaults.segmentedColors(),
-                                supportingContent = {
-                                    Text(
-                                        "${server.providerName} · ${server.sourceSummary(LocalContext.current)}",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                trailingContent = {
-                                    IconButton(onClick = { onDownload(server) }) {
-                                        Icon(
-                                            Icons.Default.Download,
-                                            contentDescription = stringResource(
-                                                R.string.cd_download_from,
-                                                server.name
-                                            )
-                                        )
-                                    }
-                                }
-                            ) {
-                                Text(
-                                    server.name,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                        Text(
+                            text = stringResource(R.string.dl_no_quality_match),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        TextButton(onClick = { qualityFilter = null }) {
+                            Text(stringResource(R.string.action_show_all))
                         }
                     }
-                } else if (state.isComplete) {
-                    Text(
-                        text = stringResource(R.string.dl_no_source),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
                 }
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            Row {
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
+            } else if (state.isComplete) {
+                item(key = "empty") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.dl_no_source),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Button(onClick = onRetry) {
+                            Text(stringResource(R.string.action_search_again))
+                        }
+                    }
+                }
             }
         }
-    )
-}
-
-private fun StreamQuality.filterLabel(): String = when (this) {
-    StreamQuality.UNKNOWN -> "Adaptive"
-    else -> label
-}
-
-private fun qualityRank(label: String): Int = when (label) {
-    "4K" -> 6
-    "1440p" -> 5
-    "1080p" -> 4
-    "HD" -> 3
-    "720p" -> 2
-    "480p" -> 1
-    else -> 0
+    }
 }
