@@ -18,8 +18,13 @@ When a doc and the code disagree, trust the code, then fix the doc.
 `local.properties` holds `TMDB_API_KEY` (falls back to `DEMO_KEY`) and optionally
 `VIDKING_API_BASE_URL`. `assembleRelease` signs when `OPENSTREAM_KEYSTORE_PATH`,
 `OPENSTREAM_KEYSTORE_PASSWORD`, `OPENSTREAM_KEY_ALIAS` and `OPENSTREAM_KEY_PASSWORD` are set in the
-environment. `.github/workflows/release-apk.yml` builds a signed APK artifact on the owner's pushes
-to `main` and on manual dispatch (any branch); there are no other CI checks.
+environment.
+`.github/workflows/build.yml` builds debug and release APKs as artifacts on pushes to (and pull
+requests into) `main` and `beta`, behind an `authorize` job so fork PRs from outsiders build
+nothing. A pull request builds its APKs as artifacts and posts nothing; the push that lands it on
+`beta` posts the signed APK and its changelog to Telegram. There are no other CI checks.
+`codeql.yml` scans `main` and `beta`; `telegram-notify.yml` announces stars and published
+releases. Detail: `docs/CI.md`.
 
 ## Toolchain
 
@@ -176,6 +181,28 @@ guides, component list) live in `docs/design/`.
 - Don't drive the app on the emulator unless asked; the maintainer tests. `installDebug` when asked.
 - Never use emojis: not in code, comments, commits, PRs, changelogs or messages sent anywhere.
 - Commit and push only when asked. End commit messages with the attribution trailer in use.
+- Every pull request targets `beta`, never `main`. Branch new work from `beta` and open the PR
+  with `gh pr create --base beta`; never change a base to `main`, and retarget a PR already
+  opened against `main` (`gh pr edit --base beta`) instead of merging it. `beta` is the branch
+  testers follow: a PR builds its APKs as artifacts and posts nothing, and the push that lands it
+  on `beta` posts the signed APK and its changelog to Telegram. `main` is what releases are cut
+  from and moves only through the `beta` -> `main` PR the owner opens. Merge into `beta` with a
+  merge commit, never a squash: a squashed message folds several `Changelog:` sections into one
+  and the testers' post comes out mangled (`docs/CI.md`).
+- Commits that change an APK end with a `Changelog:` section of `- ` bullets describing only
+  user-visible changes, each standing alone on one line. Write them for someone using the app,
+  not a developer: short, plain words, what they will notice. Open with a clear verb (Added,
+  Fixed, Improved), describe a fix as the bug looked to them, no internals, class or file names,
+  numbers they cannot see, or filler. Only git trailers (`Token: value` lines) may follow it;
+  `build.yml` publishes everything after the marker otherwise. Omit it for docs/CI/refactors.
+
+```text
+Fix the queue jumping back to the top after a reorder
+
+Changelog:
+- Fixed the queue scrolling back to the top after you move a song.
+```
+
 - Compile before calling work done, and say plainly what was and wasn't verified.
 - Treat playback and source changes as high risk; name any undocumented third-party behavior they
   rely on.
