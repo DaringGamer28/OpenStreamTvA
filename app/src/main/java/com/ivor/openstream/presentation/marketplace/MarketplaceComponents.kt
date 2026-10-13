@@ -28,8 +28,6 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -413,24 +411,10 @@ fun RepoCard(
             }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(stringResource(R.string.st_extensions_count, extensionCount)) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
-                AssistChip(
-                    onClick = {},
-                    enabled = false,
-                    label = { Text(lastSyncLabel(repo.lastSyncedAt)) },
-                    colors = AssistChipDefaults.assistChipColors(
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                )
+                // Static facts, not actions: plain pills instead of disabled chips, so
+                // screen readers hear text rather than a disabled button.
+                StaticMetaChip(stringResource(R.string.st_extensions_count, extensionCount))
+                StaticMetaChip(lastSyncLabel(repo.lastSyncedAt))
             }
             if (repo.error != null) {
                 Spacer(Modifier.height(10.dp))
@@ -441,6 +425,21 @@ fun RepoCard(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun StaticMetaChip(text: String) {
+    Surface(
+        shape = ExpressiveShapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+        )
     }
 }
 

@@ -62,7 +62,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -146,8 +146,8 @@ fun DownloadsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background),
-                // Leaves room for the floating navigation toolbar.
-                contentPadding = PaddingValues(start = gutter, end = gutter, bottom = 136.dp),
+                // Leaves room for the floating navigation toolbar and the mini player.
+                contentPadding = PaddingValues(start = gutter, end = gutter, bottom = bottomContentPadding),
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap)
             ) {
                 item(key = "header") { DownloadsHeader(state.completedCount, onBackClick) }
@@ -352,11 +352,9 @@ private fun StorageCard(
                 }
             }
             if (total > 0) {
-                LinearProgressIndicator(
+                LinearWavyProgressIndicator(
                     progress = { (usedBytes.toFloat() / total).coerceIn(0.01f, 1f) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
             }
@@ -579,7 +577,7 @@ private fun LibraryGroup(
                             }
                         ) {
                             Text(
-                                text = "E${item.episode}" + (item.episodeTitle?.let { " · $it" } ?: ""),
+                                text = stringResource(R.string.li_episode_short, item.episode) + (item.episodeTitle?.let { " · $it" } ?: ""),
                                 fontWeight = FontWeight.SemiBold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -650,8 +648,9 @@ private fun EmptyDownloads() {
     }
 }
 
+@Composable
 private fun DownloadEntity.headline(): String =
-    if (mediaType == "movie") displayTitle else "$displayTitle · S$season E$episode"
+    if (mediaType == "movie") displayTitle else "$displayTitle · ${stringResource(R.string.li_episode_code, season, episode)}"
 
 @Composable
 private fun statusLine(download: DownloadEntity): String = when (download.status) {

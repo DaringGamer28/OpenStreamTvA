@@ -44,7 +44,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -81,12 +81,13 @@ import com.ivor.openstream.R
 import com.ivor.openstream.domain.model.MarketplaceExtension
 import com.ivor.openstream.domain.model.MarketplaceSort
 import com.ivor.openstream.presentation.components.ExpressiveBackButton
+import com.ivor.openstream.presentation.components.ExpressiveMotion
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 
-private enum class MarketplaceTab(val label: String, @StringRes val labelRes: Int) {
-    BROWSE("Browse", R.string.mk_tab_browse),
-    INSTALLED("Installed", R.string.mk_tab_installed),
-    REPOSITORIES("Repositories", R.string.mk_tab_repositories)
+private enum class MarketplaceTab(@StringRes val labelRes: Int) {
+    BROWSE(R.string.mk_tab_browse),
+    INSTALLED(R.string.mk_tab_installed),
+    REPOSITORIES(R.string.mk_tab_repositories)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -160,7 +161,7 @@ fun MarketplaceScreen(
             }
 
             AnimatedVisibility(visible = state.catalog.isSyncing) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
             when (selectedTab) {
@@ -633,6 +634,8 @@ private fun SummaryStat(label: String, value: String) {
 
 @Composable
 private fun RefreshAction(isSyncing: Boolean, onClick: () -> Unit) {
+    // Static icon with "Remove animations": the syncing bar above already signals progress.
+    val reduced = ExpressiveMotion.reducedMotion()
     val transition = rememberInfiniteTransition(label = "MarketplaceRefresh")
     val rotation by transition.animateFloat(
         initialValue = 0f,
@@ -646,7 +649,7 @@ private fun RefreshAction(isSyncing: Boolean, onClick: () -> Unit) {
             contentDescription = stringResource(R.string.action_refresh_repositories),
             modifier = Modifier
                 .size(24.dp)
-                .rotate(if (isSyncing) rotation else 0f)
+                .rotate(if (isSyncing && !reduced) rotation else 0f)
         )
     }
 }
