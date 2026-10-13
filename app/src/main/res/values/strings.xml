@@ -910,4 +910,15 @@
     <string name="st_smooth_motion_max_fps_hint">Target frame rate cap for motion interpolation.</string>
     <string name="st_smooth_motion_fps_val">Up to %1$d fps</string>
     <string name="st_smooth_motion_unsupported">Not supported on this device\'s GPU (requires OpenGL ES 3.2).</string>
+
+    <!-- Issue 19: delete confirmation + download source picker -->
+    <string name="dl_delete_confirm">Delete download?</string>
+    <string name="dl_delete_body">Remove %1$s from this device? You’ll need to download it again to watch offline.</string>
+    <string name="dl_delete_group_confirm">Delete %1$s?</string>
+    <string name="dl_delete_group_body">Remove %1$d videos of %2$s from this device? You’ll need to download them again to watch offline.</string>
+    <string name="dl_pick_source_title">Choose download source</string>
+    <string name="dl_pick_source_hint">Tap a source to download from it. The list keeps updating while sources respond.</string>
+    <string name="dl_pick_batch_hint">Season download prefers the provider and quality you tap. Episodes with no match fall back to the automatic source.</string>
+    <string name="dl_batch_queued">Downloading %1$d episodes… Find them in Downloads.</string>
+    <string name="dl_hold_options">Hold to choose the source</string>
 </resources>

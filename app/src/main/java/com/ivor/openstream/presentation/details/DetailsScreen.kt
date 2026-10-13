@@ -170,6 +170,7 @@ fun DetailsScreen(
     val rating by viewModel.rating.collectAsState()
     var showListSheet by remember { mutableStateOf(false) }
     var confirmUnwatched by remember { mutableStateOf(false) }
+    val downloadOptions by viewModel.downloadOptions.collectAsState()
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         viewModel.messages.collect { snackbar.showSnackbar(it) }
@@ -255,6 +256,17 @@ fun DetailsScreen(
                                     ?.let(viewModel::downloadEpisodes)
                             }
                         },
+                        onDownloadLongPress = {
+                            if (activeDownloads > 0) {
+                                onOpenDownloads()
+                            } else if (isMovie) {
+                                viewModel.openDownloadOptions(listOf(details.asMovieEpisode()))
+                            } else {
+                                state.selectedSeasonDetails?.episodes?.filter { it.isReleased() }
+                                    ?.takeIf { it.isNotEmpty() }
+                                    ?.let(viewModel::openDownloadOptions)
+                            }
+                        },
                         trailer = trailers.firstOrNull(),
                         modifier = actionsModifier
                     )
@@ -314,6 +326,7 @@ fun DetailsScreen(
                         download = episodeDownloads[episode.seasonNumber to episode.episodeNumber],
                         onPlay = { onPlayClick(episode.seasonNumber, episode.episodeNumber) },
                         onDownload = { viewModel.downloadEpisodes(listOf(episode)) },
+                        onDownloadLongPress = { viewModel.openDownloadOptions(listOf(episode)) },
                         onSetWatched = { watched -> viewModel.setWatched(episode, watched) }
                     )
                 }
@@ -475,6 +488,13 @@ fun DetailsScreen(
                 }) { Text(stringResource(R.string.action_mark_unwatched)) }
             },
             dismissButton = { TextButton(onClick = { confirmUnwatched = false }) { Text(stringResource(R.string.action_cancel)) } }
+        )
+    }
+    downloadOptions?.let { options ->
+        DownloadOptionsDialog(
+            state = options,
+            onDismiss = viewModel::closeDownloadOptions,
+            onDownload = viewModel::downloadFromServer
         )
     }
 }
@@ -863,6 +883,7 @@ private fun PrimaryActions(
     onSave: () -> Unit,
     onShare: () -> Unit,
     onDownload: () -> Unit,
+    onDownloadLongPress: () -> Unit = {},
     showRemind: Boolean,
     reminderSet: Boolean,
     onToggleReminder: () -> Unit,
@@ -935,6 +956,8 @@ private fun PrimaryActions(
                 label = downloadLabel,
                 busy = activeDownloads > 0,
                 onClick = onDownload,
+                onLongClick = onDownloadLongPress,
+                longClickLabel = stringResource(R.string.dl_hold_options),
                 modifier = Modifier.weight(1f)
             )
             if (hasTrailer && trailer != null) {
@@ -1013,14 +1036,28 @@ private fun ActionTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     highlighted: Boolean = false,
-    busy: Boolean = false
+    busy: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
+    longClickLabel: String? = null
 ) {
+    val haptics = LocalHapticFeedback.current
     Surface(
-        onClick = onClick,
         shape = ExpressiveShapes.medium,
         color = if (highlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = if (highlighted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-        modifier = modifier.heightIn(min = 72.dp)
+        modifier = modifier
+            .heightIn(min = 72.dp)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick?.let { action ->
+                    {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        action()
+                    }
+                },
+                onClickLabel = label,
+                onLongClickLabel = longClickLabel
+            )
     ) {
         Column(
             modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp),
@@ -1242,6 +1279,7 @@ private fun EpisodeCard(
     download: DownloadEntity?,
     onPlay: () -> Unit,
     onDownload: () -> Unit,
+    onDownloadLongPress: () -> Unit,
     onSetWatched: (Boolean) -> Unit
 ) {
     val released = episode.isReleased()
@@ -1317,7 +1355,7 @@ private fun EpisodeCard(
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
-                if (released) EpisodeDownloadAction(download, onDownload)
+                if (released) EpisodeDownloadAction(download, onDownload, onDownloadLongPress)
             }
             if (episode.overview.isNotBlank()) {
                 Text(
@@ -1399,10 +1437,15 @@ private fun BoxScope.EpisodeThumbnailOverlay(number: Int, progress: WatchProgres
 }
 
 /** Download state for one episode: start, progress, or done. Failed downloads can be retried here. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun EpisodeDownloadAction(download: DownloadEntity?, onDownload: () -> Unit) {
+private fun EpisodeDownloadAction(
+    download: DownloadEntity?,
+    onDownload: () -> Unit,
+    onDownloadLongPress: () -> Unit
+) {
     val downloadingDescription = stringResource(R.string.cd_downloading_percent, download?.progress ?: 0)
+    val haptics = LocalHapticFeedback.current
     when (download?.status) {
         DownloadStatus.COMPLETED -> Icon(
             Icons.Default.DownloadDone,
@@ -1428,7 +1471,19 @@ private fun EpisodeDownloadAction(download: DownloadEntity?, onDownload: () -> U
                 strokeWidth = 3.dp
             )
         }
-        else -> IconButton(onClick = onDownload) {
+        else -> IconButton(
+            // Tap and hold are handled by the modifier so both stay on one target.
+            onClick = {},
+            modifier = Modifier.combinedClickable(
+                onClick = onDownload,
+                onLongClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDownloadLongPress()
+                },
+                onClickLabel = stringResource(R.string.action_download),
+                onLongClickLabel = stringResource(R.string.dl_hold_options)
+            )
+        ) {
             Icon(
                 if (download?.status == DownloadStatus.FAILED) Icons.Default.Refresh else Icons.Default.Download,
                 contentDescription = if (download?.status == DownloadStatus.FAILED) stringResource(R.string.action_retry_download) else stringResource(R.string.action_download)

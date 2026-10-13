@@ -97,9 +97,16 @@ fun DownloadsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var confirmDeleteAll by rememberSaveable { mutableStateOf(false) }
+    var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingGroupKey by rememberSaveable { mutableStateOf<String?>(null) }
     var subtitlesForId by rememberSaveable { mutableStateOf<String?>(null) }
     val subtitlesViewModel: DownloadSubtitlesViewModel = hiltViewModel()
     val subtitlesFor = subtitlesForId?.let { id -> state.library.flatMap { it.items }.firstOrNull { it.downloadId == id } }
+    val pendingDelete = pendingDeleteId?.let { id ->
+        state.library.flatMap { it.items }.firstOrNull { it.downloadId == id }
+            ?: state.inProgress.firstOrNull { it.downloadId == id }
+    }
+    val pendingGroup = pendingGroupKey?.let { key -> state.library.firstOrNull { it.key == key } }
 
     if (subtitlesFor != null) {
         DownloadSubtitlesSheet(
@@ -126,6 +133,50 @@ fun DownloadsScreen(
         )
     }
 
+    if (pendingDelete != null) {
+        AlertDialog(
+            onDismissRequest = { pendingDeleteId = null },
+            title = { Text(stringResource(R.string.dl_delete_confirm)) },
+            text = { Text(stringResource(R.string.dl_delete_body, pendingDelete.headline())) },
+            confirmButton = {
+                TextButton(onClick = {
+                    val target = pendingDelete
+                    pendingDeleteId = null
+                    if (target != null) viewModel.remove(target)
+                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
+
+    if (pendingGroup != null) {
+        AlertDialog(
+            onDismissRequest = { pendingGroupKey = null },
+            title = { Text(stringResource(R.string.dl_delete_group_confirm, pendingGroup.title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.dl_delete_group_body,
+                        pendingGroup.items.size,
+                        pendingGroup.title
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val group = pendingGroup
+                    pendingGroupKey = null
+                    if (group != null) viewModel.removeGroup(group)
+                }) { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingGroupKey = null }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -138,6 +189,8 @@ fun DownloadsScreen(
                 onBackClick = onBackClick,
                 onDownloadClick = onDownloadClick,
                 onDeleteAll = { confirmDeleteAll = true },
+                onDelete = { pendingDeleteId = it.downloadId },
+                onDeleteGroup = { pendingGroupKey = it.key },
                 onSubtitles = { subtitlesForId = it.downloadId }
             )
         } else {
@@ -180,7 +233,7 @@ fun DownloadsScreen(
                             onPause = { viewModel.pause(item) },
                             onResume = { viewModel.resume(item) },
                             onRetry = { viewModel.retry(item) },
-                            onCancel = { viewModel.remove(item) },
+                            onCancel = { pendingDeleteId = item.downloadId },
                             modifier = Modifier.animateItem()
                         )
                     }
@@ -194,8 +247,8 @@ fun DownloadsScreen(
                             subtitleCount = state::subtitleCount,
                             onPlay = onDownloadClick,
                             onSubtitles = { subtitlesForId = it.downloadId },
-                            onDelete = viewModel::remove,
-                            onDeleteAll = { viewModel.removeGroup(group) },
+                            onDelete = { pendingDeleteId = it.downloadId },
+                            onDeleteAll = { pendingGroupKey = group.key },
                             modifier = Modifier
                                 .animateItem()
                                 .padding(bottom = 12.dp)
@@ -249,6 +302,8 @@ private fun WideDownloads(
     onBackClick: () -> Unit,
     onDownloadClick: (DownloadEntity) -> Unit,
     onDeleteAll: () -> Unit,
+    onDelete: (DownloadEntity) -> Unit,
+    onDeleteGroup: (DownloadGroup) -> Unit,
     onSubtitles: (DownloadEntity) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
@@ -278,7 +333,7 @@ private fun WideDownloads(
                                 onPause = { viewModel.pause(item) },
                                 onResume = { viewModel.resume(item) },
                                 onRetry = { viewModel.retry(item) },
-                                onCancel = { viewModel.remove(item) }
+                                onCancel = { onDelete(item) }
                             )
                         }
                     }
@@ -306,8 +361,8 @@ private fun WideDownloads(
                     subtitleCount = state::subtitleCount,
                     onPlay = onDownloadClick,
                     onSubtitles = onSubtitles,
-                    onDelete = viewModel::remove,
-                    onDeleteAll = { viewModel.removeGroup(group) },
+                    onDelete = onDelete,
+                    onDeleteAll = { onDeleteGroup(group) },
                     modifier = Modifier.animateItem()
                 )
             }
@@ -538,7 +593,7 @@ private fun LibraryGroup(
                         IconButton(onClick = { onSubtitles(movie) }) {
                             Icon(Icons.Default.ClosedCaption, contentDescription = stringResource(R.string.cd_subtitles_for, group.title))
                         }
-                        IconButton(onClick = onDeleteAll) {
+                        IconButton(onClick = { onDelete(movie) }) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete_download))
                         }
                     } else {
