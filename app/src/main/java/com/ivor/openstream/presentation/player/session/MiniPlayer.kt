@@ -12,6 +12,7 @@ import android.widget.FrameLayout
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +30,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -182,10 +183,16 @@ fun MiniPlayer(
                         )
                         Icon(
                             Icons.Default.CastConnected,
+                            // Decorative: the row text already says where it's casting to.
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier
                                 .align(Alignment.Center)
+                                .background(
+                                    MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f),
+                                    CircleShape
+                                )
+                                .padding(6.dp)
                                 .size(28.dp)
                         )
                     } else AndroidView(
@@ -257,16 +264,12 @@ fun MiniPlayer(
                     Icon(Icons.Default.Close, contentDescription = stringResource(R.string.action_stop_playback))
                 }
             }
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 progress = { progress },
-                strokeCap = StrokeCap.Round,
-                gapSize = 0.dp,
-                drawStopIndicator = {},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .padding(bottom = 6.dp)
-                    .height(3.dp)
             )
         }
     }

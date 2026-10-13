@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import com.ivor.openstream.R
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.ivor.openstream.presentation.components.ExpressiveMotion
 import com.ivor.openstream.presentation.player.NextEpisodeTarget
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 
@@ -56,8 +58,15 @@ fun UpNextOverlay(
 ) {
     val latestPlayNow by rememberUpdatedState(onPlayNow)
     val countdown = remember(target) { Animatable(1f) }
+    // Same 8s timing with reduced motion, but the ring jumps instead of sweeping.
+    val reducedCountdown = ExpressiveMotion.reducedMotion()
     LaunchedEffect(target) {
-        countdown.animateTo(0f, tween(UP_NEXT_COUNTDOWN_MS, easing = LinearEasing))
+        if (reducedCountdown) {
+            delay(UP_NEXT_COUNTDOWN_MS.toLong())
+            countdown.snapTo(0f)
+        } else {
+            countdown.animateTo(0f, tween(UP_NEXT_COUNTDOWN_MS, easing = LinearEasing))
+        }
         latestPlayNow()
     }
 

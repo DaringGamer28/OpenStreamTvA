@@ -3,10 +3,6 @@ package com.ivor.openstream.presentation.player.components
 import androidx.compose.animation.AnimatedContent
 import com.ivor.openstream.R
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -21,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -78,15 +75,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.ivor.openstream.presentation.components.ExpressiveBackButton
+import com.ivor.openstream.presentation.components.ExpressiveMotion
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 import java.util.Locale
-
-private val ExpressiveDefaultEffects = CubicBezierEasing(0.34f, 0.80f, 0.34f, 1.00f)
-private const val DurationEffectsDefault = 200
 
 /** Sizing for the two layouts: the compact inline player and the immersive fullscreen one. */
 private data class ControlMetrics(
@@ -101,7 +100,7 @@ private data class ControlMetrics(
 private val InlineMetrics = ControlMetrics(
     edgePadding = 4.dp,
     centerGap = 28.dp,
-    seekButton = 44.dp,
+    seekButton = 48.dp,
     seekIcon = 26.dp,
     playButton = 60.dp,
     playIcon = 32.dp
@@ -162,22 +161,25 @@ fun PlayerControls(
     onBackClick: () -> Unit
 ) {
     val metrics = if (isFullscreen) FullscreenMetrics else InlineMetrics
+    // Video chrome fades on the theme's effects spec (instant with reduced motion).
+    val chromeFade = ExpressiveMotion.finiteEffectsSpec()
 
     AnimatedVisibility(
         visible = isVisible,
-        enter = fadeIn(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects)),
-        exit = fadeOut(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects)),
+        enter = fadeIn(chromeFade),
+        exit = fadeOut(chromeFade),
         modifier = modifier
     ) {
+        val scrim = MaterialTheme.colorScheme.scrim
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        0f to Color.Black.copy(alpha = 0.72f),
-                        0.3f to Color.Black.copy(alpha = 0.28f),
-                        0.7f to Color.Black.copy(alpha = 0.28f),
-                        1f to Color.Black.copy(alpha = 0.8f)
+                        0f to scrim.copy(alpha = 0.72f),
+                        0.3f to scrim.copy(alpha = 0.28f),
+                        0.7f to scrim.copy(alpha = 0.28f),
+                        1f to scrim.copy(alpha = 0.8f)
                     )
                 )
                 // Explicitly a focus group while shown, so the video surface can hand focus over.
@@ -269,7 +271,7 @@ private fun TopBar(
         ExpressiveBackButton(
             onClick = onBackClick,
             containerColor = Color.Transparent,
-            contentColor = Color.White
+            contentColor = MaterialTheme.colorScheme.inverseOnSurface
         )
         Column(
             modifier = Modifier
@@ -279,7 +281,7 @@ private fun TopBar(
             Text(
                 text = title,
                 style = if (isFullscreen) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleSmall,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
                 fontWeight = FontWeight.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -288,7 +290,7 @@ private fun TopBar(
                 Text(
                     text = subtitle,
                     style = if (isFullscreen) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.72f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -335,6 +337,8 @@ private fun TransportControls(
     onForward: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Hoisted: AnimatedContent's transitionSpec isn't a composable context.
+    val morphSpec = ExpressiveMotion.finiteEffectsSpec()
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(metrics.centerGap),
@@ -360,7 +364,7 @@ private fun TransportControls(
                 AnimatedContent(
                     targetState = isPlaying,
                     transitionSpec = {
-                        (scaleIn(spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessMediumLow)) + fadeIn()) togetherWith
+                        (scaleIn(morphSpec) + fadeIn(morphSpec)) togetherWith
                             (scaleOut() + fadeOut())
                     },
                     label = "PlayPauseIcon"
@@ -404,8 +408,8 @@ private fun SeekButton(
         onClick = onClick,
         modifier = Modifier.size(metrics.seekButton),
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Black.copy(alpha = 0.32f),
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f),
+            contentColor = MaterialTheme.colorScheme.inverseOnSurface
         )
     ) {
         Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(metrics.seekIcon))
@@ -435,7 +439,7 @@ private fun Timeline(
     val colors = SliderDefaults.colors(
         thumbColor = MaterialTheme.colorScheme.primary,
         activeTrackColor = MaterialTheme.colorScheme.primary,
-        inactiveTrackColor = Color.White.copy(alpha = 0.28f)
+        inactiveTrackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.28f)
     )
     val interactionSource = remember { MutableInteractionSource() }
     val sliderState = rememberSliderState()
@@ -457,7 +461,7 @@ private fun Timeline(
         Text(
             text = "${formatTime(shownTime)} / ${formatTime(duration)}",
             style = MaterialTheme.typography.labelMedium,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
             fontWeight = FontWeight.Bold,
             maxLines = 1
         )
@@ -494,6 +498,12 @@ private fun Timeline(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 12.dp)
+                // TalkBack announces position as a percentage; the time text beside it
+                // carries the exact value, so no new string resource is needed.
+                .semantics {
+                    contentDescription = "${formatTime(shownTime)} / ${formatTime(duration)}"
+                    progressBarRangeInfo = ProgressBarRangeInfo(playedProgress, 0f..1f)
+                }
         )
         onNextClick?.let { next ->
             HudIconButton(Icons.Default.SkipNext, stringResource(R.string.action_next_episode), next)
@@ -523,11 +533,12 @@ private fun HudChip(
     Surface(
         onClick = onClick,
         shape = ExpressiveShapes.small,
-        color = Color.White.copy(alpha = 0.14f),
-        contentColor = Color.White,
+        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.14f),
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
         modifier = Modifier
             .padding(end = 8.dp)
             .widthIn(max = 160.dp)
+            .heightIn(min = 48.dp)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -553,7 +564,7 @@ private fun HudIconButton(
     onClick: () -> Unit
 ) {
     IconButton(onClick = onClick) {
-        Icon(icon, contentDescription = contentDescription, tint = Color.White)
+        Icon(icon, contentDescription = contentDescription, tint = MaterialTheme.colorScheme.inverseOnSurface)
     }
 }
 

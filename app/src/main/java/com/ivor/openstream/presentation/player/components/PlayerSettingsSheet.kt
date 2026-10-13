@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bedtime
@@ -61,18 +60,19 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Slider
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -884,18 +884,18 @@ private fun LazyListScope.captionsPage(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
-                .background(Color.Black, ExpressiveShapes.large)
+                .background(MaterialTheme.colorScheme.scrim, ExpressiveShapes.large)
                 .padding(vertical = 28.dp, horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = stringResource(R.string.pf_where_going),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = settings.textSizeSp.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(Color.Black.copy(alpha = settings.backgroundOpacity), RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = settings.backgroundOpacity), ExpressiveShapes.extraSmall)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }
@@ -938,7 +938,20 @@ private fun LabeledSlider(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        Slider(value = value, onValueChange = onChange, valueRange = range)
+        // State-based Slider, matching the player timeline; the parent stays the source
+        // of truth except while the user is dragging.
+        val labeledSliderState = rememberSliderState(value, 0, range)
+        LaunchedEffect(value) {
+            if (labeledSliderState.value != value) labeledSliderState.value = value
+        }
+        Slider(
+            state = labeledSliderState,
+            onValueChange = {
+                labeledSliderState.value = it
+                onChange(it)
+            },
+            onValueChangeFinished = null
+        )
     }
 }
 

@@ -51,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -151,7 +152,7 @@ fun CastPlaybackView(
         }
     }
 
-    Box(modifier = modifier.background(Color.Black)) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.scrim)) {
         if (artworkUrl != null) {
             AsyncImage(
                 model = artworkUrl,
@@ -166,7 +167,7 @@ fun CastPlaybackView(
         Box(
             Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.35f))
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
         )
 
         Column(Modifier.fillMaxSize()) {
@@ -180,7 +181,7 @@ fun CastPlaybackView(
                 ExpressiveBackButton(
                     onClick = onBackClick,
                     containerColor = Color.Transparent,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.inverseOnSurface
                 )
                 Column(
                     modifier = Modifier
@@ -190,7 +191,7 @@ fun CastPlaybackView(
                     Text(
                         text = stringResource(R.string.player_playing_on, deviceName),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -198,7 +199,7 @@ fun CastPlaybackView(
                         text = if (subtitle.isNotBlank()) "$title · $subtitle" else title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.inverseOnSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.semantics { heading() }
@@ -210,7 +211,7 @@ fun CastPlaybackView(
                             Icon(
                                 if (subtitles.activeId != null) Icons.Default.ClosedCaption else Icons.Default.ClosedCaptionDisabled,
                                 contentDescription = stringResource(R.string.player_subtitles_on_tv),
-                                tint = Color.White
+                                tint = MaterialTheme.colorScheme.inverseOnSurface
                             )
                         }
                         DropdownMenu(expanded = showSubtitleMenu, onDismissRequest = { showSubtitleMenu = false }) {
@@ -228,7 +229,7 @@ fun CastPlaybackView(
                     }
                 }
                 IconButton(onClick = onCastClick) {
-                    Icon(Icons.Default.CastConnected, contentDescription = stringResource(R.string.cd_cast_device, deviceName), tint = Color.White)
+                    Icon(Icons.Default.CastConnected, contentDescription = stringResource(R.string.cd_cast_device, deviceName), tint = MaterialTheme.colorScheme.inverseOnSurface)
                 }
             }
 
@@ -243,14 +244,14 @@ fun CastPlaybackView(
                         Text(
                             text = error.message,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                             Button(onClick = onRetry, shape = ExpressiveShapes.medium) { Text(stringResource(R.string.action_retry)) }
                             if (onChooseSource != null && error.fromStream) {
                                 OutlinedButton(onClick = onChooseSource, shape = ExpressiveShapes.medium) {
-                                    Text(stringResource(R.string.player_other_source), color = Color.White)
+                                    Text(stringResource(R.string.player_other_source), color = MaterialTheme.colorScheme.inverseOnSurface)
                                 }
                             }
                         }
@@ -320,13 +321,20 @@ fun CastPlaybackView(
                 Text(
                     text = formatTime(if (scrubbing) (scrubValue * duration).toLong() else position),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.inverseOnSurface
                 )
+                // Playback drives the slider except while the user is scrubbing it.
+                val castSliderState = rememberSliderState()
+                val castPlayed = if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f
+                LaunchedEffect(castPlayed, scrubbing) {
+                    if (!scrubbing) castSliderState.value = castPlayed
+                }
                 Slider(
-                    value = if (scrubbing) scrubValue else if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f,
+                    state = castSliderState,
                     onValueChange = {
                         scrubbing = true
                         scrubValue = it
+                        castSliderState.value = it
                     },
                     onValueChangeFinished = {
                         if (duration > 0) {
@@ -340,7 +348,7 @@ fun CastPlaybackView(
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,
                         activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                        inactiveTrackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.3f)
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -349,7 +357,7 @@ fun CastPlaybackView(
                 Text(
                     text = formatTime(duration),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.inverseOnSurface
                 )
             }
         }
