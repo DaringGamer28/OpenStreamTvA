@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -26,7 +25,8 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,7 +44,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.foundation.focusable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -75,6 +74,7 @@ internal val TvFramePadding = PaddingValues(horizontal = 56.dp, vertical = 32.dp
  * Leanback home: menu row, cinematic hero and landscape rails, all remote driven.
  * One hero moment (the featured backdrop); everything else stays calm and legible.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TvHomeScreen(
     onOpenTitle: (mediaType: String, id: Int) -> Unit,
@@ -138,7 +138,7 @@ fun TvHomeScreen(
             HomeUiState.Loading -> Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
-            ) { CircularProgressIndicator() }
+            ) { LoadingIndicator() }
 
             is HomeUiState.Error -> TvErrorState(
                 onRetry = { viewModel.refresh() }
@@ -207,7 +207,6 @@ private fun TvMenuChip(
         else MaterialTheme.colorScheme.surfaceContainerHigh,
         modifier = Modifier
             .then(Modifier.scale(scale))
-            .focusable()
             .onFocusChanged { focused.value = it.isFocused }
     ) {
         Row(
@@ -252,8 +251,8 @@ private fun TvHero(
                 .background(
                     Brush.horizontalGradient(
                         0f to Color.Transparent,
-                        0.45f to Color.Black.copy(alpha = 0.55f),
-                        1f to Color.Black.copy(alpha = 0.88f)
+                        0.45f to MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f),
+                        1f to MaterialTheme.colorScheme.scrim.copy(alpha = 0.88f)
                     )
                 )
         )
@@ -268,7 +267,7 @@ private fun TvHero(
                 text = item.name,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Black,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -276,7 +275,7 @@ private fun TvHero(
                 Text(
                     text = String.format(java.util.Locale.US, "★ %.1f", rating),
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White.copy(alpha = 0.85f),
+                    color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.85f),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -424,7 +423,7 @@ private fun TvLandscapeCard(
                     )
                 }
                 if (progress != null) {
-                    androidx.compose.material3.LinearProgressIndicator(
+                    androidx.compose.material3.LinearWavyProgressIndicator(
                         progress = { progress.coerceIn(0f, 1f) },
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
@@ -435,7 +434,7 @@ private fun TvLandscapeCard(
         }
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp)
@@ -443,7 +442,7 @@ private fun TvLandscapeCard(
         subtitle?.let {
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

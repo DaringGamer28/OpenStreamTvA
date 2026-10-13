@@ -4,7 +4,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.focusable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -32,6 +31,10 @@ fun rememberTvAnimated(): Boolean {
     return remember { TvDetect.animationsEnabled(context) }
 }
 
+/**
+ * Observes focus on an already-focusable (clickable) element. Never adds another focusable
+ * node: a second target makes D-pad OK land on something with no click action.
+ */
 fun Modifier.tvFocusable(
     focusRequester: FocusRequester? = null,
     onFocused: () -> Unit = {},
@@ -40,16 +43,16 @@ fun Modifier.tvFocusable(
     var modifier: Modifier = this
     if (focusRequester != null) modifier = modifier.focusRequester(focusRequester)
     return modifier
-        .focusable()
         .onFocusChanged {
             if (it.isFocused) onFocused() else onBlurred()
         }
 }
 
-/** Scale applied to a focused TV element (near-1x when unfocused or motion is off). */
+/** Scale applied to a focused TV element (1x when unfocused or motion is off: the ring and
+ * elevation carry focus alone under reduced motion). */
 @Composable
 fun tvFocusScale(focused: Boolean, animated: Boolean): Float {
-    if (!animated) return if (focused) 1.04f else 1f
+    if (!animated) return 1f
     val scale by animateFloatAsState(
         targetValue = if (focused) 1.07f else 1f,
         animationSpec = spring(

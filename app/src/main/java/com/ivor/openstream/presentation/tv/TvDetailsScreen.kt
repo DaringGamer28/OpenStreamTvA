@@ -1,6 +1,5 @@
 package com.ivor.openstream.presentation.tv
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,7 +26,8 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +72,7 @@ private const val BACKDROP_BASE = "https://image.tmdb.org/t/p/w1280"
  * Leanback details: backdrop hero, oversized Play, season chips and an
  * episode grid — every step reachable with up/down/left/right + OK.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TvDetailsScreen(
     mediaType: String,
@@ -86,13 +87,12 @@ fun TvDetailsScreen(
     val episodeProgress by viewModel.episodeProgress.collectAsState()
     val animated = rememberTvAnimated()
 
-    BackHandler(onBack = onBackClick)
-
+    // No BackHandler: the default pop carries the predictive-back animation.
     when (val state = uiState) {
         DetailsUiState.Loading -> Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
+        ) { LoadingIndicator() }
 
         is DetailsUiState.Error -> TvErrorState(onRetry = viewModel::loadDetails)
 
@@ -373,7 +373,7 @@ private fun TvEpisodeGrid(
                             ) {
                                 Text(
                                     text = stringResource(R.string.details_watched),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.titleSmall,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
@@ -381,7 +381,7 @@ private fun TvEpisodeGrid(
                     }
                     Text(
                         text = "${episode.episodeNumber}. ${episode.name}",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(12.dp)
