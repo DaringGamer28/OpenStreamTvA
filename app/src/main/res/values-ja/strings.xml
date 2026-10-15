@@ -343,9 +343,14 @@
     <string name="st_history_cleared">視聴履歴と進行状況をクリアしました</string>
     <string name="st_clear_crash">クラッシュレポートをクリア</string>
     <string name="st_crash_cleared">クラッシュレポートをクリアしました</string>
-    <string name="st_clear_cache">画像キャッシュをクリア</string>
-    <string name="st_cache_cleared">画像キャッシュをクリアしました</string>
-    <string name="st_cache_size">アートワーク%1$s</string>
+    <string name="st_clear_all_cache">キャッシュをクリア</string>
+    <string name="st_cache_used">アートワークと作品情報で%1$s使用中</string>
+    <string name="st_cache_hint">ページをすばやく開くためアートワークと作品情報を保持</string>
+    <string name="st_cache_cleared_all">キャッシュをクリアしました</string>
+    <string name="st_cache_limit">キャッシュサイズ</string>
+    <string name="st_cache_limit_hint">アートワークと作品情報が使える容量。次回アプリ起動時に反映されます。</string>
+    <string name="st_preload_artwork">アートワークを先読み</string>
+    <string name="st_preload_artwork_hint">Wi-Fi接続時、スクロールする前に各列のポスターを読み込みます</string>
     <string name="st_show_hidden">非表示のタイトルを表示</string>
     <string name="st_backup">ライブラリをバックアップ</string>
     <string name="st_backup_hint">各プロフィールの「後で見る」、リスト、履歴、非表示タイトル、設定</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">先にOpenStreamのインストールを許可してから、戻ってインストールをタップしてください。</string>
     <string name="st_storage_help">ストレージとヘルプ</string>
     <string name="st_on_device">このデバイス上</string>
-    <string name="st_posters_cache">高速読み込みのためポスターと背景を保持</string>
     <string name="st_crash_include">%1$d件のクラッシュレポートを含みます</string>
     <string name="st_repo_data_note">リポジトリはコードではなくデータを提供します</string>
     <string name="st_repo_data_body">拡張機能はOpenStream内蔵のリゾルバーを選択・設定するだけで、第三者のリストがデバイス上でコードを実行することはありません。</string>

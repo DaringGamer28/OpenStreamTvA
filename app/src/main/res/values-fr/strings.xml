@@ -343,9 +343,14 @@
     <string name="st_history_cleared">Historique et progression effacés</string>
     <string name="st_clear_crash">Effacer les rapports de plantage</string>
     <string name="st_crash_cleared">Rapports de plantage effacés</string>
-    <string name="st_clear_cache">Vider le cache d’images</string>
-    <string name="st_cache_cleared">Cache d’images vidé</string>
-    <string name="st_cache_size">%1$s d’illustrations</string>
+    <string name="st_clear_all_cache">Vider le cache</string>
+    <string name="st_cache_used">%1$s utilisés par les illustrations et les infos des titres</string>
+    <string name="st_cache_hint">Illustrations et infos des titres conservées pour ouvrir les pages plus vite</string>
+    <string name="st_cache_cleared_all">Cache vidé</string>
+    <string name="st_cache_limit">Taille du cache</string>
+    <string name="st_cache_limit_hint">Espace que peuvent occuper les illustrations et les infos des titres. Prend effet au prochain lancement de l’app.</string>
+    <string name="st_preload_artwork">Précharger les illustrations</string>
+    <string name="st_preload_artwork_hint">En Wi-Fi, charge les affiches des rangées avant que vous n’y arriviez</string>
     <string name="st_show_hidden">Afficher les titres masqués</string>
     <string name="st_backup">Sauvegarder la bibliothèque</string>
     <string name="st_backup_hint">Regarder plus tard, listes, historique et titres masqués de chaque profil, plus les paramètres</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Autorisez d’abord OpenStream à installer les mises à jour, puis revenez et appuyez sur Installer.</string>
     <string name="st_storage_help">Stockage et aide</string>
     <string name="st_on_device">Sur cet appareil</string>
-    <string name="st_posters_cache">Affiches et fonds conservés pour un chargement plus rapide</string>
     <string name="st_crash_include">Comprend %1$d rapport de plantage</string>
     <string name="st_repo_data_note">Les dépôts fournissent des données, pas du code</string>
     <string name="st_repo_data_body">Une extension choisit et configure uniquement un résolveur déjà inclus dans OpenStream : une liste tierce ne peut donc pas exécuter son propre code sur votre appareil.</string>

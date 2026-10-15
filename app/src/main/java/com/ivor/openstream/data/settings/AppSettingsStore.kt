@@ -51,6 +51,20 @@ enum class SourceSearchMode(val label: String, @StringRes val labelRes: Int) {
     IN_ORDER("In my order", R.string.sheet_search_in_order)
 }
 
+/**
+ * How much disk the caches may use: artwork (Coil) and title info (TMDB answers). Read when the
+ * app starts, since both caches fix their size when they open.
+ */
+enum class CacheSize(val imageBytes: Long, val metadataBytes: Long) {
+    SMALL(imageBytes = 100L * MB, metadataBytes = 25L * MB),
+    STANDARD(imageBytes = 250L * MB, metadataBytes = 50L * MB),
+    LARGE(imageBytes = 600L * MB, metadataBytes = 100L * MB);
+
+    val totalBytes: Long get() = imageBytes + metadataBytes
+}
+
+private const val MB = 1024L * 1024L
+
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val dynamicColor: Boolean = true,
@@ -93,7 +107,11 @@ data class AppSettings(
     /** Output FPS ceiling for Smooth Motion (60 or 120). */
     val smoothMotionMaxFps: Int = 120,
     /** Hardware volume boost percentage via LoudnessEnhancer (100% = normal / 0 dB, up to 300%). */
-    val volumeBoostPercent: Int = 100
+    val volumeBoostPercent: Int = 100,
+    /** Disk budget for artwork and title info; takes effect on the next start. */
+    val cacheSize: CacheSize = CacheSize.STANDARD,
+    /** Load artwork for rows not on screen yet, only on unmetered networks. */
+    val preloadArtwork: Boolean = true
 ) {
     companion object {
         val SEEK_STEPS = listOf(5, 10, 15, 30)
@@ -158,6 +176,8 @@ class AppSettingsStore @Inject constructor(
             .putBoolean(KEY_SMOOTH_MOTION_ENABLED, updated.smoothMotionEnabled)
             .putInt(KEY_SMOOTH_MOTION_MAX_FPS, updated.smoothMotionMaxFps)
             .putInt(KEY_VOLUME_BOOST, updated.volumeBoostPercent)
+            .putString(KEY_CACHE_SIZE, updated.cacheSize.name)
+            .putBoolean(KEY_PRELOAD_ARTWORK, updated.preloadArtwork)
             .apply()
     }
 
@@ -196,9 +216,15 @@ class AppSettingsStore @Inject constructor(
             smoothMotionMaxFps = prefs.getInt(KEY_SMOOTH_MOTION_MAX_FPS, defaults.smoothMotionMaxFps)
                 .takeIf { it in AppSettings.SMOOTH_MOTION_FPS_OPTIONS } ?: defaults.smoothMotionMaxFps,
             volumeBoostPercent = prefs.getInt(KEY_VOLUME_BOOST, defaults.volumeBoostPercent)
-                .coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT)
+                .coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT),
+            cacheSize = enumOrDefault(prefs.getString(KEY_CACHE_SIZE, null), defaults.cacheSize),
+            preloadArtwork = prefs.getBoolean(KEY_PRELOAD_ARTWORK, defaults.preloadArtwork)
         )
     }
+
+    fun setCacheSize(size: CacheSize) = update { it.copy(cacheSize = size) }
+
+    fun setPreloadArtwork(enabled: Boolean) = update { it.copy(preloadArtwork = enabled) }
 
     fun setAppLanguage(tag: String?) = update { it.copy(appLanguage = tag) }
 
@@ -270,6 +296,8 @@ class AppSettingsStore @Inject constructor(
         const val KEY_SMOOTH_MOTION_ENABLED = "app_smooth_motion_enabled"
         const val KEY_SMOOTH_MOTION_MAX_FPS = "app_smooth_motion_max_fps"
         const val KEY_VOLUME_BOOST = "app_volume_boost_percent"
+        const val KEY_CACHE_SIZE = "app_cache_size"
+        const val KEY_PRELOAD_ARTWORK = "app_preload_artwork"
         const val KEY_THEME = "app_theme_mode"
         const val KEY_DYNAMIC_COLOR = "app_dynamic_color"
         const val KEY_DNS = "app_dns_provider"

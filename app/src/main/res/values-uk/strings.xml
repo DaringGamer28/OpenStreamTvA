@@ -343,9 +343,14 @@
     <string name="st_history_cleared">Історію перегляду та прогрес очищено</string>
     <string name="st_clear_crash">Очистити звіти про збої</string>
     <string name="st_crash_cleared">Звіти про збої очищено</string>
-    <string name="st_clear_cache">Очистити кеш зображень</string>
-    <string name="st_cache_cleared">Кеш зображень очищено</string>
-    <string name="st_cache_size">%1$s зображень</string>
+    <string name="st_clear_all_cache">Очистити кеш</string>
+    <string name="st_cache_used">%1$s займають зображення та дані про тайтли</string>
+    <string name="st_cache_hint">Зображення та дані про тайтли зберігаються, щоб сторінки відкривались швидше</string>
+    <string name="st_cache_cleared_all">Кеш очищено</string>
+    <string name="st_cache_limit">Розмір кешу</string>
+    <string name="st_cache_limit_hint">Скільки місця можуть займати зображення та дані про тайтли. Діє з наступного запуску застосунку.</string>
+    <string name="st_preload_artwork">Попереднє завантаження зображень</string>
+    <string name="st_preload_artwork_hint">Через Wi-Fi завантажувати постери рядів, перш ніж ви до них догорнете</string>
     <string name="st_show_hidden">Показувати приховані тайтли</string>
     <string name="st_backup">Резервна копія бібліотеки</string>
     <string name="st_backup_hint">«Дивитися пізніше», списки, історія та приховані тайтли кожного профілю, плюс налаштування</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Спочатку дозвольте OpenStream встановлювати оновлення, потім поверніться й натисніть Встановити.</string>
     <string name="st_storage_help">Сховище та допомога</string>
     <string name="st_on_device">На цьому пристрої</string>
-    <string name="st_posters_cache">Постери та фони для швидкого завантаження</string>
     <string name="st_crash_include">Містить %1$d звіт про збій</string>
     <string name="st_repo_data_note">Репозиторії містять дані, а не код</string>
     <string name="st_repo_data_body">Розширення лише вибирає та налаштовує резолвер, уже вбудований в OpenStream, тому сторонній список не може виконувати свій код на пристрої.</string>

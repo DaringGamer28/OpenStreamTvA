@@ -364,9 +364,14 @@
     <string name="st_history_cleared">देखने का इतिहास और प्रगति साफ़ हो गई</string>
     <string name="st_clear_crash">क्रैश रिपोर्ट साफ़ करें</string>
     <string name="st_crash_cleared">क्रैश रिपोर्ट साफ़ हो गईं</string>
-    <string name="st_clear_cache">छवि कैश साफ़ करें</string>
-    <string name="st_cache_cleared">छवि कैश साफ़ हो गया</string>
-    <string name="st_cache_size">%1$s आर्टवर्क</string>
+    <string name="st_clear_all_cache">कैश साफ़ करें</string>
+    <string name="st_cache_used">आर्टवर्क और टाइटल जानकारी के लिए %1$s इस्तेमाल हुआ</string>
+    <string name="st_cache_hint">पेज जल्दी खुलें, इसलिए आर्टवर्क और टाइटल जानकारी रखी जाती है</string>
+    <string name="st_cache_cleared_all">कैश साफ़ हो गया</string>
+    <string name="st_cache_limit">कैश का आकार</string>
+    <string name="st_cache_limit_hint">आर्टवर्क और टाइटल जानकारी कितनी जगह ले सकती है। ऐप अगली बार खुलने पर लागू होगा।</string>
+    <string name="st_preload_artwork">आर्टवर्क पहले से लोड करें</string>
+    <string name="st_preload_artwork_hint">Wi-Fi पर, स्क्रॉल करने से पहले ही पंक्तियों के पोस्टर लोड करें</string>
     <string name="st_show_hidden">छिपे टाइटल दिखाएं</string>
     <string name="st_backup">लाइब्रेरी बैकअप लें</string>
     <string name="st_backup_hint">हर प्रोफ़ाइल का बाद में देखें, सूचियां, इतिहास और छिपे टाइटल, तथा सेटिंग</string>
@@ -400,7 +405,6 @@
     <string name="st_allow_install_note">पहले OpenStream को अपडेट इंस्टॉल करने दें, फिर वापस आकर इंस्टॉल पर टैप करें।</string>
     <string name="st_storage_help">संग्रहण और सहायता</string>
     <string name="st_on_device">इस डिवाइस पर</string>
-    <string name="st_posters_cache">तेज़ लोडिंग के लिए रखे गए पोस्टर और बैकड्रॉप</string>
     <string name="st_crash_include">%1$d क्रैश रिपोर्ट सहित</string>
     <string name="st_repo_data_note">रिपॉज़िटरी कोड नहीं, डेटा देती हैं</string>
     <string name="st_repo_data_body">एक्सटेंशन केवल ऐसा रिज़ॉल्वर चुनता और कॉन्फ़िगर करता है जो OpenStream में पहले से है, इसलिए कोई तृतीय-पक्ष सूची आपके डिवाइस पर अपना कोड नहीं चला सकती।</string>
