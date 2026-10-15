@@ -343,9 +343,14 @@
     <string name="st_history_cleared">История просмотра и прогресс очищены</string>
     <string name="st_clear_crash">Очистить отчёты о сбоях</string>
     <string name="st_crash_cleared">Отчёты о сбоях очищены</string>
-    <string name="st_clear_cache">Очистить кэш изображений</string>
-    <string name="st_cache_cleared">Кэш изображений очищен</string>
-    <string name="st_cache_size">%1$s изображений</string>
+    <string name="st_clear_all_cache">Очистить кэш</string>
+    <string name="st_cache_used">%1$s занято изображениями и данными о тайтлах</string>
+    <string name="st_cache_hint">Изображения и данные о тайтлах хранятся, чтобы страницы открывались быстрее</string>
+    <string name="st_cache_cleared_all">Кэш очищен</string>
+    <string name="st_cache_limit">Размер кэша</string>
+    <string name="st_cache_limit_hint">Сколько места могут занимать изображения и данные о тайтлах. Применится при следующем запуске приложения.</string>
+    <string name="st_preload_artwork">Предзагрузка изображений</string>
+    <string name="st_preload_artwork_hint">По Wi-Fi загружать постеры рядов до того, как вы до них долистаете</string>
     <string name="st_show_hidden">Показывать скрытые тайтлы</string>
     <string name="st_backup">Резервная копия библиотеки</string>
     <string name="st_backup_hint">«Смотреть позже», списки, история и скрытые тайтлы каждого профиля, плюс настройки</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Сначала разрешите OpenStream устанавливать обновления, затем вернитесь и нажмите Установить.</string>
     <string name="st_storage_help">Хранилище и помощь</string>
     <string name="st_on_device">На этом устройстве</string>
-    <string name="st_posters_cache">Постеры и фоны для быстрой загрузки</string>
     <string name="st_crash_include">Включает %1$d отчёт о сбое</string>
     <string name="st_repo_data_note">Репозитории содержат данные, а не код</string>
     <string name="st_repo_data_body">Расширение лишь выбирает и настраивает резолвер, уже встроенный в OpenStream, поэтому сторонний список не может выполнять свой код на устройстве.</string>

@@ -18,8 +18,13 @@ When a doc and the code disagree, trust the code, then fix the doc.
 `local.properties` holds `TMDB_API_KEY` (falls back to `DEMO_KEY`) and optionally
 `VIDKING_API_BASE_URL`. `assembleRelease` signs when `OPENSTREAM_KEYSTORE_PATH`,
 `OPENSTREAM_KEYSTORE_PASSWORD`, `OPENSTREAM_KEY_ALIAS` and `OPENSTREAM_KEY_PASSWORD` are set in the
-environment. `.github/workflows/release-apk.yml` builds a signed APK artifact on the owner's pushes
-to `main` and on manual dispatch (any branch); there are no other CI checks.
+environment.
+`.github/workflows/build.yml` builds debug and release APKs as artifacts on pushes to (and pull
+requests into) `main` and `beta`, behind an `authorize` job so fork PRs from outsiders build
+nothing. A pull request builds its APKs as artifacts and posts nothing; the push that lands it on
+`beta` posts the signed APK and its changelog to Telegram. There are no other CI checks.
+`codeql.yml` scans `main` and `beta`; `telegram-notify.yml` announces stars and published
+releases. Detail: `docs/CI.md`.
 
 ## Toolchain
 
@@ -47,6 +52,8 @@ data/cast          Cast options, media item converter, LAN proxy the receiver st
 data/streaming     Source resolution, extension -> provider registry, id mapping
 data/extensions    Extension catalog: repos, cache, parser, ranking, bundled copy
 data/service       Media3 download service
+data/cache         HTTP cache rules for TMDB, cache budget, AppCaches (size/clear)
+data/images        ArtworkPrefetcher
 domain             Models and repository interfaces
 presentation       Screens + ViewModels; player/session holds the app-wide player
 ui/theme           Colors, type, ExpressiveShapes
@@ -74,6 +81,10 @@ Rules:
   The player's automatic search first asks the source that last played something
   (`rememberWorkingSource`, kept per movie/tv) on its own and stops there when it has streams; with
   none, or no answer in 10 s, the normal search runs. Downloads and "Find more" search everything.
+  That automatic search alone answers from `ResolvedStreamCache` (memory only, 10 minutes, keyed by
+  episode plus a fingerprint of the installed sources, order and search mode) and only keeps complete
+  searches that found something; `onPlaybackError` drops the episode's entry. No source documents
+  how long its links stay valid, which is why the window is short.
   Engines: `vidking-direct` (`VidkingDirectApi`, encrypted payload, prefers the master playlist so
   quality switches in-player), `web-embed` and `vidking-webview` (`WebEmbedResolver`: first a native
   pass through `HosterExtractors` (Filemoon, StreamWish/VidHide, Voe, Mp4Upload, Vidmoly, ok.ru) when
@@ -123,9 +134,24 @@ Rules:
 - **Network.** `AppDns` (DNS-over-HTTPS, default AdGuard, chosen in Settings) backs every OkHttp
   client and Coil's image loader (`OpenStreamApp`), because some ISPs block TMDB at the DNS level.
   Media3 playback/downloads and WebView sources still use the system resolver.
+- **Caching.** TMDB answers live in an OkHttp disk cache (`cacheDir/tmdb_http`). TMDB's own cache
+  headers are not relied on: `MetadataCacheHeadersInterceptor` stamps each successful answer with a
+  lifetime from `MetadataCachePolicy` (lists and discover 3 h, titles and seasons 6 h, search 1 h,
+  person 1 day, ratings 7 days, external ids 30 days), and `StaleIfErrorInterceptor` answers from
+  the cache, up to 30 days old, when TMDB is unreachable or returns 5xx/429. The `TmdbFresh` API
+  (`ForceRefreshInterceptor`) revalidates first; pull to refresh, `EpisodeNotifier` and
+  `SmartDownloads` use it (`fresh = true`), and what it fetches refreshes the shared cache. Home's
+  built lists are also kept in memory for 3 h (`AnimeRepositoryImpl`); the old SharedPreferences copy
+  is only read as an offline fallback and deleted after the next successful load. Artwork is Coil's
+  disk cache in its default folder (`coil3_disk_cache`). The Cache size setting sizes both caches when
+  the app starts, capped at a tenth of free space (`CacheBudget`). `ArtworkPrefetcher` fills Coil's
+  disk cache for Home rows and Details rails off screen: unmetered network only, not with Data Saver,
+  battery saver or on low-RAM devices, two at a time, after a 1.5 s head start, skipping anything
+  already on disk. `AppCaches` measures and clears all of it for Settings.
 - **Settings.** `AppSettingsStore` (SharedPreferences) holds theme, dynamic color, DNS,
-  Wi-Fi-only downloads and the subtitle languages saved with downloads; `MainActivity` applies the
-  theme.
+  Wi-Fi-only downloads, the subtitle languages saved with downloads, cache size and artwork preload;
+  `MainActivity` applies the theme. Cache size and preload are device settings and stay out of
+  `LibraryBackup`.
 - **Skip intro.** `SkipTimesRepository`: `AnimeEpisodeMapper` gives the MAL id and the episode within
   that entry (AniList title search only as a fallback), AniSkip v2 gives the intro/recap/credits
   times (anime only), and the player picks the submission timed on the closest file length. All
@@ -176,6 +202,28 @@ guides, component list) live in `docs/design/`.
 - Don't drive the app on the emulator unless asked; the maintainer tests. `installDebug` when asked.
 - Never use emojis: not in code, comments, commits, PRs, changelogs or messages sent anywhere.
 - Commit and push only when asked. End commit messages with the attribution trailer in use.
+- Every pull request targets `beta`, never `main`. Branch new work from `beta` and open the PR
+  with `gh pr create --base beta`; never change a base to `main`, and retarget a PR already
+  opened against `main` (`gh pr edit --base beta`) instead of merging it. `beta` is the branch
+  testers follow: a PR builds its APKs as artifacts and posts nothing, and the push that lands it
+  on `beta` posts the signed APK and its changelog to Telegram. `main` is what releases are cut
+  from and moves only through the `beta` -> `main` PR the owner opens. Merge into `beta` with a
+  merge commit, never a squash: a squashed message folds several `Changelog:` sections into one
+  and the testers' post comes out mangled (`docs/CI.md`).
+- Commits that change an APK end with a `Changelog:` section of `- ` bullets describing only
+  user-visible changes, each standing alone on one line. Write them for someone using the app,
+  not a developer: short, plain words, what they will notice. Open with a clear verb (Added,
+  Fixed, Improved), describe a fix as the bug looked to them, no internals, class or file names,
+  numbers they cannot see, or filler. Only git trailers (`Token: value` lines) may follow it;
+  `build.yml` publishes everything after the marker otherwise. Omit it for docs/CI/refactors.
+
+```text
+Fix the queue jumping back to the top after a reorder
+
+Changelog:
+- Fixed the queue scrolling back to the top after you move a song.
+```
+
 - Compile before calling work done, and say plainly what was and wasn't verified.
 - Treat playback and source changes as high risk; name any undocumented third-party behavior they
   rely on.

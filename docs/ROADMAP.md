@@ -133,5 +133,9 @@ brightness back to the system.
 
 ## Release
 
-- [x] Signed release APK built on GitHub Actions for the owner's pushes to `main` (artifact only,
-      no GitHub release). Needs the `OPENSTREAM_KEYSTORE_*` / `OPENSTREAM_KEY_*` repo secrets.
+- [x] Signed release APK built on GitHub Actions (`build.yml`: debug and release APKs as
+      artifacts on pushes and PRs, plus `mapping.txt`). Only a push to `beta` posts the signed
+      APK and its `Changelog:` bullets to Telegram; PRs post nothing. Needs the
+      `OPENSTREAM_KEYSTORE_*` / `OPENSTREAM_KEY_*` repo secrets plus `TELEGRAM_BOT_TOKEN`.
+      `main` is what releases are cut from and moves only through the `beta` -> `main` PR.
+      Detail: `docs/CI.md`.

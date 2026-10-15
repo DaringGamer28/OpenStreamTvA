@@ -55,7 +55,9 @@ Be respectful and professional in all interactions. We aim to maintain a welcomi
 - Maintain consistent spacing and layout patterns
 
 ### Commit Messages
-Use clear, descriptive commit messages:
+Use clear, descriptive commit messages written for whoever reads `git log` in a
+month: imperative, 72 characters or fewer, naming the user-visible change
+rather than the files touched. Add a body when the reason is not obvious.
 ```
 Add search history persistence
 
@@ -64,24 +66,67 @@ Add search history persistence
 - Update SearchViewModel to load/save history
 ```
 
+If someone using the app would notice your change, end the commit message with
+a `Changelog:` section: one `- ` bullet per change, each on a single line, in
+plain words for someone using the app (no internals, class or file names, or
+filler). Those bullets are sent to beta testers with the build. Only git
+trailers (`Token: value` lines) may follow the section. Omit it for
+docs/CI/refactors with no user-visible effect.
+
+```
+Fix the queue jumping back to the top after a reorder
+
+Changelog:
+- Fixed the queue scrolling back to the top after you move a song.
+```
+
+Write each bullet so it stands alone: several commits' bullets arrive in one
+message with no commit boundaries between them. Open with a clear verb (Added,
+Fixed, Improved), describe a fix as the bug looked to the user, and read the
+list back as a user before committing.
+
 ### Pull Request Process
 
-1. **Update Documentation**
+1. **Branch from `beta` and open the pull request against `beta`.** `beta` is
+   where new work lands and what beta testers get builds from; `main` only
+   moves when a tested `beta` is released. A pull request opened against
+   `main` will be retargeted before it is reviewed. Open it with
+   `gh pr create --base beta` and merge into `beta` with a merge commit,
+   never a squash (a squash folds several `Changelog:` sections into one and
+   the testers' post comes out mangled).
+2. **For anything bigger than a small fix, open an issue first** so the
+   approach can be agreed before you spend time on it.
+   [docs/ROADMAP.md](docs/ROADMAP.md) lists what is planned.
+
+3. **Read [CLAUDE.md](CLAUDE.md) before you write code.** It is short, and it
+   holds the rules that are bugs to break even when the build passes (no
+   hardcoded colors, how sources are resolved, how Room migrations are
+   written).
+4. **Keep a pull request to one topic** and fill in the template, including
+   screenshots or a recording for anything visible.
+
+A pull request from a fork does not get a CI build on its own when it comes
+from an outside contributor; that is deliberate, because building it means
+running the fork's Gradle build with the project's runners. A maintainer
+builds it when reviewing. Once it is merged into `beta`, a signed build goes
+to the beta testers.
+
+5. **Update Documentation**
    - Update `CLAUDE.md` if you change architecture or add major features
    - Update README.md if you add user-facing features
    - Add inline code documentation for complex logic
 
-2. **Test Your Changes**
+6. **Test Your Changes**
    - Ensure the app builds without errors
    - Test on multiple screen sizes if UI changes
    - Verify no regressions in existing functionality
 
-3. **Keep PRs Focused**
+7. **Keep PRs Focused**
    - One feature or bugfix per PR
    - Avoid mixing refactoring with feature additions
    - Keep changes as small as reasonably possible
 
-4. **PR Description**
+8. **PR Description**
    - Clearly describe what the PR does
    - Reference any related issues
    - Include screenshots for UI changes
