@@ -567,8 +567,12 @@ class PlaybackSession @Inject constructor(
             player.stop()
         }
         val remote = castPlayer
-        if (remote?.currentMediaItem?.mediaId == item.key && castRequestedUri == item.mediaUri) {
-            // Rejoined a session already playing this: keep going.
+        val remoteItem = remote?.currentMediaItem
+        val sameStreamOnTv = remoteItem?.mediaId == item.key &&
+            remoteItem?.mediaMetadata?.extras?.getString(EXTRA_SOURCE_URI) == item.mediaUri
+        if (sameStreamOnTv) {
+            // Rejoined a session already playing this stream: keep going. A different server
+            // picked on the phone meanwhile falls through and is loaded instead.
             castRequestedKey = item.key
             castRequestedUri = item.mediaUri
             return
