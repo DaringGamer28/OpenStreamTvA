@@ -821,4 +821,38 @@
     <string name="match_rail">Найкращі збіги для вас</string>
     <string name="match_percent">%1$d%% збіг</string>
     <string name="match_because">Бо вам сподобалося %1$s</string>
+    <string name="dl_delete_confirm">Видалити завантаження?</string>
+    <string name="dl_delete_body">Видалити %1$s з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</string>
+    <string name="dl_cancel_confirm">Скасувати завантаження?</string>
+    <string name="dl_cancel_body">Зупинити завантаження %1$s? Незавершений файл буде видалено.</string>
+    <string name="action_keep">Залишити</string>
+    <string name="season_episode_format">Сезон %1$d, серія %2$d</string>
+    <string name="dl_pick_source_title">Виберіть джерело завантаження</string>
+    <string name="dl_pick_source_hint">Виберіть, звідки завантажувати.</string>
+    <string name="dl_pick_batch_hint">Для кожної серії буде використано вибране джерело та якість, якщо вони доступні.</string>
+    <string name="dl_batch_queued">Завантажуємо серій: %1$d… Вони будуть у розділі «Завантаження».</string>
+    <string name="dl_season_already">Усі серії тут уже завантажено або завантажуються</string>
+    <string name="dl_hold_options">Утримуйте, щоб вибрати джерело</string>
+    <string name="dl_hold_tip">Порада: утримуйте «Завантажити», щоб вибрати джерело та якість.</string>
+    <string name="dl_choose_source">Виберіть джерело завантаження</string>
+    <string name="dl_no_quality_match">У цій якості джерел поки немає.</string>
+    <string name="action_show_all">Показати все</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Видалити %1$d серію «%2$s» з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</item>
+        <item quantity="few">Видалити %1$d серії «%2$s» з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</item>
+        <item quantity="many">Видалити %1$d серій «%2$s» з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</item>
+        <item quantity="other">Видалити %1$d серії «%2$s» з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Видалити %1$d серію?</item>
+        <item quantity="few">Видалити %1$d серії?</item>
+        <item quantity="many">Видалити %1$d серій?</item>
+        <item quantity="other">Видалити %1$d серії?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d серія</item>
+        <item quantity="few">%1$d серії</item>
+        <item quantity="many">%1$d серій</item>
+        <item quantity="other">%1$d серії</item>
+    </plurals>
 </resources>

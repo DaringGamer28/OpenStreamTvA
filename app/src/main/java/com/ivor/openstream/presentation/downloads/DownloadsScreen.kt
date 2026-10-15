@@ -194,8 +194,9 @@ fun DownloadsScreen(
             },
             text = {
                 Text(
-                    stringResource(
-                        R.string.dl_delete_group_body,
+                    pluralStringResource(
+                        R.plurals.dl_delete_group_body,
+                        pendingGroup.items.size,
                         pendingGroup.items.size,
                         pendingGroup.title
                     )

@@ -862,4 +862,32 @@
     <string name="match_rail">आपके लिए टॉप मैच</string>
     <string name="match_percent">%1$d%% मैच</string>
     <string name="match_because">क्योंकि आपको %1$s पसंद आया</string>
+    <string name="dl_delete_confirm">डाउनलोड हटाएँ?</string>
+    <string name="dl_delete_body">%1$s को इस डिवाइस से हटाएँ? ऑफ़लाइन देखने के लिए इसे फिर से डाउनलोड करना होगा।</string>
+    <string name="dl_cancel_confirm">डाउनलोड रद्द करें?</string>
+    <string name="dl_cancel_body">%1$s का डाउनलोड रोकें? अधूरी फ़ाइल हटा दी जाएगी।</string>
+    <string name="action_keep">रखें</string>
+    <string name="season_episode_format">सीज़न %1$d, एपिसोड %2$d</string>
+    <string name="dl_pick_source_title">डाउनलोड स्रोत चुनें</string>
+    <string name="dl_pick_source_hint">चुनें कि कहाँ से डाउनलोड करना है।</string>
+    <string name="dl_pick_batch_hint">जहाँ उपलब्ध हो, हर एपिसोड के लिए वही प्रोवाइडर और क्वालिटी इस्तेमाल होगी जिसे आप टैप करेंगे।</string>
+    <string name="dl_batch_queued">%1$d एपिसोड डाउनलोड हो रहे हैं… इन्हें डाउनलोड में देखें।</string>
+    <string name="dl_season_already">यहाँ के सभी एपिसोड पहले से डाउनलोड हैं या हो रहे हैं</string>
+    <string name="dl_hold_options">स्रोत चुनने के लिए दबाकर रखें</string>
+    <string name="dl_hold_tip">टिप: स्रोत और क्वालिटी चुनने के लिए डाउनलोड को दबाकर रखें।</string>
+    <string name="dl_choose_source">डाउनलोड स्रोत चुनें</string>
+    <string name="dl_no_quality_match">इस क्वालिटी में अभी कोई स्रोत नहीं है।</string>
+    <string name="action_show_all">सभी दिखाएँ</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">%2$s का %1$d एपिसोड इस डिवाइस से हटाएँ? ऑफ़लाइन देखने के लिए इसे फिर से डाउनलोड करना होगा।</item>
+        <item quantity="other">%2$s के %1$d एपिसोड इस डिवाइस से हटाएँ? ऑफ़लाइन देखने के लिए इन्हें फिर से डाउनलोड करना होगा।</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">1 एपिसोड हटाएँ?</item>
+        <item quantity="other">%1$d एपिसोड हटाएँ?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d एपिसोड</item>
+        <item quantity="other">%1$d एपिसोड</item>
+    </plurals>
 </resources>

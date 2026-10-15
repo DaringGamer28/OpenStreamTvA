@@ -821,4 +821,35 @@
     <string name="match_rail">Top match per te</string>
     <string name="match_percent">%1$d%% di affinità</string>
     <string name="match_because">Perché ti è piaciuto %1$s</string>
+    <string name="dl_delete_confirm">Eliminare il download?</string>
+    <string name="dl_delete_body">Rimuovere %1$s da questo dispositivo? Dovrai scaricarlo di nuovo per guardarlo offline.</string>
+    <string name="dl_cancel_confirm">Annullare il download?</string>
+    <string name="dl_cancel_body">Interrompere il download di %1$s? Il file parziale verrà rimosso.</string>
+    <string name="action_keep">Mantieni</string>
+    <string name="season_episode_format">Stagione %1$d, episodio %2$d</string>
+    <string name="dl_pick_source_title">Scegli la fonte del download</string>
+    <string name="dl_pick_source_hint">Scegli da dove scaricare.</string>
+    <string name="dl_pick_batch_hint">Useremo il provider e la qualità che tocchi per ogni episodio, se disponibili.</string>
+    <string name="dl_batch_queued">Download di %1$d episodi in corso… Li trovi in Download.</string>
+    <string name="dl_season_already">Tutti gli episodi qui sono già scaricati o in download</string>
+    <string name="dl_hold_options">Tieni premuto per scegliere la fonte</string>
+    <string name="dl_hold_tip">Suggerimento: tieni premuto Scarica per scegliere fonte e qualità.</string>
+    <string name="dl_choose_source">Scegli la fonte del download</string>
+    <string name="dl_no_quality_match">Nessuna fonte in questa qualità per ora.</string>
+    <string name="action_show_all">Mostra tutto</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Rimuovere %1$d episodio di %2$s da questo dispositivo? Dovrai scaricarlo di nuovo per guardarlo offline.</item>
+        <item quantity="many">Rimuovere %1$d episodi di %2$s da questo dispositivo? Dovrai scaricarli di nuovo per guardarli offline.</item>
+        <item quantity="other">Rimuovere %1$d episodi di %2$s da questo dispositivo? Dovrai scaricarli di nuovo per guardarli offline.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Eliminare 1 episodio?</item>
+        <item quantity="many">Eliminare %1$d episodi?</item>
+        <item quantity="other">Eliminare %1$d episodi?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d episodio</item>
+        <item quantity="many">%1$d episodi</item>
+        <item quantity="other">%1$d episodi</item>
+    </plurals>
 </resources>
