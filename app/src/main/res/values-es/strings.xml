@@ -343,9 +343,14 @@
     <string name="st_history_cleared">Historial y progreso borrados</string>
     <string name="st_clear_crash">Borrar informes de fallos</string>
     <string name="st_crash_cleared">Informes borrados</string>
-    <string name="st_clear_cache">Borrar caché de imágenes</string>
-    <string name="st_cache_cleared">Caché de imágenes borrada</string>
-    <string name="st_cache_size">%1$s de ilustraciones</string>
+    <string name="st_clear_all_cache">Borrar caché</string>
+    <string name="st_cache_used">%1$s usados por ilustraciones e información de títulos</string>
+    <string name="st_cache_hint">Ilustraciones e información de títulos guardadas para abrir páginas más rápido</string>
+    <string name="st_cache_cleared_all">Caché borrada</string>
+    <string name="st_cache_limit">Tamaño de la caché</string>
+    <string name="st_cache_limit_hint">Espacio que pueden usar las ilustraciones y la información de títulos. Se aplica la próxima vez que abras la app.</string>
+    <string name="st_preload_artwork">Precargar ilustraciones</string>
+    <string name="st_preload_artwork_hint">Con Wi-Fi, carga los pósters de las filas antes de que llegues a ellas</string>
     <string name="st_show_hidden">Mostrar títulos ocultos</string>
     <string name="st_backup">Respaldar biblioteca</string>
     <string name="st_backup_hint">Ver más tarde, listas, historial y ocultos de cada perfil, más ajustes</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Permite instalar actualizaciones y vuelve para tocar Instalar.</string>
     <string name="st_storage_help">Almacenamiento y ayuda</string>
     <string name="st_on_device">En este dispositivo</string>
-    <string name="st_posters_cache">Pósters y fondos para carga rápida</string>
     <string name="st_crash_include">Incluye %1$d informe de fallo</string>
     <string name="st_repo_data_note">Los repositorios traen datos, no código</string>
     <string name="st_repo_data_body">Una extensión solo elige y configura un resolvedor incluido en OpenStream; una lista externa no puede ejecutar código en tu dispositivo.</string>

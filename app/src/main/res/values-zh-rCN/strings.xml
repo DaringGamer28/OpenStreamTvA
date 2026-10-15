@@ -343,9 +343,14 @@
     <string name="st_history_cleared">观看历史和进度已清除</string>
     <string name="st_clear_crash">清除崩溃报告</string>
     <string name="st_crash_cleared">崩溃报告已清除</string>
-    <string name="st_clear_cache">清除图片缓存</string>
-    <string name="st_cache_cleared">图片缓存已清除</string>
-    <string name="st_cache_size">封面占用 %1$s</string>
+    <string name="st_clear_all_cache">清除缓存</string>
+    <string name="st_cache_used">封面和影片信息占用 %1$s</string>
+    <string name="st_cache_hint">保留封面和影片信息，让页面打开更快</string>
+    <string name="st_cache_cleared_all">缓存已清除</string>
+    <string name="st_cache_limit">缓存大小</string>
+    <string name="st_cache_limit_hint">封面和影片信息可占用的空间。下次启动应用时生效。</string>
+    <string name="st_preload_artwork">预加载封面</string>
+    <string name="st_preload_artwork_hint">连接 Wi-Fi 时，在你滚动到之前预先加载各行的海报</string>
     <string name="st_show_hidden">显示已隐藏的标题</string>
     <string name="st_backup">备份媒体库</string>
     <string name="st_backup_hint">包含每个用户的稍后观看、列表、历史记录、已隐藏标题及设置</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">请先允许 OpenStream 安装更新，然后返回并轻触“安装”。</string>
     <string name="st_storage_help">存储与帮助</string>
     <string name="st_on_device">在此设备上</string>
-    <string name="st_posters_cache">缓存海报和背景图以加快加载</string>
     <string name="st_crash_include">包含 %1$d 份崩溃报告</string>
     <string name="st_repo_data_note">仓库仅提供数据，不含代码</string>
     <string name="st_repo_data_body">扩展仅选用并配置 OpenStream 内置的解析器，第三方列表无法在您的设备上运行代码。</string>

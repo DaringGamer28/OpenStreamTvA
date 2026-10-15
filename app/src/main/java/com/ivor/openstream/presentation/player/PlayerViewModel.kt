@@ -628,6 +628,8 @@ class PlayerViewModel @Inject constructor(
     fun onPlaybackError(error: PlaybackException? = null) {
         val failed = _activeServer.value ?: return
         failedServerIds += failed.id
+        // Its links may have expired: the next open of this episode searches the sources again.
+        currentIdentity?.let(streamingRepository::forgetResolvedServers)
         // A source the user picked by hand (often a dub) failed: go back to what was playing rather
         // than jumping to an arbitrary server. Some dub hosts lock links to Vidking's own servers.
         val previous = switchedFrom?.takeIf { it.id !in failedServerIds }
