@@ -41,6 +41,7 @@ import com.ivor.openstream.data.cast.CastMediaItemConverter
 import com.ivor.openstream.data.cast.CastMediaProxy
 import com.ivor.openstream.data.playback.DeviceDecoders
 import com.ivor.openstream.data.playback.StreamDataGuard
+import com.ivor.openstream.data.local.entity.LOCAL_MEDIA_TYPE
 import com.ivor.openstream.data.remote.model.SubtitleDto
 import com.ivor.openstream.data.settings.AppSettingsStore
 import com.ivor.openstream.data.streaming.DownloadRequestHeaderStore
@@ -917,6 +918,9 @@ class PlaybackSession @Inject constructor(
 
     private fun saveProgress(item: NowPlaying, position: Long, duration: Long, force: Boolean) {
         if (position < WatchProgress.MIN_SAVED_POSITION_MS) return
+        // An imported file is not a title: it would show up in Continue Watching and History with
+        // nothing to open.
+        if (item.mediaType == LOCAL_MEDIA_TYPE) return
 
         val key = item.key
         val completed = position.toFloat() / duration >= WatchProgress.COMPLETION_FRACTION

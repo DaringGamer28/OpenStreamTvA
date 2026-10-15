@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.settings
 
+import android.Manifest
 import com.ivor.openstream.presentation.components.CenteredListBox
 import com.ivor.openstream.presentation.downloads.formatBytes
 import android.app.Activity
@@ -115,6 +116,10 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
     val appSettings by viewModel.appSettings.collectAsState()
     val cacheBytes by viewModel.cacheBytes.collectAsState()
+    // Turning on auto-save asks for storage access first where Android needs it (9 and older).
+    val autoExportPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.setAutoExportDownloadsToStorage(true)
+    }
     val hiddenTitleCount by viewModel.hiddenTitleCount.collectAsState()
     val crashCount by viewModel.crashCount.collectAsState()
     val isWorking by viewModel.isWorking.collectAsState()
@@ -466,7 +471,13 @@ fun SettingsScreen(
                             title = stringResource(R.string.st_save_to_storage),
                             supporting = stringResource(R.string.st_save_to_storage_summary),
                             checked = appSettings.autoExportDownloadsToStorage,
-                            onCheckedChange = viewModel::setAutoExportDownloadsToStorage
+                            onCheckedChange = { enabled ->
+                                if (enabled && viewModel.storagePermissionNeeded()) {
+                                    autoExportPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                } else {
+                                    viewModel.setAutoExportDownloadsToStorage(enabled)
+                                }
+                            }
                         )
                     }
                 }

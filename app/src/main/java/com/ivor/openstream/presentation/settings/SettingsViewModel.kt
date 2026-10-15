@@ -12,6 +12,7 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import com.ivor.openstream.data.backup.BackupFormatException
 import com.ivor.openstream.data.backup.LibraryBackup
 import com.ivor.openstream.data.cache.AppCaches
+import com.ivor.openstream.data.downloads.DownloadStorageExporter
 import com.ivor.openstream.data.downloads.SmartDownloads
 import com.ivor.openstream.data.playback.StreamDataGuard
 import com.ivor.openstream.data.notifications.EpisodeAlarm
@@ -64,6 +65,7 @@ class SettingsViewModel @Inject constructor(
     private val diagnostics: Diagnostics,
     private val smartDownloads: SmartDownloads,
     private val appCaches: AppCaches,
+    private val storageExporter: DownloadStorageExporter,
     val streamDataGuard: StreamDataGuard
 ) : ViewModel() {
 
@@ -221,6 +223,9 @@ class SettingsViewModel @Inject constructor(
     fun setMeteredMaxHeight(height: Int) = appSettingsStore.setMeteredMaxHeight(height)
 
     fun setAutoExportDownloadsToStorage(enabled: Boolean) = appSettingsStore.setAutoExportDownloadsToStorage(enabled)
+
+    /** Saving to the public Downloads folder needs a permission on Android 9 and older. */
+    fun storagePermissionNeeded(): Boolean = storageExporter.needsStoragePermission()
 
     fun clearCache() {
         viewModelScope.launch {

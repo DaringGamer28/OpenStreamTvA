@@ -862,4 +862,34 @@
     <string name="match_rail">आपके लिए टॉप मैच</string>
     <string name="match_percent">%1$d%% मैच</string>
     <string name="match_because">क्योंकि आपको %1$s पसंद आया</string>
+    <string name="st_save_to_storage">डाउनलोड स्टोरेज में सेव करें</string>
+    <string name="st_save_to_storage_summary">हर पूरा डाउनलोड Downloads/Openstream में कॉपी करें, जहाँ दूसरे ऐप इसे खोल सकें</string>
+    <string name="dl_tab_downloads">डाउनलोड</string>
+    <string name="dl_tab_local_files">लोकल फ़ाइलें</string>
+    <string name="dl_save_to_storage">स्टोरेज में सेव करें</string>
+    <string name="dl_saved_to_storage">Downloads/Openstream में सेव हुआ</string>
+    <string name="dl_save_to_storage_failed">स्टोरेज में सेव नहीं हो सका</string>
+    <string name="local_import_files">वीडियो इंपोर्ट करें</string>
+    <string name="local_no_files_title">कोई लोकल वीडियो नहीं</string>
+    <string name="local_no_files_body">OpenStream में देखने के लिए अपने डिवाइस से वीडियो फ़ाइलें इंपोर्ट करें</string>
+    <string name="local_file">लोकल वीडियो</string>
+    <string name="local_delete_confirm_title">लोकल वीडियो हटाएँ?</string>
+    <string name="local_delete_confirm_body">यह सिर्फ़ इस सूची से हटेगा। फ़ाइल आपके डिवाइस पर रहेगी।</string>
+    <string name="local_search_hint">लोकल वीडियो खोजें</string>
+    <string name="sort_name_asc">नाम (A–Z)</string>
+    <string name="sort_name_desc">नाम (Z–A)</string>
+    <string name="sort_date_added_desc">हाल में जोड़े गए</string>
+    <string name="sort_date_added_asc">पहले जोड़े गए</string>
+    <string name="sort_size_desc">सबसे बड़े</string>
+    <string name="sort_size_asc">सबसे छोटे</string>
+    <string name="sort_duration_desc">सबसे लंबे</string>
+    <string name="sort_duration_asc">सबसे छोटे (अवधि)</string>
+    <string name="dl_save_in_progress">यह पहले से डाउनलोड में सेव हो रहा है</string>
+    <string name="dl_storage_permission_needed">वीडियो को डाउनलोड फ़ोल्डर में सेव करने के लिए स्टोरेज की अनुमति दें</string>
+    <string name="dl_save_unsupported">यह डाउनलोड एक वीडियो फ़ाइल के रूप में सेव नहीं हो सकता</string>
+    <string name="dl_save_protected">यह स्ट्रीम सुरक्षित है, इसलिए यह सिर्फ़ OpenStream में चल सकती है</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d वीडियो इंपोर्ट हुआ</item>
+        <item quantity="other">%1$d वीडियो इंपोर्ट हुए</item>
+    </plurals>
 </resources>

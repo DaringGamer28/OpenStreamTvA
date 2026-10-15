@@ -821,4 +821,35 @@
     <string name="match_rail">Top match per te</string>
     <string name="match_percent">%1$d%% di affinità</string>
     <string name="match_because">Perché ti è piaciuto %1$s</string>
+    <string name="st_save_to_storage">Salva i download in memoria</string>
+    <string name="st_save_to_storage_summary">Copia ogni download finito in Downloads/Openstream, dove altre app possono aprirlo</string>
+    <string name="dl_tab_downloads">Download</string>
+    <string name="dl_tab_local_files">File locali</string>
+    <string name="dl_save_to_storage">Salva in memoria</string>
+    <string name="dl_saved_to_storage">Salvato in Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">Impossibile salvare in memoria</string>
+    <string name="local_import_files">Importa video</string>
+    <string name="local_no_files_title">Nessun video locale</string>
+    <string name="local_no_files_body">Importa file video dal dispositivo per guardarli in OpenStream</string>
+    <string name="local_file">Video locale</string>
+    <string name="local_delete_confirm_title">Rimuovere il video locale?</string>
+    <string name="local_delete_confirm_body">Esce solo da questo elenco. Il file resta sul dispositivo.</string>
+    <string name="local_search_hint">Cerca nei video locali</string>
+    <string name="sort_name_asc">Nome (A–Z)</string>
+    <string name="sort_name_desc">Nome (Z–A)</string>
+    <string name="sort_date_added_desc">Aggiunti di recente</string>
+    <string name="sort_date_added_asc">Aggiunti per primi</string>
+    <string name="sort_size_desc">Più grandi</string>
+    <string name="sort_size_asc">Più piccoli</string>
+    <string name="sort_duration_desc">Più lunghi</string>
+    <string name="sort_duration_asc">Più brevi</string>
+    <string name="dl_save_in_progress">Salvataggio già in corso in Download</string>
+    <string name="dl_storage_permission_needed">Consenti l’accesso alla memoria per salvare i video nella cartella Download</string>
+    <string name="dl_save_unsupported">Questo download non può essere salvato come un unico file video</string>
+    <string name="dl_save_protected">Questo stream è protetto e si può riprodurre solo in OpenStream</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d video importato</item>
+        <item quantity="many">%1$d video importati</item>
+        <item quantity="other">%1$d video importati</item>
+    </plurals>
 </resources>

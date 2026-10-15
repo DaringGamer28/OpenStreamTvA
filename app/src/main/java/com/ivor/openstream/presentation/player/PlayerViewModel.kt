@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.player
 
+import com.ivor.openstream.data.local.entity.LOCAL_MEDIA_TYPE
 import com.ivor.openstream.data.local.entity.LocalMediaEntity
 import com.ivor.openstream.data.repository.LocalMediaRepository
 
@@ -390,7 +391,7 @@ class PlayerViewModel @Inject constructor(
     fun loadLocalMedia(id: Long) {
         loadJob?.cancel()
         resolutionJob?.cancel()
-        _mediaType.value = "local"
+        _mediaType.value = LOCAL_MEDIA_TYPE
         currentSeason = 1
         currentEpisodeNumber = 1
         viewModelScope.launch {

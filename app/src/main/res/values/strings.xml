@@ -916,21 +916,22 @@
     <string name="st_smooth_motion_unsupported">Not supported on this device\'s GPU (requires OpenGL ES 3.2).</string>
     <!-- Local media and Storage export -->
     <string name="st_save_to_storage">Save downloads to storage</string>
-    <string name="st_save_to_storage_summary">Automatically save finished downloads to Downloads/Openstream</string>
+    <string name="st_save_to_storage_summary">Copy each finished download to Downloads/Openstream, where other apps can open it</string>
     <string name="dl_tab_downloads">Downloads</string>
     <string name="dl_tab_local_files">Local files</string>
     <string name="dl_save_to_storage">Save to storage</string>
-    <string name="dl_saving_to_storage">Saving to storage…</string>
     <string name="dl_saved_to_storage">Saved to Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Could not save to storage</string>
     <string name="local_import_files">Import videos</string>
-    <string name="local_importing">Importing…</string>
-    <string name="local_import_success">%1$d video(s) imported</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d video imported</item>
+        <item quantity="other">%1$d videos imported</item>
+    </plurals>
     <string name="local_no_files_title">No local videos</string>
-    <string name="local_no_files_body">Import video files from your device to watch them in Openstream</string>
+    <string name="local_no_files_body">Import video files from your device to watch them in OpenStream</string>
     <string name="local_file">Local video</string>
     <string name="local_delete_confirm_title">Remove local video?</string>
-    <string name="local_delete_confirm_body">Remove this video from your Openstream library?</string>
+    <string name="local_delete_confirm_body">It only leaves this list. The file stays on your device.</string>
     <string name="local_search_hint">Search local videos</string>
     <string name="sort_name_asc">Name (A–Z)</string>
     <string name="sort_name_desc">Name (Z–A)</string>
@@ -940,4 +941,8 @@
     <string name="sort_size_asc">Smallest size</string>
     <string name="sort_duration_desc">Longest duration</string>
     <string name="sort_duration_asc">Shortest duration</string>
+    <string name="dl_save_in_progress">Already saving this one to Downloads</string>
+    <string name="dl_storage_permission_needed">Allow storage access to save videos to your Downloads folder</string>
+    <string name="dl_save_unsupported">This download can’t be saved as a single video file</string>
+    <string name="dl_save_protected">This stream is protected, so it can only play inside OpenStream</string>
 </resources>

@@ -862,4 +862,33 @@
     <string name="match_rail">나를 위한 추천작</string>
     <string name="match_percent">%1$d%% 일치</string>
     <string name="match_because">%1$s을(를) 좋아해서</string>
+    <string name="st_save_to_storage">다운로드를 저장소에 저장</string>
+    <string name="st_save_to_storage_summary">완료된 다운로드를 Downloads/Openstream에 복사해 다른 앱에서도 열 수 있게 해요</string>
+    <string name="dl_tab_downloads">다운로드</string>
+    <string name="dl_tab_local_files">로컬 파일</string>
+    <string name="dl_save_to_storage">저장소에 저장</string>
+    <string name="dl_saved_to_storage">Downloads/Openstream에 저장했어요</string>
+    <string name="dl_save_to_storage_failed">저장소에 저장하지 못했어요</string>
+    <string name="local_import_files">동영상 가져오기</string>
+    <string name="local_no_files_title">로컬 동영상이 없어요</string>
+    <string name="local_no_files_body">기기의 동영상 파일을 가져와 OpenStream에서 보세요</string>
+    <string name="local_file">로컬 동영상</string>
+    <string name="local_delete_confirm_title">로컬 동영상을 삭제할까요?</string>
+    <string name="local_delete_confirm_body">이 목록에서만 빠져요. 파일은 기기에 그대로 있어요.</string>
+    <string name="local_search_hint">로컬 동영상 검색</string>
+    <string name="sort_name_asc">이름 (A–Z)</string>
+    <string name="sort_name_desc">이름 (Z–A)</string>
+    <string name="sort_date_added_desc">최근 추가순</string>
+    <string name="sort_date_added_asc">오래된 추가순</string>
+    <string name="sort_size_desc">큰 크기순</string>
+    <string name="sort_size_asc">작은 크기순</string>
+    <string name="sort_duration_desc">긴 재생 시간순</string>
+    <string name="sort_duration_asc">짧은 재생 시간순</string>
+    <string name="dl_save_in_progress">이미 다운로드 폴더에 저장 중이에요</string>
+    <string name="dl_storage_permission_needed">다운로드 폴더에 동영상을 저장하려면 저장소 접근을 허용해 주세요</string>
+    <string name="dl_save_unsupported">이 다운로드는 하나의 동영상 파일로 저장할 수 없어요</string>
+    <string name="dl_save_protected">보호된 스트림이라 OpenStream 안에서만 재생할 수 있어요</string>
+    <plurals name="local_import_success">
+        <item quantity="other">동영상 %1$d개를 가져왔어요</item>
+    </plurals>
 </resources>

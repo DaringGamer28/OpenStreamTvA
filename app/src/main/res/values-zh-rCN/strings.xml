@@ -821,4 +821,33 @@
     <string name="match_rail">最匹配你的推荐</string>
     <string name="match_percent">%1$d%% 匹配</string>
     <string name="match_because">因为你喜欢 %1$s</string>
+    <string name="st_save_to_storage">将下载内容保存到存储空间</string>
+    <string name="st_save_to_storage_summary">把每个已完成的下载复制到 Downloads/Openstream，方便其他应用打开</string>
+    <string name="dl_tab_downloads">下载</string>
+    <string name="dl_tab_local_files">本地文件</string>
+    <string name="dl_save_to_storage">保存到存储空间</string>
+    <string name="dl_saved_to_storage">已保存到 Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">无法保存到存储空间</string>
+    <string name="local_import_files">导入视频</string>
+    <string name="local_no_files_title">没有本地视频</string>
+    <string name="local_no_files_body">从设备导入视频文件，在 OpenStream 中观看</string>
+    <string name="local_file">本地视频</string>
+    <string name="local_delete_confirm_title">移除本地视频？</string>
+    <string name="local_delete_confirm_body">只会从此列表移除，文件仍保留在设备上。</string>
+    <string name="local_search_hint">搜索本地视频</string>
+    <string name="sort_name_asc">名称 (A–Z)</string>
+    <string name="sort_name_desc">名称 (Z–A)</string>
+    <string name="sort_date_added_desc">最近添加</string>
+    <string name="sort_date_added_asc">最早添加</string>
+    <string name="sort_size_desc">最大</string>
+    <string name="sort_size_asc">最小</string>
+    <string name="sort_duration_desc">时长最长</string>
+    <string name="sort_duration_asc">时长最短</string>
+    <string name="dl_save_in_progress">正在保存到“下载”文件夹</string>
+    <string name="dl_storage_permission_needed">请允许存储访问权限，以便将视频保存到“下载”文件夹</string>
+    <string name="dl_save_unsupported">此下载无法保存为单个视频文件</string>
+    <string name="dl_save_protected">此视频流受保护，只能在 OpenStream 中播放</string>
+    <plurals name="local_import_success">
+        <item quantity="other">已导入 %1$d 个视频</item>
+    </plurals>
 </resources>

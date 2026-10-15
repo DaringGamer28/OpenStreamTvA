@@ -250,11 +250,14 @@ class DownloadRepositoryImpl @Inject constructor(
         }.onFailure { Log.w(TAG, "Could not record stream subtitles for ${target.id}", it) }
         subtitleSaver.saveFor(target, streamSubtitles)
         withContext(Dispatchers.Main) {
-            // Replace any older copy so segments from two different links never mix.\n            if (media3.downloadIndex.getDownload(target.id) != null) media3.removeDownload(target.id)
+            // Replace any older copy so segments from two different links never mix.
+            if (media3.downloadIndex.getDownload(target.id) != null) media3.removeDownload(target.id)
             val started = runCatching {
                 DownloadService.sendAddDownload(context, HlsDownloadService::class.java, request, true)
             }.isSuccess
-            // Starting a foreground service from the background is blocked on Android 12+;\n            // the manager still downloads while the app process is alive.\n            if (!started) media3.addDownload(request)
+            // Starting a foreground service from the background is blocked on Android 12+;
+            // the manager still downloads while the app process is alive.
+            if (!started) media3.addDownload(request)
         }
     }
 
@@ -328,6 +331,9 @@ class DownloadRepositoryImpl @Inject constructor(
         val error = finalException?.let { context.getString(R.string.player_source_stopped) }
             ?: if (status == DownloadStatus.FAILED) context.getString(R.string.dl_failed) else null
         if (finalException != null) Log.w(TAG, "Download ${download.request.id} failed", finalException)
+        // Read before the update: only a download that has just finished is saved to storage.
+        val wasCompleted = status == DownloadStatus.COMPLETED &&
+            dao.getDownloadById(download.request.id)?.status == DownloadStatus.COMPLETED
         dao.updateProgress(
             downloadId = download.request.id,
             status = status,
@@ -342,16 +348,11 @@ class DownloadRepositoryImpl @Inject constructor(
             errorMessage = error
         )
 
-        if (status == DownloadStatus.COMPLETED && appSettings.current.autoExportDownloadsToStorage) {
+        // Startup reconciling and progress polling call this for downloads that finished long
+        // ago; those must not be saved again every time the app starts.
+        if (status == DownloadStatus.COMPLETED && !wasCompleted && appSettings.current.autoExportDownloadsToStorage) {
             val id = download.request.id
-            if (!storageExporter.isExported(id)) {
-                scope.launch {
-                    val entity = dao.getDownloadById(id)
-                    if (entity != null) {
-                        storageExporter.exportToStorage(entity)
-                    }
-                }
-            }
+            scope.launch { dao.getDownloadById(id)?.let { storageExporter.exportToStorage(it) } }
         }
     }
 

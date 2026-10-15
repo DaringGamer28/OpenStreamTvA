@@ -821,4 +821,34 @@
     <string name="match_rail">Top-Treffer für Sie</string>
     <string name="match_percent">%1$d%% Treffer</string>
     <string name="match_because">Weil Ihnen %1$s gefallen hat</string>
+    <string name="st_save_to_storage">Downloads im Speicher sichern</string>
+    <string name="st_save_to_storage_summary">Jeden fertigen Download nach Downloads/Openstream kopieren, wo andere Apps ihn öffnen können</string>
+    <string name="dl_tab_downloads">Downloads</string>
+    <string name="dl_tab_local_files">Lokale Dateien</string>
+    <string name="dl_save_to_storage">Im Speicher sichern</string>
+    <string name="dl_saved_to_storage">In Downloads/Openstream gesichert</string>
+    <string name="dl_save_to_storage_failed">Konnte nicht im Speicher gesichert werden</string>
+    <string name="local_import_files">Videos importieren</string>
+    <string name="local_no_files_title">Keine lokalen Videos</string>
+    <string name="local_no_files_body">Importiere Videodateien von deinem Gerät, um sie in OpenStream anzusehen</string>
+    <string name="local_file">Lokales Video</string>
+    <string name="local_delete_confirm_title">Lokales Video entfernen?</string>
+    <string name="local_delete_confirm_body">Es verschwindet nur aus dieser Liste. Die Datei bleibt auf deinem Gerät.</string>
+    <string name="local_search_hint">Lokale Videos durchsuchen</string>
+    <string name="sort_name_asc">Name (A–Z)</string>
+    <string name="sort_name_desc">Name (Z–A)</string>
+    <string name="sort_date_added_desc">Zuletzt hinzugefügt</string>
+    <string name="sort_date_added_asc">Zuerst hinzugefügt</string>
+    <string name="sort_size_desc">Größte zuerst</string>
+    <string name="sort_size_asc">Kleinste zuerst</string>
+    <string name="sort_duration_desc">Längste zuerst</string>
+    <string name="sort_duration_asc">Kürzeste zuerst</string>
+    <string name="dl_save_in_progress">Wird bereits in Downloads gesichert</string>
+    <string name="dl_storage_permission_needed">Erlaube den Speicherzugriff, um Videos in deinem Download-Ordner zu sichern</string>
+    <string name="dl_save_unsupported">Dieser Download lässt sich nicht als einzelne Videodatei sichern</string>
+    <string name="dl_save_protected">Dieser Stream ist geschützt und lässt sich nur in OpenStream abspielen</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d Video importiert</item>
+        <item quantity="other">%1$d Videos importiert</item>
+    </plurals>
 </resources>

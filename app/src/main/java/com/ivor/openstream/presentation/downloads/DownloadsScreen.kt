@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.downloads
 
+import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -121,7 +122,27 @@ fun DownloadsScreen(
     val state by viewModel.uiState.collectAsState()
     var confirmDeleteAll by rememberSaveable { mutableStateOf(false) }
     var subtitlesForId by rememberSaveable { mutableStateOf<String?>(null) }
-    var localMediaToDelete by rememberSaveable { mutableStateOf<LocalMediaEntity?>(null) }
+    // The id, not the row: rememberSaveable can only keep saveable values.
+    var localMediaToDeleteId by rememberSaveable { mutableStateOf<Long?>(null) }
+    val localMediaToDelete = localMediaToDeleteId?.let { id -> state.localFiles.firstOrNull { it.id == id } }
+
+    // Android 9 and older need the storage permission before saving to Downloads.
+    var pendingExport by remember { mutableStateOf<DownloadEntity?>(null) }
+    val storagePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        val download = pendingExport
+        pendingExport = null
+        if (download != null) {
+            if (granted) viewModel.exportToStorage(download) else viewModel.onStoragePermissionDenied()
+        }
+    }
+    val exportToStorage: (DownloadEntity) -> Unit = { download ->
+        if (viewModel.storageExporter.needsStoragePermission()) {
+            pendingExport = download
+            storagePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        } else {
+            viewModel.exportToStorage(download)
+        }
+    }
     val subtitlesViewModel: DownloadSubtitlesViewModel = hiltViewModel()
     val subtitlesFor = subtitlesForId?.let { id -> state.library.flatMap { it.items }.firstOrNull { it.downloadId == id } }
 
@@ -168,7 +189,7 @@ fun DownloadsScreen(
     if (localMediaToDelete != null) {
         val target = localMediaToDelete
         AlertDialog(
-            onDismissRequest = { localMediaToDelete = null },
+            onDismissRequest = { localMediaToDeleteId = null },
             title = { Text(stringResource(R.string.local_delete_confirm_title)) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -185,14 +206,12 @@ fun DownloadsScreen(
             confirmButton = {
                 TextButton(onClick = {
                     val media = localMediaToDelete
-                    localMediaToDelete = null
-                    if (media != null) {
-                        viewModel.deleteLocalMedia(media.id, alsoDeleteFile = false)
-                    }
+                    localMediaToDeleteId = null
+                    if (media != null) viewModel.removeLocalMedia(media.id)
                 }) { Text(stringResource(R.string.action_remove), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { localMediaToDelete = null }) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { localMediaToDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }
@@ -208,7 +227,7 @@ fun DownloadsScreen(
                 onBackClick = onBackClick,
                 onTabSelect = viewModel::setSelectedTab,
                 onLocalMediaClick = onLocalMediaClick,
-                onDeleteMedia = { localMediaToDelete = it },
+                onDeleteMedia = { localMediaToDeleteId = it.id },
                 onImportClick = { openDocumentLauncher.launch(arrayOf("video/*")) },
                 onSearchChange = viewModel::setSearchQuery,
                 onSortChange = viewModel::setSortOrder
@@ -222,7 +241,7 @@ fun DownloadsScreen(
                 onDownloadClick = onDownloadClick,
                 onDeleteAll = { confirmDeleteAll = true },
                 onSubtitles = { subtitlesForId = it.downloadId },
-                onExport = viewModel::exportToStorage
+                onExport = exportToStorage
             )
         } else {
             CenteredListBox(Modifier.fillMaxSize(), minGutter = 16.dp) { gutter ->
@@ -286,7 +305,7 @@ fun DownloadsScreen(
                                 exportStates = state.exportStates,
                                 onPlay = onDownloadClick,
                                 onSubtitles = { subtitlesForId = it.downloadId },
-                                onExport = viewModel::exportToStorage,
+                                onExport = exportToStorage,
                                 onDelete = viewModel::remove,
                                 onDeleteAll = { viewModel.removeGroup(group) },
                                 modifier = Modifier
@@ -308,6 +327,7 @@ fun DownloadsScreen(
     }
 }
 
+/** From here Downloads splits into a fixed side column and a library grid. */
 private val WIDE_DOWNLOADS_MIN_WIDTH = 900.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -592,6 +612,10 @@ private fun EmptyLocalFiles(onImport: () -> Unit) {
     }
 }
 
+/**
+ * Tablets: storage and anything still downloading stay in view on the left while the library
+ * fills the rest of the screen as a grid of title cards.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WideDownloads(
@@ -654,6 +678,7 @@ private fun WideDownloads(
             verticalItemSpacing = 12.dp
         ) {
             item(key = "library-title", span = StaggeredGridItemSpan.FullLine) {
+                // Lines the title up with "Downloads" in the side column.
                 Box(Modifier.statusBarsPadding().padding(top = 96.dp)) {
                     SectionTitle(if (state.library.isEmpty()) stringResource(R.string.dl_nothing_finished) else stringResource(R.string.st_on_device))
                 }
