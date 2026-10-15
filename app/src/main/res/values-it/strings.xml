@@ -343,9 +343,14 @@
     <string name="st_history_cleared">Cronologia e progressi cancellati</string>
     <string name="st_clear_crash">Cancella segnalazioni crash</string>
     <string name="st_crash_cleared">Segnalazioni crash cancellate</string>
-    <string name="st_clear_cache">Svuota cache immagini</string>
-    <string name="st_cache_cleared">Cache immagini svuotata</string>
-    <string name="st_cache_size">%1$s di artwork</string>
+    <string name="st_clear_all_cache">Svuota cache</string>
+    <string name="st_cache_used">%1$s usati per artwork e info sui titoli</string>
+    <string name="st_cache_hint">Artwork e info sui titoli salvati per aprire le pagine più in fretta</string>
+    <string name="st_cache_cleared_all">Cache svuotata</string>
+    <string name="st_cache_limit">Dimensione cache</string>
+    <string name="st_cache_limit_hint">Spazio che possono occupare artwork e info sui titoli. Vale dal prossimo avvio dell’app.</string>
+    <string name="st_preload_artwork">Precarica artwork</string>
+    <string name="st_preload_artwork_hint">Su Wi-Fi, carica i poster delle righe prima che ci arrivi</string>
     <string name="st_show_hidden">Mostra titoli nascosti</string>
     <string name="st_backup">Backup libreria</string>
     <string name="st_backup_hint">Guarda più tardi, liste, cronologia e titoli nascosti di ogni profilo, più impostazioni</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Consenti a OpenStream di installare aggiornamenti, poi torna e tocca Installa.</string>
     <string name="st_storage_help">Spazio e aiuto</string>
     <string name="st_on_device">Su questo dispositivo</string>
-    <string name="st_posters_cache">Poster e sfondi salvati per caricare più in fretta</string>
     <string name="st_crash_include">Include %1$d segnalazione crash</string>
     <string name="st_repo_data_note">I repository portano dati, non codice</string>
     <string name="st_repo_data_body">Un\'estensione sceglie e configura solo un resolver già incluso in OpenStream, così una lista di terzi non può eseguire codice sul tuo dispositivo.</string>

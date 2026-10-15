@@ -364,9 +364,14 @@
     <string name="st_history_cleared">Watch history and progress cleared</string>
     <string name="st_clear_crash">Clear crash reports</string>
     <string name="st_crash_cleared">Crash reports cleared</string>
-    <string name="st_clear_cache">Clear image cache</string>
-    <string name="st_cache_cleared">Image cache cleared</string>
-    <string name="st_cache_size">%1$s of artwork</string>
+    <string name="st_clear_all_cache">Clear cache</string>
+    <string name="st_cache_used">%1$s used for artwork and title info</string>
+    <string name="st_cache_hint">Artwork and title info kept so pages open faster</string>
+    <string name="st_cache_cleared_all">Cache cleared</string>
+    <string name="st_cache_limit">Cache size</string>
+    <string name="st_cache_limit_hint">Space artwork and title info may use. Takes effect the next time the app starts.</string>
+    <string name="st_preload_artwork">Preload artwork</string>
+    <string name="st_preload_artwork_hint">On Wi-Fi, load posters for rows before you scroll to them</string>
     <string name="st_show_hidden">Show hidden titles</string>
     <string name="st_backup">Back up library</string>
     <string name="st_backup_hint">Every profile\'s Watch Later, lists, history and hidden titles, plus settings</string>
@@ -400,7 +405,6 @@
     <string name="st_allow_install_note">Allow OpenStream to install updates first, then come back and tap Install.</string>
     <string name="st_storage_help">Storage and help</string>
     <string name="st_on_device">On this device</string>
-    <string name="st_posters_cache">Posters and backdrops kept for faster loading</string>
     <string name="st_crash_include">Includes %1$d crash report</string>
     <string name="st_repo_data_note">Repositories ship data, not code</string>
     <string name="st_repo_data_body">An extension only picks and configures a resolver that already ships inside OpenStream, so a third-party list cannot run its own code on your device.</string>

@@ -22,6 +22,12 @@ interface StreamingRepository {
     suspend fun refreshServer(server: VideoServer): Result<VideoServer>
     fun rememberServer(identity: MediaIdentity, server: VideoServer)
 
+    /** A stream [resolveServers] handed out for [identity] failed: search afresh next time. */
+    fun forgetResolvedServers(identity: MediaIdentity)
+
+    /** Drops every remembered search result ("Clear cache"). */
+    fun clearResolvedServers()
+
     /** [server] actually played: its source is the one [resolveServers] can ask first next time. */
     fun rememberWorkingSource(identity: MediaIdentity, server: VideoServer)
 }

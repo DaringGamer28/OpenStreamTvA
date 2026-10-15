@@ -343,9 +343,14 @@
     <string name="st_history_cleared">Verlauf und Fortschritt gelöscht</string>
     <string name="st_clear_crash">Absturzberichte löschen</string>
     <string name="st_crash_cleared">Absturzberichte gelöscht</string>
-    <string name="st_clear_cache">Bild-Cache leeren</string>
-    <string name="st_cache_cleared">Bild-Cache geleert</string>
-    <string name="st_cache_size">%1$s an Artworks</string>
+    <string name="st_clear_all_cache">Cache leeren</string>
+    <string name="st_cache_used">%1$s für Artworks und Titelinfos belegt</string>
+    <string name="st_cache_hint">Artworks und Titelinfos werden gespeichert, damit Seiten schneller öffnen</string>
+    <string name="st_cache_cleared_all">Cache geleert</string>
+    <string name="st_cache_limit">Cache-Größe</string>
+    <string name="st_cache_limit_hint">Platz für Artworks und Titelinfos. Gilt ab dem nächsten App-Start.</string>
+    <string name="st_preload_artwork">Artworks vorladen</string>
+    <string name="st_preload_artwork_hint">Im WLAN Poster für Reihen laden, bevor du dorthin scrollst</string>
     <string name="st_show_hidden">Ausgeblendete Titel anzeigen</string>
     <string name="st_backup">Mediathek sichern</string>
     <string name="st_backup_hint">Später ansehen, Listen, Verlauf und ausgeblendete Titel jedes Profils, plus Einstellungen</string>
@@ -379,7 +384,6 @@
     <string name="st_allow_install_note">Erlauben Sie OpenStream zuerst, Updates zu installieren, und tippen Sie dann zurück hier auf Installieren.</string>
     <string name="st_storage_help">Speicher und Hilfe</string>
     <string name="st_on_device">Auf diesem Gerät</string>
-    <string name="st_posters_cache">Poster und Hintergründe für schnelleres Laden gespeichert</string>
     <string name="st_crash_include">Enthält %1$d Absturzbericht</string>
     <string name="st_repo_data_note">Repositories liefern Daten, keinen Code</string>
     <string name="st_repo_data_body">Eine Erweiterung wählt und konfiguriert nur einen Resolver, der bereits in OpenStream enthalten ist, sodass eine Drittanbieter-Liste keinen eigenen Code auf Ihrem Gerät ausführen kann.</string>
