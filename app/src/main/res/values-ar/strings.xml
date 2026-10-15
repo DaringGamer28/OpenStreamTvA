@@ -862,4 +862,8 @@
     <string name="match_rail">أفضل الترشيحات لك</string>
     <string name="match_percent">تطابق %1$d%%</string>
     <string name="match_because">لأن %1$s أعجبك</string>
+    <string name="sheet_volume_boost">تعزيز الصوت</string>
+    <string name="sheet_volume_boost_desc">يرفع صوت الفيديوهات الهادئة. يمنع المحدِّد تشوّه الأجزاء العالية. يسري على كل ما تشغّله حتى تعيده إلى عادي.</string>
+    <string name="sheet_external_player">مشغّل خارجي</string>
+    <string name="action_open_external_player">فتح في مشغّل خارجي</string>
 </resources>

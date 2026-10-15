@@ -821,4 +821,8 @@
     <string name="match_rail">あなたへのトップマッチ</string>
     <string name="match_percent">%1$d%%マッチ</string>
     <string name="match_because">%1$sがお好きなので</string>
+    <string name="sheet_volume_boost">音量ブースト</string>
+    <string name="sheet_volume_boost_desc">音の小さい動画を大きくします。リミッターで大きな音の歪みを防ぎます。通常に戻すまで、再生するすべての動画に適用されます。</string>
+    <string name="sheet_external_player">外部プレーヤー</string>
+    <string name="action_open_external_player">外部プレーヤーで開く</string>
 </resources>

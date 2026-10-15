@@ -121,7 +121,6 @@ data class AppSettings(
         /** Quality caps offered for metered networks: 720p, 480p and no limit. */
         val METERED_CAPS = listOf(720, 480, 0)
         val SMOOTH_MOTION_FPS_OPTIONS = listOf(60, 120)
-        val VOLUME_BOOST_PRESETS = listOf(100, 125, 150, 200, 250, 300)
     }
 }
 

@@ -821,4 +821,8 @@
     <string name="match_rail">Tus mejores coincidencias</string>
     <string name="match_percent">%1$d%% de coincidencia</string>
     <string name="match_because">Porque te gustó %1$s</string>
+    <string name="sheet_volume_boost">Aumento de volumen</string>
+    <string name="sheet_volume_boost_desc">Sube el volumen de los vídeos bajos. Un limitador evita que las partes fuertes se distorsionen. Se aplica a todo lo que reproduzcas hasta que vuelvas a Normal.</string>
+    <string name="sheet_external_player">Reproductor externo</string>
+    <string name="action_open_external_player">Abrir en reproductor externo</string>
 </resources>

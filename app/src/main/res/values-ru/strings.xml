@@ -821,4 +821,8 @@
     <string name="match_rail">Лучшие совпадения для вас</string>
     <string name="match_percent">Совпадение: %1$d%%</string>
     <string name="match_because">Потому что вам понравился %1$s</string>
+    <string name="sheet_volume_boost">Усиление громкости</string>
+    <string name="sheet_volume_boost_desc">Делает тихие видео громче. Лимитер не даёт громким местам искажаться. Действует для всего, что вы смотрите, пока не вернёте «Обычная».</string>
+    <string name="sheet_external_player">Внешний плеер</string>
+    <string name="action_open_external_player">Открыть во внешнем плеере</string>
 </resources>

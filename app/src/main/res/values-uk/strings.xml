@@ -821,4 +821,8 @@
     <string name="match_rail">Найкращі збіги для вас</string>
     <string name="match_percent">%1$d%% збіг</string>
     <string name="match_because">Бо вам сподобалося %1$s</string>
+    <string name="sheet_volume_boost">Підсилення гучності</string>
+    <string name="sheet_volume_boost_desc">Робить тихі відео гучнішими. Лімітер не дає гучним місцям спотворюватися. Діє для всього, що ви дивитеся, доки не повернете «Звичайна».</string>
+    <string name="sheet_external_player">Зовнішній плеєр</string>
+    <string name="action_open_external_player">Відкрити в зовнішньому плеєрі</string>
 </resources>
