@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivor.openstream.R
+import com.ivor.openstream.data.images.ArtworkPrefetcher
+import com.ivor.openstream.data.images.TmdbImages
 import com.ivor.openstream.data.remote.model.AnimeDetailsDto
 import com.ivor.openstream.data.local.entity.WatchLaterEntity
 import com.ivor.openstream.data.local.entity.ReminderEntity
@@ -52,6 +54,7 @@ class DetailsViewModel @Inject constructor(
     private val reminderRepository: ReminderRepository,
     private val ratingRepository: TitleRatingRepository,
     private val settings: AppSettingsStore,
+    private val artworkPrefetcher: ArtworkPrefetcher,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -125,6 +128,11 @@ class DetailsViewModel @Inject constructor(
             repository.getMediaDetails(animeId, mediaType)
                 .onSuccess { details ->
                     _uiState.value = DetailsUiState.Success(details)
+                    // The rails further down the page, in the sizes DetailsScreen draws them.
+                    artworkPrefetcher.prefetch(
+                        details.cast.take(20).map { TmdbImages.url("w185", it.profilePath) } +
+                            details.recommendations?.results.orEmpty().map { TmdbImages.url("w342", it.posterPath) }
+                    )
                     // Add to watch history
                     viewModelScope.launch {
                         repository.addToWatchHistory(details.toAnimeDto(mediaType))
@@ -174,6 +182,7 @@ class DetailsViewModel @Inject constructor(
                 _uiState.value = currentState.copy(isLoadingEpisodes = true)
                 repository.getSeasonDetails(animeId, seasonNumber)
                     .onSuccess { seasonDetails ->
+                        artworkPrefetcher.prefetch(seasonDetails.episodes.map { TmdbImages.url("w300", it.stillPath) })
                         (_uiState.value as? DetailsUiState.Success)?.let { successState ->
                             _uiState.value = successState.copy(
                                 selectedSeasonDetails = seasonDetails,

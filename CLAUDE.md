@@ -52,6 +52,8 @@ data/cast          Cast options, media item converter, LAN proxy the receiver st
 data/streaming     Source resolution, extension -> provider registry, id mapping
 data/extensions    Extension catalog: repos, cache, parser, ranking, bundled copy
 data/service       Media3 download service
+data/cache         HTTP cache rules for TMDB, cache budget, AppCaches (size/clear)
+data/images        ArtworkPrefetcher
 domain             Models and repository interfaces
 presentation       Screens + ViewModels; player/session holds the app-wide player
 ui/theme           Colors, type, ExpressiveShapes
@@ -79,6 +81,10 @@ Rules:
   The player's automatic search first asks the source that last played something
   (`rememberWorkingSource`, kept per movie/tv) on its own and stops there when it has streams; with
   none, or no answer in 10 s, the normal search runs. Downloads and "Find more" search everything.
+  That automatic search alone answers from `ResolvedStreamCache` (memory only, 10 minutes, keyed by
+  episode plus a fingerprint of the installed sources, order and search mode) and only keeps complete
+  searches that found something; `onPlaybackError` drops the episode's entry. No source documents
+  how long its links stay valid, which is why the window is short.
   Engines: `vidking-direct` (`VidkingDirectApi`, encrypted payload, prefers the master playlist so
   quality switches in-player), `web-embed` and `vidking-webview` (`WebEmbedResolver`: first a native
   pass through `HosterExtractors` (Filemoon, StreamWish/VidHide, Voe, Mp4Upload, Vidmoly, ok.ru) when
@@ -128,9 +134,24 @@ Rules:
 - **Network.** `AppDns` (DNS-over-HTTPS, default AdGuard, chosen in Settings) backs every OkHttp
   client and Coil's image loader (`OpenStreamApp`), because some ISPs block TMDB at the DNS level.
   Media3 playback/downloads and WebView sources still use the system resolver.
+- **Caching.** TMDB answers live in an OkHttp disk cache (`cacheDir/tmdb_http`). TMDB's own cache
+  headers are not relied on: `MetadataCacheHeadersInterceptor` stamps each successful answer with a
+  lifetime from `MetadataCachePolicy` (lists and discover 3 h, titles and seasons 6 h, search 1 h,
+  person 1 day, ratings 7 days, external ids 30 days), and `StaleIfErrorInterceptor` answers from
+  the cache, up to 30 days old, when TMDB is unreachable or returns 5xx/429. The `TmdbFresh` API
+  (`ForceRefreshInterceptor`) revalidates first; pull to refresh, `EpisodeNotifier` and
+  `SmartDownloads` use it (`fresh = true`), and what it fetches refreshes the shared cache. Home's
+  built lists are also kept in memory for 3 h (`AnimeRepositoryImpl`); the old SharedPreferences copy
+  is only read as an offline fallback and deleted after the next successful load. Artwork is Coil's
+  disk cache in its default folder (`coil3_disk_cache`). The Cache size setting sizes both caches when
+  the app starts, capped at a tenth of free space (`CacheBudget`). `ArtworkPrefetcher` fills Coil's
+  disk cache for Home rows and Details rails off screen: unmetered network only, not with Data Saver,
+  battery saver or on low-RAM devices, two at a time, after a 1.5 s head start, skipping anything
+  already on disk. `AppCaches` measures and clears all of it for Settings.
 - **Settings.** `AppSettingsStore` (SharedPreferences) holds theme, dynamic color, DNS,
-  Wi-Fi-only downloads and the subtitle languages saved with downloads; `MainActivity` applies the
-  theme.
+  Wi-Fi-only downloads, the subtitle languages saved with downloads, cache size and artwork preload;
+  `MainActivity` applies the theme. Cache size and preload are device settings and stay out of
+  `LibraryBackup`.
 - **Skip intro.** `SkipTimesRepository`: `AnimeEpisodeMapper` gives the MAL id and the episode within
   that entry (AniList title search only as a fallback), AniSkip v2 gives the intro/recap/credits
   times (anime only), and the player picks the submission timed on the closest file length. All

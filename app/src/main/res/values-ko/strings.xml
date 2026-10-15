@@ -364,9 +364,14 @@
     <string name="st_history_cleared">시청 기록과 진행 상태가 지워졌어요</string>
     <string name="st_clear_crash">충돌 보고서 지우기</string>
     <string name="st_crash_cleared">충돌 보고서가 지워졌어요</string>
-    <string name="st_clear_cache">이미지 캐시 지우기</string>
-    <string name="st_cache_cleared">이미지 캐시가 지워졌어요</string>
-    <string name="st_cache_size">아트워크 %1$s</string>
+    <string name="st_clear_all_cache">캐시 지우기</string>
+    <string name="st_cache_used">아트워크와 작품 정보에 %1$s 사용 중</string>
+    <string name="st_cache_hint">페이지가 빨리 열리도록 아트워크와 작품 정보를 보관해요</string>
+    <string name="st_cache_cleared_all">캐시가 지워졌어요</string>
+    <string name="st_cache_limit">캐시 크기</string>
+    <string name="st_cache_limit_hint">아트워크와 작품 정보가 사용할 수 있는 공간이에요. 다음에 앱을 열 때 적용돼요.</string>
+    <string name="st_preload_artwork">아트워크 미리 불러오기</string>
+    <string name="st_preload_artwork_hint">Wi-Fi에서는 스크롤하기 전에 줄의 포스터를 미리 불러와요</string>
     <string name="st_show_hidden">숨긴 작품 표시</string>
     <string name="st_backup">라이브러리 백업</string>
     <string name="st_backup_hint">모든 프로필의 나중에 보기, 목록, 기록, 숨긴 작품 및 설정</string>
@@ -400,7 +405,6 @@
     <string name="st_allow_install_note">먼저 OpenStream의 업데이트 설치를 허용한 뒤 돌아와 설치를 탭하세요.</string>
     <string name="st_storage_help">저장 공간 및 도움말</string>
     <string name="st_on_device">이 기기에서</string>
-    <string name="st_posters_cache">빠른 로딩을 위해 포스터와 배경화면 보관</string>
     <string name="st_crash_include">충돌 보고서 %1$d개 포함</string>
     <string name="st_repo_data_note">리포지토리는 코드가 아닌 데이터를 제공해요</string>
     <string name="st_repo_data_body">확장 프로그램은 OpenStream에 내장된 확인자를 선택·설정할 뿐이므로 타사 목록이 기기에서 코드를 실행할 수 없어요.</string>
