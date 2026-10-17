@@ -87,7 +87,8 @@ class StreamingRepositoryImpl @Inject constructor(
                             incoming = cached.servers,
                             providerPriorities = providerPriorities,
                             preferredServerId = preferences.getString(preferenceKey(identity), null),
-                            providerFirst = inOrder
+                            providerFirst = inOrder,
+                            qualityCapHeight = appSettings.current.streamMaxHeight
                         )
                     )
                 )
@@ -162,7 +163,8 @@ class StreamingRepositoryImpl @Inject constructor(
                             incoming = incoming,
                             providerPriorities = providerPriorities,
                             preferredServerId = preferredServerId,
-                            providerFirst = inOrder
+                            providerFirst = inOrder,
+                            qualityCapHeight = appSettings.current.streamMaxHeight
                         )
                     }
                 },
