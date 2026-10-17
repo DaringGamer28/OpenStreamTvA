@@ -54,20 +54,23 @@ fun UpNextOverlay(
     target: NextEpisodeTarget,
     onPlayNow: () -> Unit,
     onCancel: () -> Unit,
+    autoAdvance: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val latestPlayNow by rememberUpdatedState(onPlayNow)
     val countdown = remember(target) { Animatable(1f) }
     // Same 8s timing with reduced motion, but the ring jumps instead of sweeping.
     val reducedCountdown = ExpressiveMotion.reducedMotion()
-    LaunchedEffect(target) {
-        if (reducedCountdown) {
-            delay(UP_NEXT_COUNTDOWN_MS.toLong())
-            countdown.snapTo(0f)
-        } else {
-            countdown.animateTo(0f, tween(UP_NEXT_COUNTDOWN_MS, easing = LinearEasing))
+    if (autoAdvance) {
+        LaunchedEffect(target) {
+            if (reducedCountdown) {
+                delay(UP_NEXT_COUNTDOWN_MS.toLong())
+                countdown.snapTo(0f)
+            } else {
+                countdown.animateTo(0f, tween(UP_NEXT_COUNTDOWN_MS, easing = LinearEasing))
+            }
+            latestPlayNow()
         }
-        latestPlayNow()
     }
 
     Surface(
