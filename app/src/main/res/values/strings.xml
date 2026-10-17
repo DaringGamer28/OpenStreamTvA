@@ -914,4 +914,9 @@
     <string name="st_smooth_motion_max_fps_hint">Target frame rate cap for motion interpolation.</string>
     <string name="st_smooth_motion_fps_val">Up to %1$d fps</string>
     <string name="st_smooth_motion_unsupported">Not supported on this device\'s GPU (requires OpenGL ES 3.2).</string>
+    <!-- Volume Boost & External Media Tools -->
+    <string name="sheet_volume_boost">Volume boost</string>
+    <string name="sheet_volume_boost_desc">Makes quiet videos louder. A limiter keeps loud parts from distorting. Applies to everything you play until you set it back to Normal.</string>
+    <string name="sheet_external_player">External player</string>
+    <string name="action_open_external_player">Open in external player</string>
 </resources>

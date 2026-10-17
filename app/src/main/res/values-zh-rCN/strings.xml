@@ -821,4 +821,8 @@
     <string name="match_rail">最匹配你的推荐</string>
     <string name="match_percent">%1$d%% 匹配</string>
     <string name="match_because">因为你喜欢 %1$s</string>
+    <string name="sheet_volume_boost">音量增强</string>
+    <string name="sheet_volume_boost_desc">让声音偏小的视频更响。限幅器可防止大声部分失真。在你改回“正常”之前，对所有播放内容生效。</string>
+    <string name="sheet_external_player">外部播放器</string>
+    <string name="action_open_external_player">在外部播放器中打开</string>
 </resources>

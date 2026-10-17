@@ -862,4 +862,8 @@
     <string name="match_rail">आपके लिए टॉप मैच</string>
     <string name="match_percent">%1$d%% मैच</string>
     <string name="match_because">क्योंकि आपको %1$s पसंद आया</string>
+    <string name="sheet_volume_boost">वॉल्यूम बूस्ट</string>
+    <string name="sheet_volume_boost_desc">धीमी आवाज़ वाले वीडियो को तेज़ करता है। लिमिटर तेज़ हिस्सों को बिगड़ने नहीं देता। सामान्य पर वापस करने तक हर वीडियो पर लागू रहता है।</string>
+    <string name="sheet_external_player">बाहरी प्लेयर</string>
+    <string name="action_open_external_player">बाहरी प्लेयर में खोलें</string>
 </resources>

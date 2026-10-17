@@ -821,4 +821,8 @@
     <string name="match_rail">Melhores para você</string>
     <string name="match_percent">%1$d%% de compatibilidade</string>
     <string name="match_because">Porque você gostou de %1$s</string>
+    <string name="sheet_volume_boost">Aumento de volume</string>
+    <string name="sheet_volume_boost_desc">Deixa os vídeos baixos mais altos. Um limitador evita que as partes altas distorçam. Vale para tudo o que você assistir até voltar para Normal.</string>
+    <string name="sheet_external_player">Player externo</string>
+    <string name="action_open_external_player">Abrir em player externo</string>
 </resources>
