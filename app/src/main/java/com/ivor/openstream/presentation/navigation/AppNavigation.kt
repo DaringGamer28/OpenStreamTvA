@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.navigation
 
+import com.ivor.openstream.data.local.entity.LOCAL_MEDIA_TYPE
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -130,16 +131,20 @@ sealed class Screen(
         fun createRoute(mediaType: String, animeId: Int) = "details/$mediaType/$animeId"
     }
 
-    data object Player : Screen("player/{mediaType}/{animeId}/{season}/{episode}?downloadId={downloadId}") {
+    data object Player : Screen("player/{mediaType}/{animeId}/{season}/{episode}?downloadId={downloadId}&localMediaId={localMediaId}") {
         fun createRoute(
-            mediaType: String,
-            animeId: Int,
-            season: Int,
-            episode: Int,
-            downloadId: String? = null
+            mediaType: String = "tv",
+            animeId: Int = 0,
+            season: Int = 0,
+            episode: Int = 0,
+            downloadId: String? = null,
+            localMediaId: Long? = null
         ): String {
             val base = "player/$mediaType/$animeId/$season/$episode"
-            return if (downloadId != null) "$base?downloadId=$downloadId" else base
+            val params = mutableListOf<String>()
+            if (downloadId != null) params.add("downloadId=$downloadId")
+            if (localMediaId != null) params.add("localMediaId=$localMediaId")
+            return if (params.isNotEmpty()) "$base?${params.joinToString("&")}" else base
         }
     }
 }
@@ -338,6 +343,17 @@ fun AppNavigation(
                                     downloadId = download.downloadId
                                 )
                             )
+                        },
+                        onLocalMediaClick = { localMedia ->
+                            navController.navigate(
+                                Screen.Player.createRoute(
+                                    mediaType = LOCAL_MEDIA_TYPE,
+                                    animeId = localMedia.id.toInt(),
+                                    season = 0,
+                                    episode = 0,
+                                    localMediaId = localMedia.id
+                                )
+                            )
                         }
                     )
                 }
@@ -437,6 +453,10 @@ fun AppNavigation(
                             type = NavType.StringType
                             nullable = true
                             defaultValue = null
+                        },
+                        navArgument("localMediaId") {
+                            type = NavType.LongType
+                            defaultValue = -1L
                         }
                     )
                 ) { backStackEntry ->
@@ -445,6 +465,7 @@ fun AppNavigation(
                     val season = backStackEntry.arguments?.getInt("season") ?: return@composable
                     val episode = backStackEntry.arguments?.getInt("episode") ?: return@composable
                     val downloadId = backStackEntry.arguments?.getString("downloadId")
+                    val localMediaIdArg = backStackEntry.arguments?.getLong("localMediaId")?.takeIf { it != -1L }
 
                     PlayerScreen(
                         mediaType = mediaType,
@@ -452,6 +473,7 @@ fun AppNavigation(
                         season = season,
                         episode = episode,
                         downloadId = downloadId,
+                        localMediaId = localMediaIdArg,
                         onBackClick = { navController.popBackStack() },
                         onOpenDetails = { type, id ->
                             navController.navigate(Screen.Details.createRoute(type, id)) { launchSingleTop = true }
@@ -517,7 +539,9 @@ fun AppNavigation(
                                 animeId = item.tmdbId,
                                 season = item.season,
                                 episode = item.episode,
-                                downloadId = item.downloadId
+                                downloadId = item.downloadId,
+                                // A local file plays under its row id; reopen it as that file.
+                                localMediaId = item.tmdbId.toLong().takeIf { item.mediaType == LOCAL_MEDIA_TYPE }
                             )
                         ) { launchSingleTop = true }
                     }
