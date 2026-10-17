@@ -48,6 +48,7 @@ import com.ivor.openstream.data.streaming.DownloadRequestHeaderStore
 import com.ivor.openstream.data.streaming.BROWSER_USER_AGENT
 import com.ivor.openstream.data.streaming.ImagePrefixStrippingDataSource
 import com.ivor.openstream.domain.model.VideoServer
+import com.ivor.openstream.domain.model.StreamQuality
 import com.ivor.openstream.domain.model.WatchProgress
 import com.ivor.openstream.domain.repository.WatchProgressRepository
 import com.ivor.openstream.presentation.player.NextEpisodeTarget
@@ -571,8 +572,12 @@ class PlaybackSession @Inject constructor(
             player.stop()
         }
         val remote = castPlayer
-        if (remote?.currentMediaItem?.mediaId == item.key) {
-            // Rejoined a session already playing this: keep going.
+        val remoteItem = remote?.currentMediaItem
+        val sameStreamOnTv = remoteItem?.mediaId == item.key &&
+            remoteItem?.mediaMetadata?.extras?.getString(EXTRA_SOURCE_URI) == item.mediaUri
+        if (sameStreamOnTv) {
+            // Rejoined a session already playing this stream: keep going. A different server
+            // picked on the phone meanwhile falls through and is loaded instead.
             castRequestedKey = item.key
             castRequestedUri = item.mediaUri
             return
@@ -717,6 +722,13 @@ class PlaybackSession @Inject constructor(
             item.posterPath?.let { putString(EXTRA_POSTER, it) }
             item.backdropPath?.let { putString(EXTRA_BACKDROP, it) }
             item.stillPath?.let { putString(EXTRA_STILL, it) }
+            item.server?.let { s ->
+                putString(EXTRA_SERVER_ID, s.id)
+                putString(EXTRA_PROVIDER_ID, s.providerId)
+                putString(EXTRA_PROVIDER_NAME, s.providerName)
+                putString(EXTRA_SERVER_NAME, s.name)
+                putString(EXTRA_SERVER_QUALITY, s.quality.name)
+            }
         }
         val artwork = (item.backdropPath ?: item.stillPath ?: item.posterPath)
             ?.let { Uri.parse("https://image.tmdb.org/t/p/w1280$it") }
@@ -743,6 +755,19 @@ class PlaybackSession @Inject constructor(
         val mediaItem = remote.currentMediaItem ?: return
         val extras = mediaItem.mediaMetadata.extras ?: return
         val source = extras.getString(EXTRA_SOURCE_URI) ?: return
+        val serverId = extras.getString(EXTRA_SERVER_ID)
+        val server = if (serverId != null) {
+            val qualityName = extras.getString(EXTRA_SERVER_QUALITY)
+            val quality = qualityName?.let { runCatching { StreamQuality.valueOf(it) }.getOrNull() } ?: StreamQuality.UNKNOWN
+            VideoServer(
+                id = serverId,
+                name = extras.getString(EXTRA_SERVER_NAME) ?: "Stream",
+                url = source,
+                providerId = extras.getString(EXTRA_PROVIDER_ID) ?: "",
+                providerName = extras.getString(EXTRA_PROVIDER_NAME) ?: "",
+                quality = quality
+            )
+        } else null
         val item = NowPlaying(
             mediaType = extras.getString(EXTRA_MEDIA_TYPE) ?: return,
             tmdbId = extras.getInt(EXTRA_TMDB_ID),
@@ -756,7 +781,7 @@ class PlaybackSession @Inject constructor(
             backdropPath = extras.getString(EXTRA_BACKDROP),
             stillPath = extras.getString(EXTRA_STILL),
             next = null,
-            server = null
+            server = server
         )
         castRequestedKey = item.key
         castRequestedUri = item.mediaUri
@@ -1011,5 +1036,10 @@ class PlaybackSession @Inject constructor(
         const val EXTRA_POSTER = "openstream.poster"
         const val EXTRA_BACKDROP = "openstream.backdrop"
         const val EXTRA_STILL = "openstream.still"
+        const val EXTRA_SERVER_ID = "openstream.server_id"
+        const val EXTRA_PROVIDER_ID = "openstream.provider_id"
+        const val EXTRA_PROVIDER_NAME = "openstream.provider_name"
+        const val EXTRA_SERVER_NAME = "openstream.server_name"
+        const val EXTRA_SERVER_QUALITY = "openstream.server_quality"
     }
 }

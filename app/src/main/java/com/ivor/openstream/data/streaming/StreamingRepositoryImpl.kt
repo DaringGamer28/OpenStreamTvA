@@ -354,6 +354,9 @@ class StreamingRepositoryImpl @Inject constructor(
         preferences.edit().putString(preferenceKey(identity), server.id).apply()
     }
 
+    override fun getRememberedServerId(identity: MediaIdentity): String? =
+        preferences.getString(preferenceKey(identity), null)
+
     private fun preferenceKey(identity: MediaIdentity): String =
         "last_stream_server:${identity.cacheKey}"
 

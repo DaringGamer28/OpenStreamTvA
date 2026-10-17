@@ -232,6 +232,10 @@ class PlayerViewModel @Inject constructor(
 
     /** A stream still playing from the mini player that this screen should continue, not reload. */
     private var adoptedServer: VideoServer? = null
+    private var userChosenServerId: String? = null
+
+    /** Set once the current stream has played; from then on a late answer never swaps servers. */
+    private var playbackStarted = false
 
 
     private val _captionSettings = MutableStateFlow(loadCaptionSettings())
@@ -519,6 +523,8 @@ class PlayerViewModel @Inject constructor(
         val continuing = playbackSession.nowPlaying.value
             ?.takeIf { it.matches(mediaType, tmdbId, seasonNumber, currentEpisodeNumber) }
         adoptedServer = continuing?.server?.takeIf { continuing.downloadId == null }
+        userChosenServerId = adoptedServer?.id
+        playbackStarted = adoptedServer != null
         adoptedServer?.let { _activeServer.value = it }
 
         loadJob = viewModelScope.launch {
@@ -648,15 +654,18 @@ class PlayerViewModel @Inject constructor(
 
     fun selectServer(serverId: String) {
         val server = availableServers().firstOrNull { it.id == serverId } ?: return
+        userChosenServerId = serverId
         switchedFrom = _activeServer.value?.takeIf { it.id != serverId }
         failedServerIds.remove(serverId)
         automaticFailovers = 0
         _activeServer.value = server
         setActiveId(serverId)
+        // Remembered as working only once it plays (onPlaybackReady).
         currentIdentity?.let { streamingRepository.rememberServer(it, server) }
     }
 
     fun onPlaybackReady() {
+        playbackStarted = true
         val identity = currentIdentity ?: return
         val server = _activeServer.value ?: return
         streamingRepository.rememberServer(identity, server)
@@ -724,14 +733,18 @@ class PlayerViewModel @Inject constructor(
                 includeFallbacks,
                 preferLastWorking = !includeFallbacks
             ).collect { progress ->
+                // The server the user picked (or last picked for this episode) wins when it shows
+                // up, but only before playback starts: switching later would restart the video.
+                val rememberedId = currentIdentity?.let { streamingRepository.getRememberedServerId(it) }
+                val targetServerId = (userChosenServerId ?: rememberedId).takeUnless { playbackStarted }
                 // Keep the stream the mini player is already playing at the top of the list.
                 val candidates = adoptedServer?.let { adopted ->
                     listOf(adopted) + progress.servers.filterNot { it.id == adopted.id }
                 } ?: progress.servers
                 val healthyServers = candidates.filterNot { it.id in failedServerIds }
-                val active = _activeServer.value?.takeIf { current ->
-                    healthyServers.any { it.id == current.id }
-                } ?: healthyServers.firstOrNull()
+                val active = healthyServers.firstOrNull { it.id == targetServerId }
+                    ?: _activeServer.value?.takeIf { current -> healthyServers.any { it.id == current.id } }
+                    ?: healthyServers.firstOrNull()
                 _activeServer.value = active
 
                 _serversState.value = when {
