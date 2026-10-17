@@ -821,8 +821,38 @@
     <string name="match_rail">Top-Treffer für Sie</string>
     <string name="match_percent">%1$d%% Treffer</string>
     <string name="match_because">Weil Ihnen %1$s gefallen hat</string>
+    <string name="dl_delete_confirm">Download löschen?</string>
+    <string name="dl_delete_body">%1$s von diesem Gerät entfernen? Zum Offline-Ansehen musst du es erneut herunterladen.</string>
+    <string name="dl_cancel_confirm">Download abbrechen?</string>
+    <string name="dl_cancel_body">Download von %1$s stoppen? Die unvollständige Datei wird entfernt.</string>
+    <string name="action_keep">Behalten</string>
+    <string name="season_episode_format">Staffel %1$d, Folge %2$d</string>
+    <string name="dl_pick_source_title">Download-Quelle wählen</string>
+    <string name="dl_pick_source_hint">Wähle, wovon heruntergeladen wird.</string>
+    <string name="dl_pick_batch_hint">Wir nutzen den Anbieter und die Qualität, die du antippst, für jede Folge, wo verfügbar.</string>
+    <string name="dl_batch_queued">%1$d Folgen werden heruntergeladen… Du findest sie unter Downloads.</string>
+    <string name="dl_season_already">Alle Folgen hier sind bereits heruntergeladen oder werden geladen</string>
+    <string name="dl_hold_options">Halten, um die Quelle zu wählen</string>
+    <string name="dl_hold_tip">Tipp: Halte Download gedrückt, um Quelle und Qualität zu wählen.</string>
+    <string name="dl_choose_source">Download-Quelle wählen</string>
+    <string name="dl_no_quality_match">Noch keine Quellen in dieser Qualität.</string>
+    <string name="action_show_all">Alle zeigen</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">%1$d Folge von %2$s von diesem Gerät entfernen? Zum Offline-Ansehen musst du sie erneut herunterladen.</item>
+        <item quantity="other">%1$d Folgen von %2$s von diesem Gerät entfernen? Zum Offline-Ansehen musst du sie erneut herunterladen.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">1 Folge löschen?</item>
+        <item quantity="other">%1$d Folgen löschen?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d Folge</item>
+        <item quantity="other">%1$d Folgen</item>
+    </plurals>
+
     <string name="sheet_volume_boost">Lautstärke-Boost</string>
     <string name="sheet_volume_boost_desc">Macht leise Videos lauter. Ein Limiter verhindert, dass laute Stellen verzerren. Gilt für alles, was du abspielst, bis du wieder Normal wählst.</string>
     <string name="sheet_external_player">Externer Player</string>
     <string name="action_open_external_player">In externem Player öffnen</string>
+
 </resources>

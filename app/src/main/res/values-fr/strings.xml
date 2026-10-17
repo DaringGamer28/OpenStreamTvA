@@ -821,8 +821,41 @@
     <string name="match_rail">Vos meilleures correspondances</string>
     <string name="match_percent">%1$d%% de correspondance</string>
     <string name="match_because">Parce que vous avez aimé %1$s</string>
+    <string name="dl_delete_confirm">Supprimer le téléchargement ?</string>
+    <string name="dl_delete_body">Retirer %1$s de cet appareil ? Vous devrez le retélécharger pour le regarder hors ligne.</string>
+    <string name="dl_cancel_confirm">Annuler le téléchargement ?</string>
+    <string name="dl_cancel_body">Arrêter le téléchargement de %1$s ? Le fichier partiel sera supprimé.</string>
+    <string name="action_keep">Conserver</string>
+    <string name="season_episode_format">Saison %1$d, épisode %2$d</string>
+    <string name="dl_pick_source_title">Choisir la source de téléchargement</string>
+    <string name="dl_pick_source_hint">Choisissez d’où télécharger.</string>
+    <string name="dl_pick_batch_hint">Nous utiliserons le fournisseur et la qualité choisis pour chaque épisode quand c’est possible.</string>
+    <string name="dl_batch_queued">Téléchargement de %1$d épisodes… Retrouvez-les dans Téléchargements.</string>
+    <string name="dl_season_already">Tous les épisodes ici sont déjà téléchargés ou en cours</string>
+    <string name="dl_hold_options">Maintenir pour choisir la source</string>
+    <string name="dl_hold_tip">Astuce : maintenez Télécharger pour choisir la source et la qualité.</string>
+    <string name="dl_choose_source">Choisir la source de téléchargement</string>
+    <string name="dl_no_quality_match">Aucune source dans cette qualité pour l’instant.</string>
+    <string name="action_show_all">Tout afficher</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Retirer %1$d épisode de %2$s de cet appareil ? Vous devrez le retélécharger pour le regarder hors ligne.</item>
+        <item quantity="many">Retirer %1$d épisodes de %2$s de cet appareil ? Vous devrez les retélécharger pour les regarder hors ligne.</item>
+        <item quantity="other">Retirer %1$d épisodes de %2$s de cet appareil ? Vous devrez les retélécharger pour les regarder hors ligne.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Supprimer 1 épisode ?</item>
+        <item quantity="many">Supprimer %1$d épisodes ?</item>
+        <item quantity="other">Supprimer %1$d épisodes ?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d épisode</item>
+        <item quantity="many">%1$d épisodes</item>
+        <item quantity="other">%1$d épisodes</item>
+    </plurals>
+
     <string name="sheet_volume_boost">Amplification du volume</string>
     <string name="sheet_volume_boost_desc">Rend les vidéos trop faibles plus fortes. Un limiteur évite que les passages forts saturent. S’applique à tout ce que vous lisez jusqu’à ce que vous repassiez sur Normale.</string>
     <string name="sheet_external_player">Lecteur externe</string>
     <string name="action_open_external_player">Ouvrir dans un lecteur externe</string>
+
 </resources>
