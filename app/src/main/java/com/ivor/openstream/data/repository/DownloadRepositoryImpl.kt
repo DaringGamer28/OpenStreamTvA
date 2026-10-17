@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
 import com.ivor.openstream.R
+import com.ivor.openstream.data.downloads.DownloadStorageExporter
 import com.ivor.openstream.data.local.dao.DownloadDao
 import com.ivor.openstream.data.local.entity.DownloadEntity
 import com.ivor.openstream.data.service.HlsDownloadService
@@ -74,7 +75,8 @@ class DownloadRepositoryImpl @Inject constructor(
     private val json: Json,
     private val appSettings: AppSettingsStore,
     private val savedSubtitles: SavedSubtitleRepository,
-    private val subtitleSaver: DownloadSubtitleSaver
+    private val subtitleSaver: DownloadSubtitleSaver,
+    private val storageExporter: DownloadStorageExporter
 ) : DownloadRepository {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -177,6 +179,12 @@ class DownloadRepositoryImpl @Inject constructor(
         if (isMedia3(downloadId)) return entity.uri // Served from the download cache.
         return runCatching { systemDownloads.getUriForDownloadedFile(downloadId.toLong())?.toString() }
             .getOrNull() ?: entity.uri
+    }
+
+    override suspend fun exportToStorage(downloadId: String): Result<Uri> {
+        val entity = dao.getDownloadById(downloadId)
+            ?: return Result.failure(IllegalStateException("Download $downloadId not found"))
+        return storageExporter.exportToStorage(entity)
     }
 
     // region Starting downloads
@@ -332,6 +340,9 @@ class DownloadRepositoryImpl @Inject constructor(
         val error = finalException?.let { context.getString(R.string.player_source_stopped) }
             ?: if (status == DownloadStatus.FAILED) context.getString(R.string.dl_failed) else null
         if (finalException != null) Log.w(TAG, "Download ${download.request.id} failed", finalException)
+        // Read before the update: only a download that has just finished is saved to storage.
+        val wasCompleted = status == DownloadStatus.COMPLETED &&
+            dao.getDownloadById(download.request.id)?.status == DownloadStatus.COMPLETED
         dao.updateProgress(
             downloadId = download.request.id,
             status = status,
@@ -345,6 +356,13 @@ class DownloadRepositoryImpl @Inject constructor(
             },
             errorMessage = error
         )
+
+        // Startup reconciling and progress polling call this for downloads that finished long
+        // ago; those must not be saved again every time the app starts.
+        if (status == DownloadStatus.COMPLETED && !wasCompleted && appSettings.current.autoExportDownloadsToStorage) {
+            val id = download.request.id
+            scope.launch { dao.getDownloadById(id)?.let { storageExporter.exportToStorage(it) } }
+        }
     }
 
     private suspend fun syncLegacySystemDownloads() {

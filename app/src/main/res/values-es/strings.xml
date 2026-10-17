@@ -821,6 +821,37 @@
     <string name="match_rail">Tus mejores coincidencias</string>
     <string name="match_percent">%1$d%% de coincidencia</string>
     <string name="match_because">Porque te gustó %1$s</string>
+    <string name="st_save_to_storage">Guardar descargas en el almacenamiento</string>
+    <string name="st_save_to_storage_summary">Copia cada descarga terminada en Downloads/Openstream, donde otras apps pueden abrirla</string>
+    <string name="dl_tab_downloads">Descargas</string>
+    <string name="dl_tab_local_files">Archivos locales</string>
+    <string name="dl_save_to_storage">Guardar en el almacenamiento</string>
+    <string name="dl_saved_to_storage">Guardado en Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">No se pudo guardar en el almacenamiento</string>
+    <string name="local_import_files">Importar vídeos</string>
+    <string name="local_no_files_title">No hay vídeos locales</string>
+    <string name="local_no_files_body">Importa archivos de vídeo de tu dispositivo para verlos en OpenStream</string>
+    <string name="local_file">Vídeo local</string>
+    <string name="local_delete_confirm_title">¿Quitar vídeo local?</string>
+    <string name="local_delete_confirm_body">Solo sale de esta lista. El archivo sigue en tu dispositivo.</string>
+    <string name="local_search_hint">Buscar vídeos locales</string>
+    <string name="sort_name_asc">Nombre (A–Z)</string>
+    <string name="sort_name_desc">Nombre (Z–A)</string>
+    <string name="sort_date_added_desc">Añadidos recientemente</string>
+    <string name="sort_date_added_asc">Añadidos primero</string>
+    <string name="sort_size_desc">Más grandes</string>
+    <string name="sort_size_asc">Más pequeños</string>
+    <string name="sort_duration_desc">Más largos</string>
+    <string name="sort_duration_asc">Más cortos</string>
+    <string name="dl_save_in_progress">Ya se está guardando en Descargas</string>
+    <string name="dl_storage_permission_needed">Permite el acceso al almacenamiento para guardar vídeos en tu carpeta de descargas</string>
+    <string name="dl_save_unsupported">Esta descarga no se puede guardar como un único archivo de vídeo</string>
+    <string name="dl_save_protected">Esta transmisión está protegida y solo se puede reproducir en OpenStream</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d vídeo importado</item>
+        <item quantity="many">%1$d vídeos importados</item>
+        <item quantity="other">%1$d vídeos importados</item>
+    </plurals>
     <string name="dl_delete_confirm">¿Eliminar descarga?</string>
     <string name="dl_delete_body">¿Quitar %1$s de este dispositivo? Tendrás que descargarlo de nuevo para verlo sin conexión.</string>
     <string name="dl_cancel_confirm">¿Cancelar descarga?</string>
@@ -857,5 +888,4 @@
     <string name="sheet_volume_boost_desc">Sube el volumen de los vídeos bajos. Un limitador evita que las partes fuertes se distorsionen. Se aplica a todo lo que reproduzcas hasta que vuelvas a Normal.</string>
     <string name="sheet_external_player">Reproductor externo</string>
     <string name="action_open_external_player">Abrir en reproductor externo</string>
-
 </resources>

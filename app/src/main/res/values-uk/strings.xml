@@ -821,6 +821,38 @@
     <string name="match_rail">Найкращі збіги для вас</string>
     <string name="match_percent">%1$d%% збіг</string>
     <string name="match_because">Бо вам сподобалося %1$s</string>
+    <string name="st_save_to_storage">Зберігати завантаження в пам’ять</string>
+    <string name="st_save_to_storage_summary">Копіювати кожне готове завантаження в Downloads/Openstream, де його зможуть відкрити інші застосунки</string>
+    <string name="dl_tab_downloads">Завантаження</string>
+    <string name="dl_tab_local_files">Локальні файли</string>
+    <string name="dl_save_to_storage">Зберегти в пам’ять</string>
+    <string name="dl_saved_to_storage">Збережено в Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">Не вдалося зберегти в пам’ять</string>
+    <string name="local_import_files">Імпортувати відео</string>
+    <string name="local_no_files_title">Немає локальних відео</string>
+    <string name="local_no_files_body">Імпортуйте відеофайли з пристрою, щоб дивитися їх в OpenStream</string>
+    <string name="local_file">Локальне відео</string>
+    <string name="local_delete_confirm_title">Прибрати локальне відео?</string>
+    <string name="local_delete_confirm_body">Воно лише зникне з цього списку. Файл залишиться на пристрої.</string>
+    <string name="local_search_hint">Пошук локальних відео</string>
+    <string name="sort_name_asc">Назва (А–Я)</string>
+    <string name="sort_name_desc">Назва (Я–А)</string>
+    <string name="sort_date_added_desc">Нещодавно додані</string>
+    <string name="sort_date_added_asc">Давно додані</string>
+    <string name="sort_size_desc">Спершу великі</string>
+    <string name="sort_size_asc">Спершу малі</string>
+    <string name="sort_duration_desc">Спершу довгі</string>
+    <string name="sort_duration_asc">Спершу короткі</string>
+    <string name="dl_save_in_progress">Це відео вже зберігається в «Завантаження»</string>
+    <string name="dl_storage_permission_needed">Дозвольте доступ до пам’яті, щоб зберігати відео в папку «Завантаження»</string>
+    <string name="dl_save_unsupported">Це завантаження не можна зберегти одним відеофайлом</string>
+    <string name="dl_save_protected">Цей потік захищено, тож він відтворюється лише в OpenStream</string>
+    <plurals name="local_import_success">
+        <item quantity="one">Імпортовано %1$d відео</item>
+        <item quantity="few">Імпортовано %1$d відео</item>
+        <item quantity="many">Імпортовано %1$d відео</item>
+        <item quantity="other">Імпортовано %1$d відео</item>
+    </plurals>
     <string name="dl_delete_confirm">Видалити завантаження?</string>
     <string name="dl_delete_body">Видалити %1$s з цього пристрою? Щоб дивитися офлайн, доведеться завантажити знову.</string>
     <string name="dl_cancel_confirm">Скасувати завантаження?</string>
@@ -860,5 +892,4 @@
     <string name="sheet_volume_boost_desc">Робить тихі відео гучнішими. Лімітер не дає гучним місцям спотворюватися. Діє для всього, що ви дивитеся, доки не повернете «Звичайна».</string>
     <string name="sheet_external_player">Зовнішній плеєр</string>
     <string name="action_open_external_player">Відкрити в зовнішньому плеєрі</string>
-
 </resources>

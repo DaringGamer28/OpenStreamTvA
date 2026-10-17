@@ -1,5 +1,9 @@
 package com.ivor.openstream.presentation.player
 
+import com.ivor.openstream.data.local.entity.LOCAL_MEDIA_TYPE
+import com.ivor.openstream.data.local.entity.LocalMediaEntity
+import com.ivor.openstream.data.repository.LocalMediaRepository
+
 import android.content.Context
 import android.net.Uri
 import com.ivor.openstream.data.playback.ExternalPlayer
@@ -123,7 +127,8 @@ class PlayerViewModel @Inject constructor(
     private val skipTimesRepository: SkipTimesRepository,    private val subtitleFetcher: SubtitleFetcher,
     private val savedSubtitleRepository: SavedSubtitleRepository,
     @ApplicationContext private val context: Context,
-    private val streamDataGuard: StreamDataGuard
+    private val streamDataGuard: StreamDataGuard,
+    private val localMediaRepository: LocalMediaRepository
 ) : ViewModel() {
     /** A sideloaded subtitle's text, downloaded and unwrapped by the data layer. */
     suspend fun loadSubtitleText(url: String, headers: Map<String, String>): String =
@@ -420,6 +425,29 @@ class PlayerViewModel @Inject constructor(
         sharedPreferences.edit()
             .putString(KEY_CAPTION_STYLE, json.encodeToString(settings))
             .apply()
+    }
+
+    suspend fun getLocalMedia(id: Long): LocalMediaEntity? =
+        localMediaRepository.getLocalMediaById(id)
+
+    fun loadLocalMedia(id: Long) {
+        loadJob?.cancel()
+        resolutionJob?.cancel()
+        _mediaType.value = LOCAL_MEDIA_TYPE
+        currentSeason = 1
+        currentEpisodeNumber = 1
+        viewModelScope.launch {
+            val item = localMediaRepository.getLocalMediaById(id) ?: return@launch
+            _mediaDetails.value = AnimeDetailsDto(
+                id = item.id.toInt(),
+                movieTitle = item.displayName,
+                overview = "",
+                posterPath = null,
+                backdropPath = null,
+                voteAverage = 0.0
+            )
+            onMediaLoaded(item.uri, null)
+        }
     }
 
     suspend fun getPlaybackUri(downloadId: String): String? =

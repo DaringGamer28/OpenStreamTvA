@@ -862,6 +862,40 @@
     <string name="match_rail">أفضل الترشيحات لك</string>
     <string name="match_percent">تطابق %1$d%%</string>
     <string name="match_because">لأن %1$s أعجبك</string>
+    <string name="st_save_to_storage">حفظ التنزيلات في وحدة التخزين</string>
+    <string name="st_save_to_storage_summary">نسخ كل تنزيل مكتمل إلى Downloads/Openstream حيث يمكن للتطبيقات الأخرى فتحه</string>
+    <string name="dl_tab_downloads">التنزيلات</string>
+    <string name="dl_tab_local_files">الملفات المحلية</string>
+    <string name="dl_save_to_storage">حفظ في وحدة التخزين</string>
+    <string name="dl_saved_to_storage">تم الحفظ في Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">تعذّر الحفظ في وحدة التخزين</string>
+    <string name="local_import_files">استيراد فيديوهات</string>
+    <string name="local_no_files_title">لا توجد فيديوهات محلية</string>
+    <string name="local_no_files_body">استورد ملفات فيديو من جهازك لمشاهدتها في OpenStream</string>
+    <string name="local_file">فيديو محلي</string>
+    <string name="local_delete_confirm_title">إزالة الفيديو المحلي؟</string>
+    <string name="local_delete_confirm_body">سيُزال من هذه القائمة فقط. يبقى الملف على جهازك.</string>
+    <string name="local_search_hint">البحث في الفيديوهات المحلية</string>
+    <string name="sort_name_asc">الاسم (أ–ي)</string>
+    <string name="sort_name_desc">الاسم (ي–أ)</string>
+    <string name="sort_date_added_desc">المضافة حديثًا</string>
+    <string name="sort_date_added_asc">المضافة أولًا</string>
+    <string name="sort_size_desc">الأكبر حجمًا</string>
+    <string name="sort_size_asc">الأصغر حجمًا</string>
+    <string name="sort_duration_desc">الأطول مدة</string>
+    <string name="sort_duration_asc">الأقصر مدة</string>
+    <string name="dl_save_in_progress">يتم حفظه في التنزيلات بالفعل</string>
+    <string name="dl_storage_permission_needed">اسمح بالوصول إلى وحدة التخزين لحفظ الفيديوهات في مجلد التنزيلات</string>
+    <string name="dl_save_unsupported">لا يمكن حفظ هذا التنزيل كملف فيديو واحد</string>
+    <string name="dl_save_protected">هذا البث محمي، لذا لا يعمل إلا داخل OpenStream</string>
+    <plurals name="local_import_success">
+        <item quantity="zero">تم استيراد %1$d فيديو</item>
+        <item quantity="one">تم استيراد فيديو واحد</item>
+        <item quantity="two">تم استيراد فيديوهين</item>
+        <item quantity="few">تم استيراد %1$d فيديوهات</item>
+        <item quantity="many">تم استيراد %1$d فيديو</item>
+        <item quantity="other">تم استيراد %1$d فيديو</item>
+    </plurals>
     <string name="dl_delete_confirm">حذف التنزيل؟</string>
     <string name="dl_delete_body">إزالة %1$s من هذا الجهاز؟ ستحتاج إلى تنزيله مجددًا للمشاهدة دون اتصال.</string>
     <string name="dl_cancel_confirm">إلغاء التنزيل؟</string>
@@ -907,5 +941,4 @@
     <string name="sheet_volume_boost_desc">يرفع صوت الفيديوهات الهادئة. يمنع المحدِّد تشوّه الأجزاء العالية. يسري على كل ما تشغّله حتى تعيده إلى عادي.</string>
     <string name="sheet_external_player">مشغّل خارجي</string>
     <string name="action_open_external_player">فتح في مشغّل خارجي</string>
-
 </resources>
