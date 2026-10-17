@@ -83,7 +83,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Theaters
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -92,7 +91,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -844,7 +843,7 @@ private fun MetaLine(details: AnimeDetailsDto, isMovie: Boolean, modifier: Modif
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (rating != null) {
-            Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB300), modifier = Modifier.size(16.dp))
+            Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(16.dp))
             Text(
                 text = String.format(Locale.US, " %.1f", rating) +
                     (details.voteCount?.takeIf { it > 0 }?.let { " (${compactCount(it)})" } ?: "") +
@@ -910,8 +909,8 @@ private fun PrimaryActions(
                     text = when {
                         resume == null -> stringResource(R.string.details_play)
                         isMovie -> stringResource(R.string.cd_resume)
-                        resume.isUpNext -> stringResource(R.string.continue_with_code, "S${resume.season} E${resume.episode}")
-                        else -> stringResource(R.string.resume_code, "S${resume.season} E${resume.episode}")
+                        resume.isUpNext -> stringResource(R.string.continue_with_code, stringResource(R.string.li_episode_code, resume.season, resume.episode))
+                        else -> stringResource(R.string.resume_code, stringResource(R.string.li_episode_code, resume.season, resume.episode))
                     },
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
@@ -923,7 +922,7 @@ private fun PrimaryActions(
             }
         }
         if (resume != null && resume.fraction > 0f) {
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 progress = { resume.fraction },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1415,14 +1414,14 @@ private fun EpisodeCard(
 private fun BoxScope.EpisodeThumbnailOverlay(number: Int, progress: WatchProgress?) {
     Surface(
         shape = ExpressiveShapes.extraSmall,
-        color = Color.Black.copy(alpha = 0.65f),
-        contentColor = Color.White,
+        color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
+        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
         modifier = Modifier
             .align(Alignment.TopStart)
             .padding(6.dp)
     ) {
         Text(
-            text = "E$number",
+            text = stringResource(R.string.li_episode_short, number),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -1432,7 +1431,7 @@ private fun BoxScope.EpisodeThumbnailOverlay(number: Int, progress: WatchProgres
         progress?.completed == true -> Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.45f)),
+                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -1442,16 +1441,13 @@ private fun BoxScope.EpisodeThumbnailOverlay(number: Int, progress: WatchProgres
                 modifier = Modifier.size(28.dp)
             )
         }
-        progress != null && progress.fraction > 0f -> LinearProgressIndicator(
+        progress != null && progress.fraction > 0f -> LinearWavyProgressIndicator(
             progress = { progress.fraction },
             color = MaterialTheme.colorScheme.primary,
-            trackColor = Color.Black.copy(alpha = 0.45f),
-            gapSize = 0.dp,
-            drawStopIndicator = {},
+            trackColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(4.dp)
         )
     }
 }
@@ -1485,10 +1481,9 @@ private fun EpisodeDownloadAction(
                 .size(32.dp)
                 .semantics { contentDescription = downloadingDescription }
         ) {
-            CircularProgressIndicator(
+            LinearWavyProgressIndicator(
                 progress = { download.progress / 100f },
-                modifier = Modifier.fillMaxSize(),
-                strokeWidth = 3.dp
+                modifier = Modifier.fillMaxWidth()
             )
         }
         else -> {
@@ -1603,7 +1598,7 @@ private fun TrailerRail(trailers: List<VideoDto>) {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
-                    Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)))
+                    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.3f)))
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primary,

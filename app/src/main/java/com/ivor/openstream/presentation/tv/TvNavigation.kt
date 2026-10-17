@@ -37,8 +37,9 @@ fun TvNavigation() {
     val navController = rememberNavController()
     fun openTab(route: String) {
         navController.navigate(route) {
-            popUpTo(TvRoutes.HOME)
+            popUpTo(TvRoutes.HOME) { saveState = true }
             launchSingleTop = true
+            restoreState = true
         }
     }
     NavHost(navController = navController, startDestination = TvRoutes.HOME) {
