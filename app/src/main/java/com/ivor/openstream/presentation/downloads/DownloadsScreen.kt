@@ -78,7 +78,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
@@ -229,6 +228,9 @@ fun DownloadsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { localMediaToDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
 
     if (pendingDelete != null) {
         val cancelling = pendingDelete.status.let { it == DownloadStatus.QUEUED || it == DownloadStatus.RUNNING || it == DownloadStatus.RESOLVING || it == DownloadStatus.PAUSED }
@@ -375,19 +377,6 @@ fun DownloadsScreen(
                             Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { LoadingIndicator() }
                         }
                         state.isEmpty -> item(key = "empty") { EmptyDownloads() }
-                if (state.inProgress.isNotEmpty()) {
-                    item(key = "in-progress-title") { SectionTitle(stringResource(R.string.hist_filter_in_progress)) }
-                    itemsIndexed(state.inProgress, key = { _, item -> "active:${item.downloadId}" }) { index, item ->
-                        InProgressRow(
-                            download = item,
-                            index = index,
-                            count = state.inProgress.size,
-                            onPause = { viewModel.pause(item) },
-                            onResume = { viewModel.resume(item) },
-                            onRetry = { viewModel.retry(item) },
-                            onCancel = { pendingDeleteId = item.downloadId },
-                            modifier = Modifier.animateItem()
-                        )
                     }
 
                     if (state.inProgress.isNotEmpty()) {
@@ -423,7 +412,6 @@ fun DownloadsScreen(
                                     .padding(bottom = 12.dp)
                             )
                         }
-                    }
                     }
                 }
             }
