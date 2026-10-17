@@ -373,8 +373,12 @@ fun PlayerScreen(
     }
 
     // Handle back press in fullscreen -- exit fullscreen instead of navigating back
-    BackHandler(enabled = isFullscreen) {
+    BackHandler(enabled = !tvControls && isFullscreen) {
         exitFullscreen()
+    }
+    // Android TV: closing an open source picker leaves the player.
+    BackHandler(enabled = tvControls && showServerPicker) {
+        showServerPicker = false
     }
 
     // Clean up on dispose
@@ -758,6 +762,7 @@ fun PlayerScreen(
                         onEpisodeClick(target.season, target.episode)
                     },
                     onCancel = { showUpNext = false },
+                    autoAdvance = !tvControls,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(if (isFullscreen) 32.dp else 12.dp)

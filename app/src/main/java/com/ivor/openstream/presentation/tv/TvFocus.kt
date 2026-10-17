@@ -70,7 +70,7 @@ fun Modifier.tvFocusable(
  */
 fun Modifier.tvFocusHighlight(
     shape: Shape = CircleShape,
-    borderWidth: Dp = 3.dp,
+    borderWidth: Dp = TvDimens.of(960, 540).focusRingWidth,
     focusedBorderColor: Color? = null,
     scaleWhenFocused: Boolean = true,
     focusRequester: FocusRequester? = null,
@@ -138,9 +138,9 @@ fun TvCard(
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
         border = if (focused) {
-            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+            BorderStroke(LocalTvDimens.current.focusRingWidth, MaterialTheme.colorScheme.primary)
         } else null,
-        shadowElevation = if (focused) 16.dp else 0.dp,
+        shadowElevation = if (focused) LocalTvDimens.current.paddingLarge else 0.dp,
         modifier = modifier
             .scale(scale)
             .tvFocusable(focusRequester = focusRequester, onFocused = onFocused, onBlurred = onBlurred)
@@ -188,7 +188,7 @@ fun TvButton(
         enabled = enabled,
         shape = shape,
         border = highlightBorder,
-        elevation = if (isFocused) ButtonDefaults.buttonElevation(defaultElevation = 8.dp) else null,
+        elevation = if (isFocused) ButtonDefaults.buttonElevation(defaultElevation = LocalTvDimens.current.paddingMedium) else null,
         colors = if (isFocused) focusedColors else colors,
         contentPadding = contentPadding,
         modifier = buttonModifier
@@ -275,7 +275,7 @@ fun TvIconButton(
             .onFocusChanged { isFocused = it.isFocused }
             .then(
                 if (isFocused) {
-                    Modifier.border(2.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    Modifier.border(LocalTvDimens.current.focusRingWidth, MaterialTheme.colorScheme.primary, CircleShape)
                 } else Modifier
             )
     ) {

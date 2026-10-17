@@ -189,6 +189,7 @@ class SettingsViewModel @Inject constructor(
     fun setShowSkipButton(enabled: Boolean) = appSettingsStore.update { it.copy(showSkipButton = enabled) }
 
     fun setDownloadMaxHeight(height: Int) = appSettingsStore.update { it.copy(downloadMaxHeight = height) }
+    fun setStreamMaxHeight(height: Int) = appSettingsStore.setStreamMaxHeight(height)
 
     fun setPipLeftAction(action: PipAction) = appSettingsStore.update { it.copy(pipLeftAction = action) }
 

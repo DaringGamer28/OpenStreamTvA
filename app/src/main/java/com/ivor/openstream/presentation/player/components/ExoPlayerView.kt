@@ -431,6 +431,10 @@ fun ExoPlayerView(
 
     // While locked, back does nothing except show the unlock button.
     BackHandler(enabled = isLocked) { revealUnlockButton() }
+    // Android TV: back hides the chrome first, then leaves the player.
+    BackHandler(enabled = dpadControls && !isLocked) {
+        if (areControlsVisible) areControlsVisible = false else onBackClick()
+    }
 
     LaunchedEffect(seekFeedbackSequence) {
         if (seekFeedbackSequence > 0) {
@@ -812,7 +816,7 @@ fun ExoPlayerView(
     // Auto-hide controls
     LaunchedEffect(areControlsVisible, isPlaying) {
         if (areControlsVisible && isPlaying) {
-            delay(3000)
+            delay(if (dpadControls) 11000 else 3000)
             areControlsVisible = false
         }
     }

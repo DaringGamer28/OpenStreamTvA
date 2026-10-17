@@ -80,6 +80,8 @@ data class AppSettings(
     val showSkipButton: Boolean = true,
     /** Tallest rendition a download picks from a master playlist. */
     val downloadMaxHeight: Int = 1080,
+    /** Tallest rendition allowed while streaming, on any network. 0 means no limit. */
+    val streamMaxHeight: Int = 1080,
     /** Picture-in-picture buttons left and right of play/pause (Android shows three at most). */
     val pipLeftAction: PipAction = PipAction.REWIND,
     val pipRightAction: PipAction = PipAction.FORWARD,
@@ -122,6 +124,8 @@ data class AppSettings(
         val SMART_AHEAD_OPTIONS = listOf(1, 2, 3)
         /** Quality caps offered for metered networks: 720p, 480p and no limit. */
         val METERED_CAPS = listOf(720, 480, 0)
+    /** Quality caps offered for streaming: 1080p, 720p, 4K and no limit. */
+    val STREAM_CAPS = listOf(1080, 720, 2160, 0)
         val SMOOTH_MOTION_FPS_OPTIONS = listOf(60, 120)
     }
 }
@@ -162,6 +166,7 @@ class AppSettingsStore @Inject constructor(
             .putBoolean(KEY_AUTO_PLAY_NEXT, updated.autoPlayNext)
             .putBoolean(KEY_SHOW_SKIP_BUTTON, updated.showSkipButton)
             .putInt(KEY_DOWNLOAD_HEIGHT, updated.downloadMaxHeight)
+            .putInt(KEY_STREAM_HEIGHT, updated.streamMaxHeight)
             .putString(KEY_PIP_LEFT, updated.pipLeftAction.name)
             .putString(KEY_PIP_RIGHT, updated.pipRightAction.name)
             .putString(KEY_SUBTITLE_LANGUAGES, updated.subtitleDownloadLanguages.joinToString(","))
@@ -198,6 +203,8 @@ class AppSettingsStore @Inject constructor(
             showSkipButton = prefs.getBoolean(KEY_SHOW_SKIP_BUTTON, defaults.showSkipButton),
             downloadMaxHeight = prefs.getInt(KEY_DOWNLOAD_HEIGHT, defaults.downloadMaxHeight)
                 .takeIf { it in AppSettings.DOWNLOAD_HEIGHTS } ?: defaults.downloadMaxHeight,
+            streamMaxHeight = prefs.getInt(KEY_STREAM_HEIGHT, defaults.streamMaxHeight)
+                .takeIf { it in AppSettings.STREAM_CAPS } ?: defaults.streamMaxHeight,
             pipLeftAction = enumOrDefault(prefs.getString(KEY_PIP_LEFT, null), defaults.pipLeftAction),
             pipRightAction = enumOrDefault(prefs.getString(KEY_PIP_RIGHT, null), defaults.pipRightAction),
             subtitleDownloadLanguages = prefs.getString(KEY_SUBTITLE_LANGUAGES, null)
@@ -245,6 +252,9 @@ class AppSettingsStore @Inject constructor(
     /** 0 clears the cap, so metered networks stream at the source's best quality. */
     fun setMeteredMaxHeight(height: Int) =
         update { it.copy(meteredMaxHeight = height.takeIf { it in AppSettings.METERED_CAPS } ?: 0) }
+
+    fun setStreamMaxHeight(height: Int) =
+        update { it.copy(streamMaxHeight = height.takeIf { it in AppSettings.STREAM_CAPS } ?: 1080) }
 
     fun setSmoothMotionEnabled(enabled: Boolean) = update { it.copy(smoothMotionEnabled = enabled) }
 
@@ -311,6 +321,7 @@ class AppSettingsStore @Inject constructor(
         const val KEY_AUTO_PLAY_NEXT = "app_auto_play_next"
         const val KEY_SHOW_SKIP_BUTTON = "app_show_skip_button"
         const val KEY_DOWNLOAD_HEIGHT = "app_download_max_height"
+        const val KEY_STREAM_HEIGHT = "app_stream_max_height"
         const val KEY_ACTIVE_PROFILE = "app_active_profile_id"
         const val KEY_PIP_LEFT = "app_pip_left_action"
         const val KEY_PIP_RIGHT = "app_pip_right_action"

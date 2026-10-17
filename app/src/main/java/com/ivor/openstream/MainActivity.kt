@@ -84,16 +84,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val settings by appSettings.settings.collectAsState()
-            val darkTheme = when (settings.themeMode) {
+            val tvMode = rememberTvMode()
+            val darkTheme = if (tvMode) true else when (settings.themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            OpenStreamTheme(darkTheme = darkTheme, dynamicColor = settings.dynamicColor) {
+            OpenStreamTheme(darkTheme = darkTheme, dynamicColor = if (tvMode) false else settings.dynamicColor) {
                 // Most screens draw their own background without a Scaffold, so this root
                 // Surface is what gives un-styled Text the theme's onBackground color.
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    if (rememberTvMode()) {
+                    if (tvMode) {
                         TvNavigation()
                     } else {
                         AppNavigation(

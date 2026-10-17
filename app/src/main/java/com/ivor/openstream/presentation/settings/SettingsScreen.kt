@@ -418,6 +418,21 @@ fun SettingsScreen(
                     }
                 }
 
+                item(key = "stream-quality") {
+                    SettingsGroup(title = stringResource(R.string.st_stream_cap)) {
+                        ChoiceRow(
+                            index = 0, count = 1,
+                            icon = Icons.Default.HighQuality,
+                            title = stringResource(R.string.st_stream_cap),
+                            supporting = stringResource(R.string.st_stream_cap_hint),
+                            options = AppSettings.STREAM_CAPS,
+                            selected = appSettings.streamMaxHeight,
+                            label = { if (it == 0) stringResource(R.string.st_stream_cap_none) else if (it == 2160) stringResource(R.string.q_2160p) else "${it}p" },
+                            onSelect = viewModel::setStreamMaxHeight
+                        )
+                    }
+                }
+
                 item(key = "downloads") {
                     SettingsGroup(title = stringResource(R.string.dl_title)) {
                         ChoiceRow(
