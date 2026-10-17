@@ -896,4 +896,49 @@
         <item quantity="many">تم استيراد %1$d فيديو</item>
         <item quantity="other">تم استيراد %1$d فيديو</item>
     </plurals>
+    <string name="dl_delete_confirm">حذف التنزيل؟</string>
+    <string name="dl_delete_body">إزالة %1$s من هذا الجهاز؟ ستحتاج إلى تنزيله مجددًا للمشاهدة دون اتصال.</string>
+    <string name="dl_cancel_confirm">إلغاء التنزيل؟</string>
+    <string name="dl_cancel_body">إيقاف تنزيل %1$s؟ ستتم إزالة الملف غير المكتمل.</string>
+    <string name="action_keep">إبقاء</string>
+    <string name="season_episode_format">الموسم %1$d، الحلقة %2$d</string>
+    <string name="dl_pick_source_title">اختيار مصدر التنزيل</string>
+    <string name="dl_pick_source_hint">اختر من أين يتم التنزيل.</string>
+    <string name="dl_pick_batch_hint">سنستخدم المزوّد والجودة اللذين تختارهما لكل حلقة متى توفّرا.</string>
+    <string name="dl_batch_queued">جارٍ تنزيل %1$d حلقات… ستجدها في التنزيلات.</string>
+    <string name="dl_season_already">كل الحلقات هنا منزّلة بالفعل أو قيد التنزيل</string>
+    <string name="dl_hold_options">اضغط مطولًا لاختيار المصدر</string>
+    <string name="dl_hold_tip">نصيحة: اضغط مطولًا على تنزيل لاختيار المصدر والجودة.</string>
+    <string name="dl_choose_source">اختيار مصدر التنزيل</string>
+    <string name="dl_no_quality_match">لا توجد مصادر بهذه الجودة بعد.</string>
+    <string name="action_show_all">عرض الكل</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="zero">إزالة %1$d حلقة من %2$s من هذا الجهاز؟</item>
+        <item quantity="one">إزالة حلقة واحدة من %2$s من هذا الجهاز؟ ستحتاج إلى تنزيلها مجددًا للمشاهدة دون اتصال.</item>
+        <item quantity="two">إزالة حلقتين من %2$s من هذا الجهاز؟ ستحتاج إلى تنزيلهما مجددًا للمشاهدة دون اتصال.</item>
+        <item quantity="few">إزالة %1$d حلقات من %2$s من هذا الجهاز؟ ستحتاج إلى تنزيلها مجددًا للمشاهدة دون اتصال.</item>
+        <item quantity="many">إزالة %1$d حلقة من %2$s من هذا الجهاز؟ ستحتاج إلى تنزيلها مجددًا للمشاهدة دون اتصال.</item>
+        <item quantity="other">إزالة %1$d حلقة من %2$s من هذا الجهاز؟ ستحتاج إلى تنزيلها مجددًا للمشاهدة دون اتصال.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="zero">حذف %1$d حلقة؟</item>
+        <item quantity="one">حذف حلقة واحدة؟</item>
+        <item quantity="two">حذف حلقتين؟</item>
+        <item quantity="few">حذف %1$d حلقات؟</item>
+        <item quantity="many">حذف %1$d حلقة؟</item>
+        <item quantity="other">حذف %1$d حلقة؟</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="zero">%1$d حلقة</item>
+        <item quantity="one">حلقة واحدة</item>
+        <item quantity="two">حلقتان</item>
+        <item quantity="few">%1$d حلقات</item>
+        <item quantity="many">%1$d حلقة</item>
+        <item quantity="other">%1$d حلقة</item>
+    </plurals>
+
+    <string name="sheet_volume_boost">تعزيز الصوت</string>
+    <string name="sheet_volume_boost_desc">يرفع صوت الفيديوهات الهادئة. يمنع المحدِّد تشوّه الأجزاء العالية. يسري على كل ما تشغّله حتى تعيده إلى عادي.</string>
+    <string name="sheet_external_player">مشغّل خارجي</string>
+    <string name="action_open_external_player">فتح في مشغّل خارجي</string>
 </resources>

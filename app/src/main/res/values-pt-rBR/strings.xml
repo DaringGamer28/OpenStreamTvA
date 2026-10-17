@@ -852,4 +852,40 @@
         <item quantity="many">%1$d vídeos importados</item>
         <item quantity="other">%1$d vídeos importados</item>
     </plurals>
+    <string name="dl_delete_confirm">Excluir download?</string>
+    <string name="dl_delete_body">Remover %1$s deste dispositivo? Você vai precisar baixar de novo para assistir offline.</string>
+    <string name="dl_cancel_confirm">Cancelar download?</string>
+    <string name="dl_cancel_body">Parar o download de %1$s? O arquivo parcial será removido.</string>
+    <string name="action_keep">Manter</string>
+    <string name="season_episode_format">Temporada %1$d, episódio %2$d</string>
+    <string name="dl_pick_source_title">Escolher a fonte do download</string>
+    <string name="dl_pick_source_hint">Escolha de onde baixar.</string>
+    <string name="dl_pick_batch_hint">Vamos usar o provedor e a qualidade que você tocar para cada episódio, quando disponíveis.</string>
+    <string name="dl_batch_queued">Baixando %1$d episódios… Encontre-os em Downloads.</string>
+    <string name="dl_season_already">Todos os episódios aqui já foram baixados ou estão baixando</string>
+    <string name="dl_hold_options">Segure para escolher a fonte</string>
+    <string name="dl_hold_tip">Dica: segure Baixar para escolher a fonte e a qualidade.</string>
+    <string name="dl_choose_source">Escolher a fonte do download</string>
+    <string name="dl_no_quality_match">Ainda não há fontes nesta qualidade.</string>
+    <string name="action_show_all">Mostrar tudo</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Remover %1$d episódio de %2$s deste dispositivo? Você vai precisar baixá-lo de novo para assistir offline.</item>
+        <item quantity="many">Remover %1$d episódios de %2$s deste dispositivo? Você vai precisar baixá-los de novo para assistir offline.</item>
+        <item quantity="other">Remover %1$d episódios de %2$s deste dispositivo? Você vai precisar baixá-los de novo para assistir offline.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Excluir 1 episódio?</item>
+        <item quantity="many">Excluir %1$d episódios?</item>
+        <item quantity="other">Excluir %1$d episódios?</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d episódio</item>
+        <item quantity="many">%1$d episódios</item>
+        <item quantity="other">%1$d episódios</item>
+    </plurals>
+
+    <string name="sheet_volume_boost">Aumento de volume</string>
+    <string name="sheet_volume_boost_desc">Deixa os vídeos baixos mais altos. Um limitador evita que as partes altas distorçam. Vale para tudo o que você assistir até voltar para Normal.</string>
+    <string name="sheet_external_player">Player externo</string>
+    <string name="action_open_external_player">Abrir em player externo</string>
 </resources>

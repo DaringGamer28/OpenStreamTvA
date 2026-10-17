@@ -202,6 +202,13 @@ guides, component list) live in `docs/design/`.
 - Don't drive the app on the emulator unless asked; the maintainer tests. `installDebug` when asked.
 - Never use emojis: not in code, comments, commits, PRs, changelogs or messages sent anywhere.
 - Commit and push only when asked. End commit messages with the attribution trailer in use.
+- This is a Windows checkout (Git Bash and PowerShell, `core.autocrlf`). Don't pass long or
+  multi-line text inline: PowerShell here-strings given to `git commit -F -` become a pathspec,
+  and long Git Bash heredocs full of non-ASCII text fail with "unexpected EOF". Write commit
+  messages, PR bodies, scripts and translation data to a file in the scratchpad with the Write
+  tool, then pass the path (`git commit -F <file>`, `gh pr create --body-file <file>`,
+  `python <script> <args>`). Scripts that edit tracked files keep each file's existing line
+  endings.
 - Every pull request targets `beta`, never `main`. Branch new work from `beta` and open the PR
   with `gh pr create --base beta`; never change a base to `main`, and retarget a PR already
   opened against `main` (`gh pr edit --base beta`) instead of merging it. `beta` is the branch

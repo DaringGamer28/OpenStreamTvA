@@ -23,6 +23,7 @@ import com.ivor.openstream.domain.model.DownloadStatus
 import com.ivor.openstream.domain.model.DownloadTarget
 import com.ivor.openstream.domain.model.VideoServer
 import com.ivor.openstream.domain.repository.DownloadRepository
+import com.ivor.openstream.domain.repository.SourcePreference
 import com.ivor.openstream.domain.repository.StreamingRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -49,6 +50,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.math.abs
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -117,7 +119,7 @@ class DownloadRepositoryImpl @Inject constructor(
         job.await()
     }
 
-    override fun enqueue(targets: List<DownloadTarget>) {
+    override fun enqueue(targets: List<DownloadTarget>, preference: SourcePreference?) {
         targets.forEach { target ->
             scope.launch {
                 val existing = dao.getDownloadById(target.id)
@@ -125,7 +127,7 @@ class DownloadRepositoryImpl @Inject constructor(
                     return@launch
                 }
                 dao.insertDownload(placeholder(target))
-                resolveAndStart(target)
+                resolveAndStart(target, preference)
             }
         }
     }
@@ -187,11 +189,11 @@ class DownloadRepositoryImpl @Inject constructor(
 
     // region Starting downloads
 
-    private fun resolveAndStart(target: DownloadTarget) {
+    private fun resolveAndStart(target: DownloadTarget, preference: SourcePreference? = null) {
         resolutionJobs.remove(target.id)?.cancel()
         val job = scope.launch(start = CoroutineStart.LAZY) {
             resolutionSlots.withPermit {
-                val server = findDownloadableServer(target)
+                val server = findDownloadableServer(target, preference)
                 if (server == null) {
                     dao.updateProgress(target.id, DownloadStatus.FAILED, 0, 0, 0, context.getString(R.string.dl_no_source))
                 } else {
@@ -211,15 +213,22 @@ class DownloadRepositoryImpl @Inject constructor(
         job.start()
     }
 
-    private suspend fun findDownloadableServer(target: DownloadTarget): VideoServer? {
+    private suspend fun findDownloadableServer(target: DownloadTarget, preference: SourcePreference?): VideoServer? {
         var latest = emptyList<VideoServer>()
         withTimeoutOrNull(RESOLUTION_TIMEOUT_MS) {
             streamingRepository.resolveServers(target.toIdentity())
                 .onEach { latest = it.servers }
                 .first { it.isComplete }
         }
+        val downloadable = latest.filter { it.isDownloadable }
+        // The source the user picked, at the quality closest to theirs; otherwise the ranked best.
+        preference?.let { wanted ->
+            downloadable.filter { it.providerId == wanted.providerId }
+                .minByOrNull { abs(it.quality.rank - wanted.qualityRank) }
+                ?.let { return it }
+        }
         // Servers arrive ranked best-first.
-        return latest.firstOrNull { it.isDownloadable }
+        return downloadable.firstOrNull()
     }
 
     private suspend fun start(server: VideoServer, target: DownloadTarget) {

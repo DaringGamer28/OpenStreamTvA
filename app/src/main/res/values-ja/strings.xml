@@ -850,4 +850,34 @@
     <plurals name="local_import_success">
         <item quantity="other">%1$d 本の動画をインポートしました</item>
     </plurals>
+    <string name="dl_delete_confirm">ダウンロードを削除しますか？</string>
+    <string name="dl_delete_body">%1$sをこの端末から削除しますか？オフラインで見るには再度ダウンロードが必要です。</string>
+    <string name="dl_cancel_confirm">ダウンロードをキャンセルしますか？</string>
+    <string name="dl_cancel_body">%1$sのダウンロードを停止しますか？途中までのファイルは削除されます。</string>
+    <string name="action_keep">残す</string>
+    <string name="season_episode_format">シーズン%1$d、第%2$d話</string>
+    <string name="dl_pick_source_title">ダウンロード元を選択</string>
+    <string name="dl_pick_source_hint">ダウンロード元を選んでください。</string>
+    <string name="dl_pick_batch_hint">利用できる場合、各エピソードにタップしたプロバイダと画質を使います。</string>
+    <string name="dl_batch_queued">%1$d話をダウンロード中… ダウンロードで確認できます。</string>
+    <string name="dl_season_already">ここのエピソードはすべてダウンロード済みかダウンロード中です</string>
+    <string name="dl_hold_options">長押しでダウンロード元を選択</string>
+    <string name="dl_hold_tip">ヒント: ダウンロードを長押しすると、ダウンロード元と画質を選べます。</string>
+    <string name="dl_choose_source">ダウンロード元を選択</string>
+    <string name="dl_no_quality_match">この画質のソースはまだありません。</string>
+    <string name="action_show_all">すべて表示</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="other">%2$sの%1$d話をこの端末から削除しますか？オフラインで見るには再度ダウンロードが必要です。</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="other">%1$d話を削除しますか？</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="other">%1$d話</item>
+    </plurals>
+
+    <string name="sheet_volume_boost">音量ブースト</string>
+    <string name="sheet_volume_boost_desc">音の小さい動画を大きくします。リミッターで大きな音の歪みを防ぎます。通常に戻すまで、再生するすべての動画に適用されます。</string>
+    <string name="sheet_external_player">外部プレーヤー</string>
+    <string name="action_open_external_player">外部プレーヤーで開く</string>
 </resources>

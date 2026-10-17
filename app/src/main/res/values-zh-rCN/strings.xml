@@ -850,4 +850,34 @@
     <plurals name="local_import_success">
         <item quantity="other">已导入 %1$d 个视频</item>
     </plurals>
+    <string name="dl_delete_confirm">删除下载？</string>
+    <string name="dl_delete_body">要从此设备移除 %1$s 吗？离线观看需要重新下载。</string>
+    <string name="dl_cancel_confirm">取消下载？</string>
+    <string name="dl_cancel_body">停止下载 %1$s？未完成的文件将被删除。</string>
+    <string name="action_keep">保留</string>
+    <string name="season_episode_format">第 %1$d 季第 %2$d 集</string>
+    <string name="dl_pick_source_title">选择下载来源</string>
+    <string name="dl_pick_source_hint">选择从哪里下载。</string>
+    <string name="dl_pick_batch_hint">在可用时，每一集都会使用你点选的提供方和画质。</string>
+    <string name="dl_batch_queued">正在下载 %1$d 集… 可在“下载”中查看。</string>
+    <string name="dl_season_already">这里的所有剧集都已下载或正在下载</string>
+    <string name="dl_hold_options">长按以选择来源</string>
+    <string name="dl_hold_tip">提示：长按“下载”可选择来源和画质。</string>
+    <string name="dl_choose_source">选择下载来源</string>
+    <string name="dl_no_quality_match">此画质暂无来源。</string>
+    <string name="action_show_all">显示全部</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="other">要从此设备移除 %2$s 的 %1$d 集吗？离线观看需要重新下载。</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="other">删除 %1$d 集？</item>
+    </plurals>
+    <plurals name="dl_batch_count">
+        <item quantity="other">%1$d 集</item>
+    </plurals>
+
+    <string name="sheet_volume_boost">音量增强</string>
+    <string name="sheet_volume_boost_desc">让声音偏小的视频更响。限幅器可防止大声部分失真。在你改回“正常”之前，对所有播放内容生效。</string>
+    <string name="sheet_external_player">外部播放器</string>
+    <string name="action_open_external_player">在外部播放器中打开</string>
 </resources>

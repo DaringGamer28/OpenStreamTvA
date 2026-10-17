@@ -76,6 +76,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -121,6 +128,8 @@ fun DownloadsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var confirmDeleteAll by rememberSaveable { mutableStateOf(false) }
+    var pendingDeleteId by rememberSaveable { mutableStateOf<String?>(null) }
+    var pendingGroupKey by rememberSaveable { mutableStateOf<String?>(null) }
     var subtitlesForId by rememberSaveable { mutableStateOf<String?>(null) }
     // The id, not the row: rememberSaveable can only keep saveable values.
     var localMediaToDeleteId by rememberSaveable { mutableStateOf<Long?>(null) }
@@ -145,6 +154,11 @@ fun DownloadsScreen(
     }
     val subtitlesViewModel: DownloadSubtitlesViewModel = hiltViewModel()
     val subtitlesFor = subtitlesForId?.let { id -> state.library.flatMap { it.items }.firstOrNull { it.downloadId == id } }
+    val pendingDelete = pendingDeleteId?.let { id ->
+        state.library.flatMap { it.items }.firstOrNull { it.downloadId == id }
+            ?: state.inProgress.firstOrNull { it.downloadId == id }
+    }
+    val pendingGroup = pendingGroupKey?.let { key -> state.library.firstOrNull { it.key == key } }
 
     val openDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenMultipleDocuments()
@@ -175,10 +189,13 @@ fun DownloadsScreen(
             title = { Text(stringResource(R.string.dl_delete_all_confirm)) },
             text = { Text(stringResource(R.string.dl_delete_all_body)) },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmDeleteAll = false
-                    viewModel.removeAll()
-                }) { Text(stringResource(R.string.action_delete_all), color = MaterialTheme.colorScheme.error) }
+                TextButton(
+                    onClick = {
+                        confirmDeleteAll = false
+                        viewModel.removeAll()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete_all)) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDeleteAll = false }) { Text(stringResource(R.string.action_cancel)) }
@@ -212,6 +229,84 @@ fun DownloadsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { localMediaToDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
+
+    if (pendingDelete != null) {
+        val cancelling = pendingDelete.status.let { it == DownloadStatus.QUEUED || it == DownloadStatus.RUNNING || it == DownloadStatus.RESOLVING || it == DownloadStatus.PAUSED }
+        if (cancelling) {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteId = null },
+                title = { Text(stringResource(R.string.dl_cancel_confirm)) },
+                text = { Text(stringResource(R.string.dl_cancel_body, pendingDelete.describe())) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val target = pendingDelete
+                            pendingDeleteId = null
+                            if (target != null) viewModel.remove(target)
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.cd_cancel_download)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_keep)) }
+                }
+            )
+        } else {
+            AlertDialog(
+                onDismissRequest = { pendingDeleteId = null },
+                title = { Text(stringResource(R.string.dl_delete_confirm)) },
+                text = { Text(stringResource(R.string.dl_delete_body, pendingDelete.describe())) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val target = pendingDelete
+                            pendingDeleteId = null
+                            if (target != null) viewModel.remove(target)
+                        },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) { Text(stringResource(R.string.action_delete)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingDeleteId = null }) { Text(stringResource(R.string.action_cancel)) }
+                }
+            )
+        }
+    }
+
+    if (pendingGroup != null) {
+        AlertDialog(
+            onDismissRequest = { pendingGroupKey = null },
+            title = {
+                Text(
+                    pluralStringResource(
+                        R.plurals.dl_delete_episodes,
+                        pendingGroup.items.size,
+                        pendingGroup.items.size
+                    )
+                )
+            },
+            text = {
+                Text(
+                    pluralStringResource(
+                        R.plurals.dl_delete_group_body,
+                        pendingGroup.items.size,
+                        pendingGroup.items.size,
+                        pendingGroup.title
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val group = pendingGroup
+                        pendingGroupKey = null
+                        if (group != null) viewModel.removeGroup(group)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingGroupKey = null }) { Text(stringResource(R.string.action_cancel)) }
             }
         )
     }
@@ -241,7 +336,9 @@ fun DownloadsScreen(
                 onDownloadClick = onDownloadClick,
                 onDeleteAll = { confirmDeleteAll = true },
                 onSubtitles = { subtitlesForId = it.downloadId },
-                onExport = exportToStorage
+                onExport = exportToStorage,
+                onDelete = { pendingDeleteId = it.downloadId },
+                onDeleteGroup = { pendingGroupKey = it.key }
             )
         } else {
             CenteredListBox(Modifier.fillMaxSize(), minGutter = 16.dp) { gutter ->
@@ -278,6 +375,19 @@ fun DownloadsScreen(
                             Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { LoadingIndicator() }
                         }
                         state.isEmpty -> item(key = "empty") { EmptyDownloads() }
+                if (state.inProgress.isNotEmpty()) {
+                    item(key = "in-progress-title") { SectionTitle(stringResource(R.string.hist_filter_in_progress)) }
+                    itemsIndexed(state.inProgress, key = { _, item -> "active:${item.downloadId}" }) { index, item ->
+                        InProgressRow(
+                            download = item,
+                            index = index,
+                            count = state.inProgress.size,
+                            onPause = { viewModel.pause(item) },
+                            onResume = { viewModel.resume(item) },
+                            onRetry = { viewModel.retry(item) },
+                            onCancel = { pendingDeleteId = item.downloadId },
+                            modifier = Modifier.animateItem()
+                        )
                     }
 
                     if (state.inProgress.isNotEmpty()) {
@@ -290,7 +400,7 @@ fun DownloadsScreen(
                                 onPause = { viewModel.pause(item) },
                                 onResume = { viewModel.resume(item) },
                                 onRetry = { viewModel.retry(item) },
-                                onCancel = { viewModel.remove(item) },
+                                onCancel = { pendingDeleteId = item.downloadId },
                                 modifier = Modifier.animateItem()
                             )
                         }
@@ -306,13 +416,14 @@ fun DownloadsScreen(
                                 onPlay = onDownloadClick,
                                 onSubtitles = { subtitlesForId = it.downloadId },
                                 onExport = exportToStorage,
-                                onDelete = viewModel::remove,
-                                onDeleteAll = { viewModel.removeGroup(group) },
+                                onDelete = { pendingDeleteId = it.downloadId },
+                                onDeleteAll = { pendingGroupKey = group.key },
                                 modifier = Modifier
                                     .animateItem()
                                     .padding(bottom = 12.dp)
                             )
                         }
+                    }
                     }
                 }
             }
@@ -626,7 +737,9 @@ private fun WideDownloads(
     onDownloadClick: (DownloadEntity) -> Unit,
     onDeleteAll: () -> Unit,
     onSubtitles: (DownloadEntity) -> Unit,
-    onExport: (DownloadEntity) -> Unit
+    onExport: (DownloadEntity) -> Unit,
+    onDelete: (DownloadEntity) -> Unit,
+    onDeleteGroup: (DownloadGroup) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -661,7 +774,7 @@ private fun WideDownloads(
                                 onPause = { viewModel.pause(item) },
                                 onResume = { viewModel.resume(item) },
                                 onRetry = { viewModel.retry(item) },
-                                onCancel = { viewModel.remove(item) }
+                                onCancel = { onDelete(item) }
                             )
                         }
                     }
@@ -691,8 +804,8 @@ private fun WideDownloads(
                     onPlay = onDownloadClick,
                     onSubtitles = onSubtitles,
                     onExport = onExport,
-                    onDelete = viewModel::remove,
-                    onDeleteAll = { viewModel.removeGroup(group) },
+                    onDelete = onDelete,
+                    onDeleteAll = { onDeleteGroup(group) },
                     modifier = Modifier.animateItem()
                 )
             }
@@ -929,7 +1042,7 @@ private fun LibraryGroup(
                         IconButton(onClick = { onSubtitles(movie) }) {
                             Icon(Icons.Default.ClosedCaption, contentDescription = stringResource(R.string.cd_subtitles_for, group.title))
                         }
-                        IconButton(onClick = onDeleteAll) {
+                        IconButton(onClick = { onDelete(movie) }) {
                             Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.cd_delete_download))
                         }
                     } else {
@@ -1078,6 +1191,12 @@ private fun EmptyDownloads() {
 
 private fun DownloadEntity.headline(): String =
     if (mediaType == "movie") displayTitle else "$displayTitle · S$season E$episode"
+
+/** Plain words for confirmation dialogs: "Title" or "Title · Season 1, Episode 5". */
+@Composable
+private fun DownloadEntity.describe(): String =
+    if (mediaType == "movie") displayTitle
+    else "$displayTitle · ${stringResource(R.string.season_episode_format, season, episode)}"
 
 @Composable
 private fun statusLine(download: DownloadEntity): String = when (download.status) {

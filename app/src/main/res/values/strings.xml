@@ -945,4 +945,40 @@
     <string name="dl_storage_permission_needed">Allow storage access to save videos to your Downloads folder</string>
     <string name="dl_save_unsupported">This download can’t be saved as a single video file</string>
     <string name="dl_save_protected">This stream is protected, so it can only play inside OpenStream</string>
+
+    <!-- Issue 19: delete confirmation + download source picker -->
+    <string name="dl_delete_confirm">Delete download?</string>
+    <string name="dl_delete_body">Remove %1$s from this device? You’ll need to download it again to watch offline.</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Remove %1$d episode of %2$s from this device? You’ll need to download it again to watch offline.</item>
+        <item quantity="other">Remove %1$d episodes of %2$s from this device? You’ll need to download them again to watch offline.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Delete 1 episode?</item>
+        <item quantity="other">Delete %1$d episodes?</item>
+    </plurals>
+    <string name="dl_cancel_confirm">Cancel download?</string>
+    <string name="dl_cancel_body">Stop downloading %1$s? The partial file will be removed.</string>
+    <string name="action_keep">Keep</string>
+    <string name="season_episode_format">Season %1$d, Episode %2$d</string>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+    <string name="dl_pick_source_title">Choose download source</string>
+    <string name="dl_pick_source_hint">Choose where to download from.</string>
+    <string name="dl_pick_batch_hint">We’ll use the provider and quality you tap for every episode where available.</string>
+    <string name="dl_batch_queued">Downloading %1$d episodes… Find them in Downloads.</string>
+    <string name="dl_season_already">Every episode here is already downloaded or downloading</string>
+    <string name="dl_hold_options">Hold to choose the source</string>
+    <string name="dl_hold_tip">Tip: hold Download to choose the source and quality.</string>
+    <string name="dl_choose_source">Choose download source</string>
+    <string name="dl_no_quality_match">No sources in this quality yet.</string>
+    <string name="action_show_all">Show all</string>
+
+    <!-- Volume Boost & External Media Tools -->
+    <string name="sheet_volume_boost">Volume boost</string>
+    <string name="sheet_volume_boost_desc">Makes quiet videos louder. A limiter keeps loud parts from distorting. Applies to everything you play until you set it back to Normal.</string>
+    <string name="sheet_external_player">External player</string>
+    <string name="action_open_external_player">Open in external player</string>
 </resources>
