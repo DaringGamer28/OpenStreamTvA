@@ -849,4 +849,10 @@
         <item quantity="one">%1$d Folge</item>
         <item quantity="other">%1$d Folgen</item>
     </plurals>
+
+    <string name="sheet_volume_boost">Lautstärke-Boost</string>
+    <string name="sheet_volume_boost_desc">Macht leise Videos lauter. Ein Limiter verhindert, dass laute Stellen verzerren. Gilt für alles, was du abspielst, bis du wieder Normal wählst.</string>
+    <string name="sheet_external_player">Externer Player</string>
+    <string name="action_open_external_player">In externem Player öffnen</string>
+
 </resources>

@@ -852,4 +852,10 @@
         <item quantity="many">%1$d episodi</item>
         <item quantity="other">%1$d episodi</item>
     </plurals>
+
+    <string name="sheet_volume_boost">Aumento volume</string>
+    <string name="sheet_volume_boost_desc">Rende più forti i video troppo bassi. Un limitatore evita che le parti forti distorcano. Vale per tutto ciò che riproduci finché non torni su Normale.</string>
+    <string name="sheet_external_player">Lettore esterno</string>
+    <string name="action_open_external_player">Apri in un lettore esterno</string>
+
 </resources>

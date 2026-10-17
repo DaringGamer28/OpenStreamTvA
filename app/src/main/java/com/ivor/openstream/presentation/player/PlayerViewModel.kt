@@ -1,6 +1,10 @@
 package com.ivor.openstream.presentation.player
 
 import android.content.Context
+import android.net.Uri
+import com.ivor.openstream.data.playback.ExternalPlayer
+import com.ivor.openstream.data.playback.ExternalPlayerRequest
+import com.ivor.openstream.data.playback.ExternalSubtitle
 import com.ivor.openstream.R
 import com.ivor.openstream.data.local.entity.CustomListItemEntity
 import com.ivor.openstream.data.local.dao.CustomListSummary
@@ -138,6 +142,40 @@ class PlayerViewModel @Inject constructor(
 
     fun setSmoothMotionEnabled(enabled: Boolean) = appSettingsStore.setSmoothMotionEnabled(enabled)
     fun setSmoothMotionMaxFps(maxFps: Int) = appSettingsStore.setSmoothMotionMaxFps(maxFps)
+    fun setVolumeBoostPercent(percent: Int) = appSettingsStore.setVolumeBoostPercent(percent)
+
+    /**
+     * Pauses playback and hands the playing stream to another player app (VLC, mpv, MX Player,
+     * Just Player, Nova) through the system chooser. Only for streams: a download lives in this
+     * app's cache, which other apps can't read. Returns false when nothing could be handed over.
+     */
+    fun openInExternalPlayer(context: Context): Boolean {
+        val server = activeServer.value ?: return false
+        val details = _mediaDetails.value
+        val episode = _currentEpisode.value
+        val title = when {
+            details != null && episode != null && _mediaType.value != "movie" ->
+                "${details.name} S${episode.seasonNumber}E${episode.episodeNumber}"
+            else -> details?.name?.takeIf { it.isNotBlank() } ?: server.name
+        }
+        // The stream's own subtitles first; other apps can only open plain files on the web.
+        val candidates = server.subtitles.map { it.url to it.label } +
+            remoteSubtitles.value.map { it.url to (it.display ?: it.language ?: "Subtitle") }
+        val subtitles = candidates
+            .distinctBy { it.first }
+            .filter { (url, _) -> ExternalPlayer.canOpenSubtitle(url) }
+            .map { (url, name) -> ExternalSubtitle(uri = Uri.parse(url), name = name) }
+        val request = ExternalPlayerRequest(
+            mediaUri = Uri.parse(server.url),
+            title = title,
+            positionMs = player.currentPosition.coerceAtLeast(0L),
+            headers = server.headers,
+            subtitles = subtitles
+        )
+        val launched = ExternalPlayer.launch(context, request, context.getString(R.string.sheet_external_player))
+        if (launched) player.pause()
+        return launched
+    }
 
     fun applyRequestHeaders(headers: Map<String, String>) = playbackSession.setRequestHeaders(headers)
 
@@ -194,6 +232,10 @@ class PlayerViewModel @Inject constructor(
 
     /** A stream still playing from the mini player that this screen should continue, not reload. */
     private var adoptedServer: VideoServer? = null
+    private var userChosenServerId: String? = null
+
+    /** Set once the current stream has played; from then on a late answer never swaps servers. */
+    private var playbackStarted = false
 
 
     private val _captionSettings = MutableStateFlow(loadCaptionSettings())
@@ -481,6 +523,8 @@ class PlayerViewModel @Inject constructor(
         val continuing = playbackSession.nowPlaying.value
             ?.takeIf { it.matches(mediaType, tmdbId, seasonNumber, currentEpisodeNumber) }
         adoptedServer = continuing?.server?.takeIf { continuing.downloadId == null }
+        userChosenServerId = adoptedServer?.id
+        playbackStarted = adoptedServer != null
         adoptedServer?.let { _activeServer.value = it }
 
         loadJob = viewModelScope.launch {
@@ -610,15 +654,18 @@ class PlayerViewModel @Inject constructor(
 
     fun selectServer(serverId: String) {
         val server = availableServers().firstOrNull { it.id == serverId } ?: return
+        userChosenServerId = serverId
         switchedFrom = _activeServer.value?.takeIf { it.id != serverId }
         failedServerIds.remove(serverId)
         automaticFailovers = 0
         _activeServer.value = server
         setActiveId(serverId)
+        // Remembered as working only once it plays (onPlaybackReady).
         currentIdentity?.let { streamingRepository.rememberServer(it, server) }
     }
 
     fun onPlaybackReady() {
+        playbackStarted = true
         val identity = currentIdentity ?: return
         val server = _activeServer.value ?: return
         streamingRepository.rememberServer(identity, server)
@@ -686,14 +733,18 @@ class PlayerViewModel @Inject constructor(
                 includeFallbacks,
                 preferLastWorking = !includeFallbacks
             ).collect { progress ->
+                // The server the user picked (or last picked for this episode) wins when it shows
+                // up, but only before playback starts: switching later would restart the video.
+                val rememberedId = currentIdentity?.let { streamingRepository.getRememberedServerId(it) }
+                val targetServerId = (userChosenServerId ?: rememberedId).takeUnless { playbackStarted }
                 // Keep the stream the mini player is already playing at the top of the list.
                 val candidates = adoptedServer?.let { adopted ->
                     listOf(adopted) + progress.servers.filterNot { it.id == adopted.id }
                 } ?: progress.servers
                 val healthyServers = candidates.filterNot { it.id in failedServerIds }
-                val active = _activeServer.value?.takeIf { current ->
-                    healthyServers.any { it.id == current.id }
-                } ?: healthyServers.firstOrNull()
+                val active = healthyServers.firstOrNull { it.id == targetServerId }
+                    ?: _activeServer.value?.takeIf { current -> healthyServers.any { it.id == current.id } }
+                    ?: healthyServers.firstOrNull()
                 _activeServer.value = active
 
                 _serversState.value = when {

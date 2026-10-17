@@ -852,4 +852,10 @@
         <item quantity="many">%1$d episódios</item>
         <item quantity="other">%1$d episódios</item>
     </plurals>
+
+    <string name="sheet_volume_boost">Aumento de volume</string>
+    <string name="sheet_volume_boost_desc">Deixa os vídeos baixos mais altos. Um limitador evita que as partes altas distorçam. Vale para tudo o que você assistir até voltar para Normal.</string>
+    <string name="sheet_external_player">Player externo</string>
+    <string name="action_open_external_player">Abrir em player externo</string>
+
 </resources>

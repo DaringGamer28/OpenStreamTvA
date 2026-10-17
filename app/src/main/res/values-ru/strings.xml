@@ -855,4 +855,10 @@
         <item quantity="many">%1$d серий</item>
         <item quantity="other">%1$d серии</item>
     </plurals>
+
+    <string name="sheet_volume_boost">Усиление громкости</string>
+    <string name="sheet_volume_boost_desc">Делает тихие видео громче. Лимитер не даёт громким местам искажаться. Действует для всего, что вы смотрите, пока не вернёте «Обычная».</string>
+    <string name="sheet_external_player">Внешний плеер</string>
+    <string name="action_open_external_player">Открыть во внешнем плеере</string>
+
 </resources>

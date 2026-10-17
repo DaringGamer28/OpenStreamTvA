@@ -944,4 +944,11 @@
     <string name="dl_choose_source">Choose download source</string>
     <string name="dl_no_quality_match">No sources in this quality yet.</string>
     <string name="action_show_all">Show all</string>
+
+    <!-- Volume Boost & External Media Tools -->
+    <string name="sheet_volume_boost">Volume boost</string>
+    <string name="sheet_volume_boost_desc">Makes quiet videos louder. A limiter keeps loud parts from distorting. Applies to everything you play until you set it back to Normal.</string>
+    <string name="sheet_external_player">External player</string>
+    <string name="action_open_external_player">Open in external player</string>
+
 </resources>

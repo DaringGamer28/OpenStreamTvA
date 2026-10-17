@@ -855,4 +855,10 @@
         <item quantity="many">%1$d серій</item>
         <item quantity="other">%1$d серії</item>
     </plurals>
+
+    <string name="sheet_volume_boost">Підсилення гучності</string>
+    <string name="sheet_volume_boost_desc">Робить тихі відео гучнішими. Лімітер не дає гучним місцям спотворюватися. Діє для всього, що ви дивитеся, доки не повернете «Звичайна».</string>
+    <string name="sheet_external_player">Зовнішній плеєр</string>
+    <string name="action_open_external_player">Відкрити в зовнішньому плеєрі</string>
+
 </resources>

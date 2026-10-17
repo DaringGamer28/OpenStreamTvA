@@ -1,4 +1,9 @@
 package com.ivor.openstream.presentation.player.components
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.scale
 
 import androidx.compose.animation.AnimatedContent
 import com.ivor.openstream.R
@@ -342,9 +347,20 @@ private fun TransportControls(
     ) {
         SeekButton(rewindIcon(seekStepSeconds), stringResource(R.string.player_rewind_seconds, seekStepSeconds), metrics, onRewind)
 
+        val playInteractionSource = remember { MutableInteractionSource() }
+        val isPlayFocused by playInteractionSource.collectIsFocusedAsState()
         FilledIconButton(
             onClick = onPauseToggle,
-            modifier = Modifier.size(metrics.playButton),
+            interactionSource = playInteractionSource,
+            modifier = Modifier
+                .size(metrics.playButton)
+                .then(
+                    if (isPlayFocused) {
+                        Modifier
+                            .scale(1.12f)
+                            .border(3.dp, MaterialTheme.colorScheme.onPrimary, if (isPlaying) ExpressiveShapes.large else ExpressiveShapes.extraLarge)
+                    } else Modifier
+                ),
             shape = if (isPlaying) ExpressiveShapes.large else ExpressiveShapes.extraLarge,
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -400,12 +416,24 @@ private fun SeekButton(
     metrics: ControlMetrics,
     onClick: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     IconButton(
         onClick = onClick,
-        modifier = Modifier.size(metrics.seekButton),
+        interactionSource = interactionSource,
+        modifier = Modifier
+            .size(metrics.seekButton)
+            .then(
+                if (isFocused) {
+                    Modifier
+                        .scale(1.15f)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        .border(2.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                } else Modifier
+            ),
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = Color.Black.copy(alpha = 0.32f),
-            contentColor = Color.White
+            containerColor = if (isFocused) MaterialTheme.colorScheme.primaryContainer else Color.Black.copy(alpha = 0.32f),
+            contentColor = if (isFocused) MaterialTheme.colorScheme.onPrimaryContainer else Color.White
         )
     ) {
         Icon(icon, contentDescription = contentDescription, modifier = Modifier.size(metrics.seekIcon))
@@ -520,14 +548,20 @@ private fun HudChip(
     onClick: () -> Unit,
     icon: ImageVector? = null
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     Surface(
         onClick = onClick,
+        interactionSource = interactionSource,
         shape = ExpressiveShapes.small,
-        color = Color.White.copy(alpha = 0.14f),
-        contentColor = Color.White,
+        color = if (isFocused) MaterialTheme.colorScheme.primaryContainer else Color.White.copy(alpha = 0.14f),
+        contentColor = if (isFocused) MaterialTheme.colorScheme.onPrimaryContainer else Color.White,
+        border = if (isFocused) BorderStroke(2.5.dp, MaterialTheme.colorScheme.primary) else null,
+        shadowElevation = if (isFocused) 8.dp else 0.dp,
         modifier = Modifier
             .padding(end = 8.dp)
             .widthIn(max = 160.dp)
+            .then(if (isFocused) Modifier.scale(1.08f) else Modifier)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -552,8 +586,26 @@ private fun HudIconButton(
     contentDescription: String,
     onClick: () -> Unit
 ) {
-    IconButton(onClick = onClick) {
-        Icon(icon, contentDescription = contentDescription, tint = Color.White)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    IconButton(
+        onClick = onClick,
+        interactionSource = interactionSource,
+        modifier = Modifier
+            .then(
+                if (isFocused) {
+                    Modifier
+                        .scale(1.15f)
+                        .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+                        .border(2.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                } else Modifier
+            )
+    ) {
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            tint = if (isFocused) MaterialTheme.colorScheme.onPrimaryContainer else Color.White
+        )
     }
 }
 

@@ -846,4 +846,10 @@
     <plurals name="dl_batch_count">
         <item quantity="other">%1$d 集</item>
     </plurals>
+
+    <string name="sheet_volume_boost">音量增强</string>
+    <string name="sheet_volume_boost_desc">让声音偏小的视频更响。限幅器可防止大声部分失真。在你改回“正常”之前，对所有播放内容生效。</string>
+    <string name="sheet_external_player">外部播放器</string>
+    <string name="action_open_external_player">在外部播放器中打开</string>
+
 </resources>
