@@ -863,6 +863,11 @@
     <string name="pin_locked_seconds">Too many tries. Try again in %1$d seconds.</string>
     <string name="pin_saved">PIN saved</string>
     <string name="pin_removed">PIN removed</string>
+    <string name="pin_clear">Clear</string>
+    <string name="pin_backspace">Backspace</string>
+    <string name="pin_submit">Submit</string>
+    <string name="li_episode_code">S%1$d E%2$d</string>
+    <string name="li_episode_short">E%1$d</string>
     <string name="pin_on">PIN locked</string>
 
     <!-- Smart downloads -->

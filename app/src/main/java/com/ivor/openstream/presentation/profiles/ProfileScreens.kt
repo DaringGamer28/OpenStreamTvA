@@ -3,7 +3,9 @@ package com.ivor.openstream.presentation.profiles
 import com.ivor.openstream.presentation.components.CenteredListBox
 import com.ivor.openstream.R
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import com.ivor.openstream.presentation.components.ExpressiveMotion
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -208,7 +210,11 @@ fun WhoIsWatchingScreen(
 
 @Composable
 private fun ProfileTile(profile: Profile, selected: Boolean, onClick: () -> Unit) {
-    val scale by animateFloatAsState(if (selected) 1f else 0.92f, tween(300), label = "profileTileScale")
+    val scale by animateFloatAsState(
+        if (selected) 1f else 0.92f,
+        ExpressiveMotion.effectsSpec(),
+        label = "profileTileScale"
+    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -269,9 +275,12 @@ fun ProfileSwitchButton(
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     var holding by remember { mutableStateOf(false) }
+    // The fill tracks the finger, so its duration stays tied to the hold even with
+    // reduced motion; only the release snap goes instant.
+    val reducedHold = ExpressiveMotion.reducedMotion()
     val progress by animateFloatAsState(
         targetValue = if (holding) 1f else 0f,
-        animationSpec = tween(if (holding) KIDS_HOLD_MS.toInt() else 150),
+        animationSpec = if (reducedHold && !holding) snap() else tween(if (holding) KIDS_HOLD_MS.toInt() else 150),
         label = "kidsHold"
     )
     val isKids = profile?.isKids == true
@@ -680,11 +689,11 @@ private fun PinPadDialog(
                     }
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         IconButton(onClick = onClear, enabled = !locked && pin.isNotEmpty(), modifier = Modifier.weight(1f)) {
-                            Icon(Icons.Filled.Clear, contentDescription = null)
+                            Icon(Icons.Filled.Clear, contentDescription = stringResource(R.string.pin_clear))
                         }
                         PinKey(label = "0", enabled = !locked, onClick = { onDigit('0') })
                         IconButton(onClick = onBackspace, enabled = !locked && pin.isNotEmpty(), modifier = Modifier.weight(1f)) {
-                            Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = stringResource(R.string.pin_backspace))
                         }
                     }
                 }
@@ -692,7 +701,7 @@ private fun PinPadDialog(
         },
         confirmButton = {
             IconButton(onClick = onSubmit, enabled = canSubmit) {
-                Icon(Icons.Filled.Check, contentDescription = null)
+                Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.pin_submit))
             }
         }
     )
