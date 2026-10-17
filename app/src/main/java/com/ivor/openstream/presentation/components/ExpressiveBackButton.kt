@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 fun ExpressiveBackButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
+    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer
 ) {
     val interactionSource = remember { MutableInteractionSource() }
