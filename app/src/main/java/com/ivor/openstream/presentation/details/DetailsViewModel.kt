@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivor.openstream.R
+import com.ivor.openstream.data.images.ArtworkPrefetcher
+import com.ivor.openstream.data.images.TmdbImages
 import com.ivor.openstream.data.remote.model.AnimeDetailsDto
 import com.ivor.openstream.data.local.entity.WatchLaterEntity
 import com.ivor.openstream.data.local.entity.ReminderEntity
@@ -18,10 +20,15 @@ import com.ivor.openstream.data.repository.CustomListRepository
 import com.ivor.openstream.data.repository.ReminderRepository
 import com.ivor.openstream.data.repository.TitleRatingRepository
 import com.ivor.openstream.data.settings.AppSettingsStore
+import com.ivor.openstream.domain.model.DownloadStatus
 import com.ivor.openstream.domain.model.DownloadTarget
+import com.ivor.openstream.domain.model.MediaIdentity
+import com.ivor.openstream.domain.model.VideoServer
 import com.ivor.openstream.domain.model.WatchProgress
 import com.ivor.openstream.domain.repository.AnimeRepository
 import com.ivor.openstream.domain.repository.DownloadRepository
+import com.ivor.openstream.domain.repository.SourcePreference
+import com.ivor.openstream.domain.repository.StreamingRepository
 import com.ivor.openstream.domain.repository.WatchLaterRepository
 import com.ivor.openstream.domain.repository.WatchProgressRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +46,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.Job
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -47,11 +55,13 @@ class DetailsViewModel @Inject constructor(
     private val repository: AnimeRepository,
     private val watchLaterRepository: WatchLaterRepository,
     private val downloadRepository: DownloadRepository,
+    private val streamingRepository: StreamingRepository,
     private val watchProgressRepository: WatchProgressRepository,
     private val listRepository: CustomListRepository,
     private val reminderRepository: ReminderRepository,
     private val ratingRepository: TitleRatingRepository,
     private val settings: AppSettingsStore,
+    private val artworkPrefetcher: ArtworkPrefetcher,
     @ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -125,6 +135,11 @@ class DetailsViewModel @Inject constructor(
             repository.getMediaDetails(animeId, mediaType)
                 .onSuccess { details ->
                     _uiState.value = DetailsUiState.Success(details)
+                    // The rails further down the page, in the sizes DetailsScreen draws them.
+                    artworkPrefetcher.prefetch(
+                        details.cast.take(20).map { TmdbImages.url("w185", it.profilePath) } +
+                            details.recommendations?.results.orEmpty().map { TmdbImages.url("w342", it.posterPath) }
+                    )
                     // Add to watch history
                     viewModelScope.launch {
                         repository.addToWatchHistory(details.toAnimeDto(mediaType))
@@ -174,6 +189,7 @@ class DetailsViewModel @Inject constructor(
                 _uiState.value = currentState.copy(isLoadingEpisodes = true)
                 repository.getSeasonDetails(animeId, seasonNumber)
                     .onSuccess { seasonDetails ->
+                        artworkPrefetcher.prefetch(seasonDetails.episodes.map { TmdbImages.url("w300", it.stillPath) })
                         (_uiState.value as? DetailsUiState.Success)?.let { successState ->
                             _uiState.value = successState.copy(
                                 selectedSeasonDetails = seasonDetails,
@@ -376,6 +392,131 @@ class DetailsViewModel @Inject constructor(
             }
         )
     }
+
+    // region Download source picker (long-press a download button)
+
+    private val _downloadOptions = MutableStateFlow<DownloadOptionsUiState?>(null)
+    /** Sources to download from for the episodes [openDownloadOptions] was called with. */
+    val downloadOptions: StateFlow<DownloadOptionsUiState?> = _downloadOptions.asStateFlow()
+    private var downloadOptionsJob: Job? = null
+
+    /**
+     * Opens the source picker for one episode/movie (exact server download) or a whole season
+     * (the tapped row's provider and quality become the preference for every episode).
+     */
+    fun openDownloadOptions(episodes: List<EpisodeDto>) {
+        val details = (_uiState.value as? DetailsUiState.Success)?.details ?: return
+        if (episodes.isEmpty()) return
+        downloadOptionsJob?.cancel()
+        val representative = episodes.first()
+        val label = when {
+            episodes.size > 1 -> null
+            mediaType == "movie" -> null
+            else -> context.getString(
+                R.string.season_episode_format,
+                representative.seasonNumber,
+                representative.episodeNumber
+            )
+        }
+        _downloadOptions.value = DownloadOptionsUiState(
+            title = details.name,
+            episodeLabel = label,
+            episodes = episodes,
+            servers = emptyList(),
+            isLoading = true,
+            isBatch = episodes.size > 1
+        )
+        val identity = MediaIdentity(
+            tmdbId = animeId,
+            tmdbType = mediaType,
+            title = details.name,
+            season = representative.seasonNumber,
+            episode = representative.episodeNumber,
+            year = details.date.take(4).toIntOrNull()
+        )
+        downloadOptionsJob = viewModelScope.launch {
+            streamingRepository.resolveServers(identity).collect { progress ->
+                val current = _downloadOptions.value ?: return@collect
+                _downloadOptions.value = current.copy(
+                    servers = progress.servers.filter { it.isDownloadable },
+                    isLoading = !progress.isComplete,
+                    completedProviders = progress.completedProviders,
+                    totalProviders = progress.totalProviders,
+                    isComplete = progress.isComplete
+                )
+            }
+        }
+    }
+
+    fun closeDownloadOptions() {
+        downloadOptionsJob?.cancel()
+        _downloadOptions.value = null
+    }
+
+    /** Re-runs source resolution for the picker's episodes (empty-state retry). */
+    fun retryDownloadOptions() {
+        val episodes = _downloadOptions.value?.episodes ?: return
+        openDownloadOptions(episodes)
+    }
+
+    /**
+     * Downloads the picker's episode from [server]. For a season, the episode the picker searched
+     * downloads from [server] and the rest go to the app-wide queue preferring its source and
+     * quality, so leaving this screen doesn't stop them.
+     */
+    fun downloadFromServer(server: VideoServer) {
+        val options = _downloadOptions.value ?: return
+        val details = (_uiState.value as? DetailsUiState.Success)?.details ?: return
+        closeDownloadOptions()
+        // A season pick skips what is already downloaded or on its way; a single pick re-downloads.
+        val episodes = if (!options.isBatch) options.episodes else options.episodes.filterNot { episode ->
+            episodeDownloads.value[episode.seasonNumber to episode.episodeNumber]
+                ?.let { it.status == DownloadStatus.COMPLETED || DownloadStatus.isActive(it.status) } == true
+        }
+        val first = episodes.firstOrNull() ?: run {
+            _messages.tryEmit(context.getString(R.string.dl_season_already))
+            return
+        }
+        val rest = episodes.drop(1)
+        if (rest.isNotEmpty()) {
+            downloadRepository.enqueue(
+                rest.map { targetFor(details, it) },
+                SourcePreference(providerId = server.providerId, qualityRank = server.quality.rank)
+            )
+        }
+        viewModelScope.launch {
+            runCatching { downloadRepository.download(server, targetFor(details, first)) }
+                .onSuccess {
+                    _messages.tryEmit(
+                        if (rest.isEmpty()) context.getString(R.string.er_download_started)
+                        else context.getString(R.string.dl_batch_queued, episodes.size)
+                    )
+                }
+                .onFailure { error ->
+                    // That link was refused: let the queue find this one a source too.
+                    if (rest.isNotEmpty()) {
+                        downloadRepository.enqueue(listOf(targetFor(details, first)))
+                        _messages.tryEmit(context.getString(R.string.dl_batch_queued, episodes.size))
+                    } else {
+                        _messages.tryEmit(error.message ?: context.getString(R.string.dl_could_not_start))
+                    }
+                }
+        }
+    }
+
+    private fun targetFor(details: AnimeDetailsDto, episode: EpisodeDto) = DownloadTarget(
+        tmdbId = animeId,
+        mediaType = mediaType,
+        season = episode.seasonNumber,
+        episode = episode.episodeNumber,
+        showTitle = details.name,
+        episodeTitle = episode.name.takeIf { mediaType != "movie" },
+        posterPath = details.posterPath,
+        stillPath = episode.stillPath ?: details.backdropPath,
+        year = details.date.take(4).toIntOrNull()
+    )
+
+    // endregion
 }
 
 private const val DEFAULT_RUNTIME_MIN = 24
@@ -429,3 +570,17 @@ sealed interface DetailsUiState {
     ) : DetailsUiState
     data class Error(val message: String) : DetailsUiState
 }
+
+/** Live source results for the long-press download picker. */
+data class DownloadOptionsUiState(
+    val title: String,
+    val episodeLabel: String?,
+    val episodes: List<EpisodeDto>,
+    val servers: List<VideoServer>,
+    val isLoading: Boolean,
+    val completedProviders: Int = 0,
+    val totalProviders: Int = 0,
+    val isComplete: Boolean = false,
+    val isBatch: Boolean = false
+)
+

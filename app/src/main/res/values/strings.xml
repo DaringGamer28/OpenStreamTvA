@@ -364,9 +364,14 @@
     <string name="st_history_cleared">Watch history and progress cleared</string>
     <string name="st_clear_crash">Clear crash reports</string>
     <string name="st_crash_cleared">Crash reports cleared</string>
-    <string name="st_clear_cache">Clear image cache</string>
-    <string name="st_cache_cleared">Image cache cleared</string>
-    <string name="st_cache_size">%1$s of artwork</string>
+    <string name="st_clear_all_cache">Clear cache</string>
+    <string name="st_cache_used">%1$s used for artwork and title info</string>
+    <string name="st_cache_hint">Artwork and title info kept so pages open faster</string>
+    <string name="st_cache_cleared_all">Cache cleared</string>
+    <string name="st_cache_limit">Cache size</string>
+    <string name="st_cache_limit_hint">Space artwork and title info may use. Takes effect the next time the app starts.</string>
+    <string name="st_preload_artwork">Preload artwork</string>
+    <string name="st_preload_artwork_hint">On Wi-Fi, load posters for rows before you scroll to them</string>
     <string name="st_show_hidden">Show hidden titles</string>
     <string name="st_backup">Back up library</string>
     <string name="st_backup_hint">Every profile\'s Watch Later, lists, history and hidden titles, plus settings</string>
@@ -400,7 +405,6 @@
     <string name="st_allow_install_note">Allow OpenStream to install updates first, then come back and tap Install.</string>
     <string name="st_storage_help">Storage and help</string>
     <string name="st_on_device">On this device</string>
-    <string name="st_posters_cache">Posters and backdrops kept for faster loading</string>
     <string name="st_crash_include">Includes %1$d crash report</string>
     <string name="st_repo_data_note">Repositories ship data, not code</string>
     <string name="st_repo_data_body">An extension only picks and configures a resolver that already ships inside OpenStream, so a third-party list cannot run its own code on your device.</string>
@@ -910,4 +914,71 @@
     <string name="st_smooth_motion_max_fps_hint">Target frame rate cap for motion interpolation.</string>
     <string name="st_smooth_motion_fps_val">Up to %1$d fps</string>
     <string name="st_smooth_motion_unsupported">Not supported on this device\'s GPU (requires OpenGL ES 3.2).</string>
+    <!-- Local media and Storage export -->
+    <string name="st_save_to_storage">Save downloads to storage</string>
+    <string name="st_save_to_storage_summary">Copy each finished download to Downloads/Openstream, where other apps can open it</string>
+    <string name="dl_tab_downloads">Downloads</string>
+    <string name="dl_tab_local_files">Local files</string>
+    <string name="dl_save_to_storage">Save to storage</string>
+    <string name="dl_saved_to_storage">Saved to Downloads/Openstream</string>
+    <string name="dl_save_to_storage_failed">Could not save to storage</string>
+    <string name="local_import_files">Import videos</string>
+    <plurals name="local_import_success">
+        <item quantity="one">%1$d video imported</item>
+        <item quantity="other">%1$d videos imported</item>
+    </plurals>
+    <string name="local_no_files_title">No local videos</string>
+    <string name="local_no_files_body">Import video files from your device to watch them in OpenStream</string>
+    <string name="local_file">Local video</string>
+    <string name="local_delete_confirm_title">Remove local video?</string>
+    <string name="local_delete_confirm_body">It only leaves this list. The file stays on your device.</string>
+    <string name="local_search_hint">Search local videos</string>
+    <string name="sort_name_asc">Name (A–Z)</string>
+    <string name="sort_name_desc">Name (Z–A)</string>
+    <string name="sort_date_added_desc">Recently added</string>
+    <string name="sort_date_added_asc">Oldest added</string>
+    <string name="sort_size_desc">Largest size</string>
+    <string name="sort_size_asc">Smallest size</string>
+    <string name="sort_duration_desc">Longest duration</string>
+    <string name="sort_duration_asc">Shortest duration</string>
+    <string name="dl_save_in_progress">Already saving this one to Downloads</string>
+    <string name="dl_storage_permission_needed">Allow storage access to save videos to your Downloads folder</string>
+    <string name="dl_save_unsupported">This download can’t be saved as a single video file</string>
+    <string name="dl_save_protected">This stream is protected, so it can only play inside OpenStream</string>
+
+    <!-- Issue 19: delete confirmation + download source picker -->
+    <string name="dl_delete_confirm">Delete download?</string>
+    <string name="dl_delete_body">Remove %1$s from this device? You’ll need to download it again to watch offline.</string>
+    <plurals name="dl_delete_group_body">
+        <item quantity="one">Remove %1$d episode of %2$s from this device? You’ll need to download it again to watch offline.</item>
+        <item quantity="other">Remove %1$d episodes of %2$s from this device? You’ll need to download them again to watch offline.</item>
+    </plurals>
+    <plurals name="dl_delete_episodes">
+        <item quantity="one">Delete 1 episode?</item>
+        <item quantity="other">Delete %1$d episodes?</item>
+    </plurals>
+    <string name="dl_cancel_confirm">Cancel download?</string>
+    <string name="dl_cancel_body">Stop downloading %1$s? The partial file will be removed.</string>
+    <string name="action_keep">Keep</string>
+    <string name="season_episode_format">Season %1$d, Episode %2$d</string>
+    <plurals name="dl_batch_count">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+    <string name="dl_pick_source_title">Choose download source</string>
+    <string name="dl_pick_source_hint">Choose where to download from.</string>
+    <string name="dl_pick_batch_hint">We’ll use the provider and quality you tap for every episode where available.</string>
+    <string name="dl_batch_queued">Downloading %1$d episodes… Find them in Downloads.</string>
+    <string name="dl_season_already">Every episode here is already downloaded or downloading</string>
+    <string name="dl_hold_options">Hold to choose the source</string>
+    <string name="dl_hold_tip">Tip: hold Download to choose the source and quality.</string>
+    <string name="dl_choose_source">Choose download source</string>
+    <string name="dl_no_quality_match">No sources in this quality yet.</string>
+    <string name="action_show_all">Show all</string>
+
+    <!-- Volume Boost & External Media Tools -->
+    <string name="sheet_volume_boost">Volume boost</string>
+    <string name="sheet_volume_boost_desc">Makes quiet videos louder. A limiter keeps loud parts from distorting. Applies to everything you play until you set it back to Normal.</string>
+    <string name="sheet_external_player">External player</string>
+    <string name="action_open_external_player">Open in external player</string>
 </resources>
