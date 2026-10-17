@@ -986,4 +986,7 @@
     <string name="sheet_volume_boost_desc">Makes quiet videos louder. A limiter keeps loud parts from distorting. Applies to everything you play until you set it back to Normal.</string>
     <string name="sheet_external_player">External player</string>
     <string name="action_open_external_player">Open in external player</string>
+    <string name="st_stream_cap">Quality limit</string>
+    <string name="st_stream_cap_hint">Highest quality a stream may use. Default 1080p.</string>
+    <string name="st_stream_cap_none">No limit</string>
 </resources>
