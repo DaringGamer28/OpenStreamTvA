@@ -2,7 +2,10 @@ package com.ivor.openstream.presentation.components
 
 import android.provider.Settings
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -47,4 +50,27 @@ object ExpressiveMotion {
     @Composable
     fun <T> fastEffectsSpec(): AnimationSpec<T> =
         if (reducedMotion()) snap() else MaterialTheme.motionScheme.fastEffectsSpec()
+
+    /**
+     * Effect spec as a [FiniteAnimationSpec] for enter/exit transitions, which don't accept
+     * the general [AnimationSpec]. Falls back to the md.sys.motion.spring.default.effects
+     * values (stiffness 1600, damping 1) if the scheme ever returns a non-finite spec.
+     */
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    fun finiteEffectsSpec(): FiniteAnimationSpec<Float> =
+        if (reducedMotion()) snap() else
+            (MaterialTheme.motionScheme.defaultEffectsSpec<Float>() as? FiniteAnimationSpec<Float>
+                ?: spring(stiffness = 1600f, dampingRatio = 1f))
+
+    /**
+     * Spatial spec (slides) as a [FiniteAnimationSpec] for offset transitions. Falls back to
+     * the md.sys.motion.spring.default.spatial values (stiffness 700, damping 0.9).
+     */
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    @Composable
+    fun finiteSpatialSpec(): FiniteAnimationSpec<IntOffset> =
+        if (reducedMotion()) snap() else
+            (MaterialTheme.motionScheme.defaultSpatialSpec<IntOffset>() as? FiniteAnimationSpec<IntOffset>
+                ?: spring(stiffness = 700f, dampingRatio = 0.9f))
 }

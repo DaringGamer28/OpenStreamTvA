@@ -31,7 +31,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -51,12 +51,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ivor.openstream.ui.theme.ExpressiveShapes
+import com.ivor.openstream.presentation.components.ExpressiveMotion
 
 /**
  * The shared surface for player sheets (settings, sources). Inline, it is a bottom sheet below the
@@ -74,12 +74,15 @@ fun PlayerPanelHost(
     content: @Composable ColumnScope.(listModifier: Modifier, onClose: (() -> Unit)?) -> Unit
 ) {
     if (isFullscreen) {
+        // Panel motion follows the theme (instant with reduced motion).
+        val panelFade = ExpressiveMotion.finiteEffectsSpec()
+        val panelSlide = ExpressiveMotion.finiteSpatialSpec()
         Box(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(visible = visible, enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(visible = visible, enter = fadeIn(panelFade), exit = fadeOut(panelFade)) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.45f))
+                        .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.45f))
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -89,12 +92,16 @@ fun PlayerPanelHost(
             }
             AnimatedVisibility(
                 visible = visible,
-                enter = slideInHorizontally { it } + fadeIn(),
-                exit = slideOutHorizontally { it } + fadeOut(),
+                enter = slideInHorizontally(panelSlide) { it } + fadeIn(panelFade),
+                exit = slideOutHorizontally(panelSlide) { it } + fadeOut(panelFade),
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) {
                 Surface(
-                    shape = RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp),
+                    // Inner edge rounds with the extraLarge token; the outer edge stays square.
+                    shape = ExpressiveShapes.extraLarge.copy(
+                        topEnd = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp)
+                    ),
                     color = MaterialTheme.colorScheme.surfaceContainer,
                     modifier = Modifier
                         .fillMaxHeight()

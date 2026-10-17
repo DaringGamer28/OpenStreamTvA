@@ -13,8 +13,6 @@ import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -124,14 +122,11 @@ import com.ivor.openstream.presentation.player.components.SourcesPanel
 import com.ivor.openstream.presentation.player.components.UpNextOverlay
 import com.ivor.openstream.presentation.player.components.PlayerInfoPanel
 import com.ivor.openstream.presentation.components.ExpressiveBackButton
+import com.ivor.openstream.presentation.components.ExpressiveMotion
+import com.ivor.openstream.presentation.components.LocalWindowWidthClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 import androidx.compose.runtime.key
-
-// Expressive Motion Tokens
-private val ExpressiveDefaultSpatial = CubicBezierEasing(0.38f, 1.21f, 0.22f, 1.00f)
-private val ExpressiveDefaultEffects = CubicBezierEasing(0.34f, 0.80f, 0.34f, 1.00f)
-private const val DurationSpatialDefault = 500
-private const val DurationEffectsDefault = 200
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -462,7 +457,8 @@ fun PlayerScreen(
             // Wide windows (tablets in landscape, desktop) use YouTube's desktop layout: the video in
             // the top-left corner with what's playing under it, and the queue in a column on the right.
             // Narrower ones stack everything under a full-width 16:9 video.
-            val wide = maxWidth >= 840.dp
+            // Expanded starts at 840.dp, matching the previous hand-rolled breakpoint exactly.
+            val wide = LocalWindowWidthClass.current == WindowWidthSizeClass.Expanded
             val sideBySide = !isImmersive && wide
             val gutter = if (wide) 16.dp else 0.dp
             val queueWidth = if (wide) (maxWidth * 0.32f).coerceIn(340.dp, 420.dp) else 0.dp
@@ -477,6 +473,8 @@ fun PlayerScreen(
             val videoWidth = if (wide) videoHeight * 16f / 9f else maxWidth
 
             // 1. Video Player Area - Always present, size depends on isFullscreen
+            // Fades follow the theme (instant with reduced motion).
+            val videoFade = ExpressiveMotion.finiteEffectsSpec()
             val videoModifier = if (isImmersive) {
                 Modifier.fillMaxSize()
             } else {
@@ -488,13 +486,13 @@ fun PlayerScreen(
 
             Box(
                 modifier = videoModifier
-                    .background(Color.Black)
+                    .background(MaterialTheme.colorScheme.scrim)
             ) {
             AnimatedContent(
                 targetState = videoUrl != null,
                 transitionSpec = {
-                    fadeIn(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects)) togetherWith 
-                    fadeOut(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects))
+                    fadeIn(videoFade) togetherWith
+                    fadeOut(videoFade)
                 },
                 label = "PlayerState"
             ) { hasUrl ->
@@ -625,10 +623,12 @@ fun PlayerScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Black)
+                                    .background(MaterialTheme.colorScheme.scrim)
                             ) {
                                 // Blurred Backdrop
                                 val backdropPath = mediaDetails?.backdropPath
+                                // Hoisted: draw blocks aren't composable and can't read the theme.
+                                val backdropScrim = MaterialTheme.colorScheme.scrim
                                 if (backdropPath != null) {
                                     AsyncImage(
                                         model = "https://image.tmdb.org/t/p/w1280$backdropPath",
@@ -641,8 +641,8 @@ fun PlayerScreen(
                                                 drawRect(
                                                     brush = Brush.verticalGradient(
                                                         colors = listOf(
-                                                            Color.Black.copy(alpha = 0.5f),
-                                                            Color.Black.copy(alpha = 0.8f)
+                                                            backdropScrim.copy(alpha = 0.5f),
+                                                            backdropScrim.copy(alpha = 0.8f)
                                                         )
                                                     ),
                                                     blendMode = BlendMode.SrcOver
@@ -670,7 +670,7 @@ fun PlayerScreen(
                                     }
                                     Text(
                                         text = playerTitle,
-                                        color = Color.White,
+                                        color = MaterialTheme.colorScheme.inverseOnSurface,
                                         style = if (isFullscreen) {
                                             MaterialTheme.typography.headlineSmall
                                         } else {
@@ -684,7 +684,7 @@ fun PlayerScreen(
                                     if (playerSubtitle.isNotEmpty()) {
                                         Text(
                                             text = playerSubtitle,
-                                            color = Color.White.copy(alpha = 0.7f),
+                                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
                                             style = if (isFullscreen) {
                                                 MaterialTheme.typography.titleSmall
                                             } else {
@@ -712,7 +712,7 @@ fun PlayerScreen(
                                                 stringResource(R.string.player_preparing_sources)
                                             }
                                         },
-                                        color = Color.White.copy(alpha = 0.6f),
+                                        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.6f),
                                         style = MaterialTheme.typography.labelMedium,
                                         textAlign = TextAlign.Center
                                     )
@@ -740,8 +740,8 @@ fun PlayerScreen(
                                 ) {
                                     ExpressiveBackButton(
                                         onClick = onBackClick,
-                                        containerColor = Color.White.copy(alpha = 0.1f),
-                                        contentColor = Color.White
+                                        containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.1f),
+                                        contentColor = MaterialTheme.colorScheme.inverseOnSurface
                                     )
                                 }
                             }
@@ -778,13 +778,15 @@ fun PlayerScreen(
             // Under the video: what's playing, what's next, and the rest of the season. Wide windows
             // split it: the "about" part under the video, the queue in the right-hand column.
             val infoPanel: @Composable (Modifier, PlayerInfoSections) -> Unit = { panelModifier, sections ->
+                val infoFade = ExpressiveMotion.finiteEffectsSpec()
+                val infoSlide = ExpressiveMotion.finiteSpatialSpec()
                 AnimatedVisibility(
                     visible = !isImmersive,
                     modifier = panelModifier,
-                    enter = fadeIn(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects)) +
-                        slideInVertically(tween(DurationSpatialDefault, easing = ExpressiveDefaultSpatial)) { it / 4 },
-                    exit = fadeOut(tween(DurationEffectsDefault, easing = ExpressiveDefaultEffects)) +
-                        slideOutVertically(tween(DurationSpatialDefault, easing = ExpressiveDefaultSpatial)) { it / 4 }
+                    enter = fadeIn(infoFade) +
+                        slideInVertically(infoSlide) { it / 4 },
+                    exit = fadeOut(infoFade) +
+                        slideOutVertically(infoSlide) { it / 4 }
                 ) {
                     PlayerInfoPanel(
                         mediaType = mediaType,
