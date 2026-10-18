@@ -24,6 +24,7 @@ import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.LoadEventInfo
@@ -41,6 +42,9 @@ import com.ivor.openstream.data.cast.CastMediaItemConverter
 import com.ivor.openstream.data.cast.CastMediaProxy
 import com.ivor.openstream.data.playback.DeviceDecoders
 import com.ivor.openstream.data.playback.StreamDataGuard
+import com.ivor.openstream.data.playback.VideoShaderControl
+import com.ivor.openstream.data.playback.VideoShaderEffect
+import com.ivor.openstream.data.settings.VideoShaderCustomization
 import com.ivor.openstream.data.local.entity.LOCAL_MEDIA_TYPE
 import com.ivor.openstream.data.playback.VolumeBooster
 import com.ivor.openstream.data.remote.model.SubtitleDto
@@ -182,6 +186,22 @@ class PlaybackSession @Inject constructor(
     var smoothMotion: SmoothMotion? = null
         private set
 
+    /**
+     * The live look on the video picture. The stage in the effect graph reads it once per frame, so
+     * a change is on screen immediately; the panel's sliders write here while a finger is down and
+     * only the release is stored.
+     */
+    val videoShaderControl = VideoShaderControl().apply {
+        settings = appSettingsStore.current.videoShaders
+    }
+
+    private val _videoShaders = MutableStateFlow(appSettingsStore.current.videoShaders)
+
+    /** What the shader stage is drawing from: the switch, the preset and the picture sliders. */
+    val videoShaders: StateFlow<VideoShaderCustomization> = _videoShaders.asStateFlow()
+
+    private var shaderRedrawJob: Job? = null
+
     private val volumeBooster = VolumeBooster()
 
     init {
@@ -194,6 +214,7 @@ class PlaybackSession @Inject constructor(
                 smoothMotion?.enabled = settings.smoothMotionEnabled
                 smoothMotion?.maxFps = settings.smoothMotionMaxFps
                 volumeBooster.setBoostPercentage(settings.volumeBoostPercent)
+                applyVideoShaders(settings.videoShaders)
             }
         }
         // Saves progress every few seconds, and remembers where the TV is (its state is gone once
@@ -215,10 +236,55 @@ class PlaybackSession @Inject constructor(
         }
     }
 
-    /** Created on first use, on the main thread, by whichever surface shows video first. */
-    val player: ExoPlayer by lazy { buildPlayer().also { localPlayerCreated = true } }
+    /**
+     * Puts [settings] on the picture without storing them: a slider mid-drag, which is judged by
+     * watching and stored once, when the finger lifts.
+     */
+    fun previewVideoShaders(settings: VideoShaderCustomization) = applyVideoShaders(settings)
 
-    // region Media session (notification, lock screen, headset buttons)
+    fun setVideoShaders(settings: VideoShaderCustomization) {
+        applyVideoShaders(settings)
+        appSettingsStore.setVideoShaders(settings)
+    }
+
+    private fun applyVideoShaders(settings: VideoShaderCustomization) {
+        if (settings == _videoShaders.value) return
+        _videoShaders.value = settings
+        videoShaderControl.settings = settings
+        // A paused player draws nothing new, so a look changed while it is paused would wait for Play.
+        redrawPausedFrame()
+    }
+
+    /**
+     * Asks a paused player for a fresh frame through the effect graph.
+     *
+     * With a graph installed Media3 stops drawing once playback pauses, and a new look is not one of
+     * the events that makes it draw again: without this, choosing a preset over a paused video shows
+     * nothing until Play, and entering fullscreen while paused leaves the frame at the size the last
+     * surface had. Media3's own redraw needs a replayable frame cache that playback never builds
+     * [verified September 2026 against the 1.11.0 bytecode], so an exact seek to where playback
+     * already is renders the frame afresh without moving it. Settled first, because a surface
+     * hand-off reports sizes in a burst.
+     */
+    private fun redrawPausedFrame() {
+        if (!localPlayerCreated) return
+        shaderRedrawJob?.cancel()
+        shaderRedrawJob = scope.launch {
+            delay(GRAPH_REDRAW_SETTLE_MS)
+            val current = player
+            if (current.isPlaying || current.playbackState != Player.STATE_READY ||
+                current.isCurrentMediaItemLive
+            ) {
+                return@launch
+            }
+            current.setSeekParameters(SeekParameters.EXACT)
+            current.seekTo(current.currentPosition)
+            current.setSeekParameters(SeekParameters.DEFAULT)
+        }
+    }
+
+    /** Created on first use, on the main thread, by whichever surface shows video first. */
+    val player: ExoPlayer by lazy { buildPlayer().also { localPlayerCreated = true } }    // region Media session (notification, lock screen, headset buttons)
 
     private var mediaSessionInstance: MediaSession? = null
 
@@ -894,7 +960,13 @@ class PlaybackSession @Inject constructor(
             SmoothMotionConfig(
                 enabled = appSettingsStore.current.smoothMotionEnabled,
                 maxFps = appSettingsStore.current.smoothMotionMaxFps
-            )
+            ),
+            // The shader stage runs before interpolation, so a look is drawn from the frames the
+            // source sent and Smooth motion interpolates the result. It stays in the graph when the
+            // switch is off and copies each frame, as Smooth motion itself does, which is what lets
+            // the switch in Settings and the panel act on a player that is already open - this
+            // app's player is built once and kept for the life of the process.
+            otherEffects = listOf(VideoShaderEffect(videoShaderControl))
         )
         volumeBooster.setBoostPercentage(appSettingsStore.current.volumeBoostPercent)
         volumeBooster.attachSession(basePlayer.audioSessionId)
@@ -1033,6 +1105,8 @@ class PlaybackSession @Inject constructor(
         const val TAG = "PlaybackSession"
         const val PROGRESS_TICK_MS = 1_000L
         const val PROGRESS_SAVE_INTERVAL_MS = 10_000L
+        /** How long a surface change is given to settle before a paused frame is asked for again. */
+        const val GRAPH_REDRAW_SETTLE_MS = 250L
         const val VOLUME_STEP = 0.05
         /** Receivers load every track with the media; keep the list short. */
         const val MAX_CAST_SUBTITLES = 12

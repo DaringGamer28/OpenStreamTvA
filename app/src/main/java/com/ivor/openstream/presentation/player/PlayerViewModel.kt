@@ -64,6 +64,7 @@ import com.ivor.openstream.data.settings.AppSettings
 import com.ivor.openstream.domain.model.SkipSegment
 import com.ivor.openstream.data.repository.SkipTimesRepository
 import com.ivor.openstream.data.settings.AppSettingsStore
+import com.ivor.openstream.data.settings.VideoShaderCustomization
 import com.ivor.openstream.data.subtitles.SavedSubtitleRepository
 import com.ivor.openstream.data.subtitles.SubtitleFetcher
 import com.ivor.openstream.presentation.player.session.SleepTimer
@@ -148,6 +149,16 @@ class PlayerViewModel @Inject constructor(
     fun setSmoothMotionEnabled(enabled: Boolean) = appSettingsStore.setSmoothMotionEnabled(enabled)
     fun setSmoothMotionMaxFps(maxFps: Int) = appSettingsStore.setSmoothMotionMaxFps(maxFps)
     fun setVolumeBoostPercent(percent: Int) = appSettingsStore.setVolumeBoostPercent(percent)
+
+    /** The look the video picture is drawn in, as the player's effect graph is reading it. */
+    val videoShaders: StateFlow<VideoShaderCustomization> = playbackSession.videoShaders
+
+    /** A slider mid-drag: on the picture at once, stored when the finger lifts. */
+    fun previewVideoShaders(settings: VideoShaderCustomization) =
+        playbackSession.previewVideoShaders(settings)
+
+    fun setVideoShaders(settings: VideoShaderCustomization) =
+        playbackSession.setVideoShaders(settings)
 
     /**
      * Pauses playback and hands the playing stream to another player app (VLC, mpv, MX Player,

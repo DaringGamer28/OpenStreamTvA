@@ -40,6 +40,7 @@ import com.ivor.openstream.presentation.watch_history.WatchHistoryScreen
 import com.ivor.openstream.presentation.watch_later.WatchLaterScreen
 import com.ivor.openstream.presentation.update.UpdateScreen
 import com.ivor.openstream.presentation.settings.SettingsScreen
+import com.ivor.openstream.presentation.settings.VideoShaderSettingsScreen
 import com.ivor.openstream.presentation.marketplace.MarketplaceScreen
 import com.ivor.openstream.presentation.player.session.MiniPlayer
 import com.ivor.openstream.presentation.lists.CustomListScreen
@@ -116,6 +117,7 @@ sealed class Screen(
     data object History : Screen("history", "History", R.string.nav_history, Icons.Default.History)
     data object Update : Screen("update")
     data object Settings : Screen("settings")
+    data object VideoShaders : Screen("video_shaders")
     data object Marketplace : Screen("marketplace")
     data object Person : Screen("person/{personId}") {
         fun createRoute(personId: Int) = "person/$personId"
@@ -382,7 +384,14 @@ fun AppNavigation(
                     SettingsScreen(
                         onBackClick = { navController.popBackStack() },
                         onOpenMarketplace = { navController.navigate(Screen.Marketplace.route) },
-                        onOpenProfiles = { navController.navigate(Screen.Profiles.route) }
+                        onOpenProfiles = { navController.navigate(Screen.Profiles.route) },
+                        onOpenVideoShaders = { navController.navigate(Screen.VideoShaders.route) }
+                    )
+                }
+
+                composable(Screen.VideoShaders.route) {
+                    VideoShaderSettingsScreen(
+                        onBackClick = { navController.popBackStack() }
                     )
                 }
 
