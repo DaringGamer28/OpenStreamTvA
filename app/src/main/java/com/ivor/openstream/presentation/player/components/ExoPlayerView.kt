@@ -45,6 +45,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.graphics.Shadow
@@ -341,14 +344,19 @@ fun ExoPlayerView(
     var scaleFeedbackSequence by remember { mutableIntStateOf(0) }
     var showScaleFeedback by remember { mutableStateOf(false) }
 
-    // Hold to speed up: the rate, and how far the held finger has slid from where it started.
+    // Hold to speed up: the rate, how far the held finger has slid, and the moment between the
+    // long press firing and the hold having lasted long enough to mean it.
     var boostSpeed by remember { mutableFloatStateOf(BOOST_SPEED_MIN) }
-    var boostTravel by remember { mutableFloatStateOf(0f) }
-    var boostSpeedStart by remember { mutableFloatStateOf(BOOST_SPEED_MIN) }
+    var boostResidue by remember { mutableFloatStateOf(0f) }
+    var boostPending by remember { mutableStateOf(false) }
+    // The platform's long press, which is only the trigger: the boost's own window is measured
+    // from the same press, so the wait after it is what is left of that window.
+    val longPressTimeoutMs = LocalViewConfiguration.current.longPressTimeoutMillis
     // The lock's confirmation, and the hold that opens it again.
     var showLockedPill by remember { mutableStateOf(false) }
     var lockedPillSequence by remember { mutableIntStateOf(0) }
-    // Zoom to fill, from the panel's switch. A new video starts letterboxed, as it always did.
+    // Zoom to fill, from the panel's switch. A new video starts letterboxed: how much of a picture a
+    // window can afford to crop is this picture's answer, not a setting that outlives it.
     var zoomToFill by rememberSaveable(videoUrl) { mutableStateOf(false) }
     // The video's shape and the surface's, which together say what a fill would crop away.
     var videoAspect by remember { mutableStateOf<Float?>(null) }
@@ -356,12 +364,14 @@ fun ExoPlayerView(
     var surfaceHeight by remember { mutableIntStateOf(0) }
     val haptics = LocalHapticFeedback.current
 
-    fun changeVideoScale(scale: VideoScale) {
+    fun changeVideoScale(scale: VideoScale, announce: Boolean = true) {
         videoScale = scale
         // The panel's switch and the picture are two views of one choice, so they move together.
         zoomToFill = scale == VideoScale.ZOOM
-        showScaleFeedback = true
-        scaleFeedbackSequence++
+        if (announce) {
+            showScaleFeedback = true
+            scaleFeedbackSequence++
+        }
     }
 
     /** Whether a fill would crop no more than [MAX_ACCEPTABLE_CROP] of the picture. */
@@ -372,17 +382,22 @@ fun ExoPlayerView(
     }
 
     // The switch, the HUD's cycle and the pinch are three ways to one choice; this is what keeps
-    // the picture in step with the switch, and a fill is refused when the source cannot spare it.
+    // the picture in step with the switch. A fill the source cannot spare is refused, and one that
+    // stops being affordable - a rotation, a window that narrows, a shape that arrives late - is
+    // given back rather than left sitting there cropped past the cap.
     LaunchedEffect(zoomToFill, videoAspect, surfaceWidth, surfaceHeight) {
         if (zoomToFill) {
-            if (videoScale != VideoScale.ZOOM) {
-                when {
-                    // Nothing has said what shape the picture is yet: wait for it rather than
-                    // refusing a fill that may be perfectly fine.
-                    videoAspect == null || surfaceWidth <= 0 -> Unit
-                    canZoomToFill() -> changeVideoScale(VideoScale.ZOOM)
-                    else -> zoomToFill = false
+            when {
+                // Nothing has said what shape the picture is yet: wait for it rather than
+                // refusing a fill that may be perfectly fine.
+                videoAspect == null || surfaceWidth <= 0 -> Unit
+                canZoomToFill() -> {
+                    if (videoScale != VideoScale.ZOOM) changeVideoScale(VideoScale.ZOOM)
                 }
+                // The picture comes back out with the switch when a fill can no longer be
+                // afforded. Said quietly: nothing the viewer did brought this on.
+                videoScale == VideoScale.ZOOM -> changeVideoScale(VideoScale.FIT, announce = false)
+                else -> zoomToFill = false
             }
         } else if (videoScale == VideoScale.ZOOM) {
             changeVideoScale(VideoScale.FIT)
@@ -430,6 +445,32 @@ fun ExoPlayerView(
         currentTime = exoPlayer.currentPosition
     }
 
+    /** Starts the hold's rate change, from wherever the held finger's slide has reached. */
+    fun startSpeedBoost() {
+        boostPending = false
+        // Starts at the rate the setting asks for; sliding the held finger still reaches every
+        // other rate, so that is where it begins, not a cap.
+        boostSpeed = currentGestures.holdSpeed.coerceIn(BOOST_SPEED_MIN, BOOST_SPEED_MAX)
+        boostResidue = 0f
+        isSpeedBoosted = true
+        areControlsVisible = false
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        exoPlayer.setPlaybackParameters(
+            exoPlayer.playbackParameters.withSpeed(boostSpeed)
+        )
+    }
+
+    // The rest of the hold's own window, counted from the long press the platform has already waited
+    // out. A release before it is up clears the flag and cancels this delay, so a tap that lingered
+    // a moment past the long press never changes the rate.
+    LaunchedEffect(boostPending, longPressTimeoutMs) {
+        if (boostPending) {
+            delay((SPEED_BOOST_HOLD_MS - longPressTimeoutMs).coerceAtLeast(0L))
+            startSpeedBoost()
+        }
+    }
+
+    /** Offers the unlock badge. The badge is what takes the offer away again if it goes unused. */
     fun revealUnlockButton() {
         showUnlockButton = true
         unlockButtonSequence++
@@ -516,13 +557,6 @@ fun ExoPlayerView(
 
     fun handleDpadKey(event: KeyEvent): Boolean = dpadAction(event)
 
-    LaunchedEffect(unlockButtonSequence) {
-        if (unlockButtonSequence > 0) {
-            delay(2500)
-            showUnlockButton = false
-        }
-    }
-
     // While locked, back does nothing except show the unlock button.
     BackHandler(enabled = isLocked) { revealUnlockButton() }
     // Android TV: back hides the chrome first, then leaves the player.
@@ -539,8 +573,9 @@ fun ExoPlayerView(
     }
 
     // The video's shape, which zoom-to-fill's crop judgement needs. With the effect graph installed
-    // the player itself reports no size, so Smooth motion's own reading is the primary source and
-    // the player's size is the fallback for when Smooth motion is not installed at all.
+    // the player itself reports no size, so Smooth motion's own reading is the source there and the
+    // player's size is the fallback for when Smooth motion is not installed at all.
+    val latestSmoothMotion by rememberUpdatedState(smoothMotion)
     LaunchedEffect(smoothMotion) {
         smoothMotion?.videoAspectRatio?.collect { videoAspect = it }
     }
@@ -548,6 +583,8 @@ fun ExoPlayerView(
     // Reset subtitle state when switching videos
     LaunchedEffect(videoUrl) {
         activeVideoHeight = 0
+        // The shape is this video's business too, and nothing has said what it is yet.
+        videoAspect = null
         subtitleChoiceMade = false
         selectedSubtitle = null
         manualCues = emptyList()
@@ -1005,7 +1042,9 @@ fun ExoPlayerView(
 
             override fun onVideoSizeChanged(videoSize: VideoSize) {
                 activeVideoHeight = videoSize.height
-                if (videoSize.height > 0) {
+                // The stand-in for when nothing has installed a different pipeline: with the effect
+                // graph in place Smooth motion's own reading is what carries the shape.
+                if (videoSize.height > 0 && latestSmoothMotion == null) {
                     videoAspect = videoSize.width * videoSize.pixelWidthHeightRatio / videoSize.height
                 }
             }
@@ -1075,9 +1114,12 @@ fun ExoPlayerView(
                 detectTapGestures(
                     onPress = {
                         tryAwaitRelease()
+                        // The press has gone, so whatever it was waiting to start is not
+                        // starting now.
+                        boostPending = false
                         if (isSpeedBoosted) {
                             isSpeedBoosted = false
-                            boostTravel = 0f
+                            boostResidue = 0f
                             exoPlayer.setPlaybackParameters(exoPlayer.playbackParameters.withSpeed(playbackSpeed))
                         }
                     },
@@ -1103,17 +1145,12 @@ fun ExoPlayerView(
                         }
                     },
                     onLongPress = {
+                        // The long press is only the trigger. The rate changes once the hold has
+                        // lasted the boost's own window, which is longer than the platform's long
+                        // press, so a tap that lingered a moment past it changes nothing. A release
+                        // in between calls the whole thing off from onPress above.
                         if (!isLocked && currentGestures.holdToSpeedUp && exoPlayer.isPlaying) {
-                            // Starts at the rate the setting asks for; sliding the held finger
-                            // still reaches every other rate, so that is where it begins, not a cap.
-                            boostSpeed = currentGestures.holdSpeed
-                            boostTravel = 0f
-                            isSpeedBoosted = true
-                            areControlsVisible = false
-                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                            exoPlayer.setPlaybackParameters(
-                                exoPlayer.playbackParameters.withSpeed(boostSpeed)
-                            )
+                            boostPending = true
                         }
                     }
                 )
@@ -1201,10 +1238,12 @@ fun ExoPlayerView(
                     onDragStart = {
                         if (isLocked) {
                             revealUnlockButton()
-                        } else if (isSpeedBoosted) {
-                            // A held finger slides the rate, so this drag is not a scrub.
-                            boostTravel = 0f
-                            boostSpeedStart = boostSpeed
+                        } else if (isSpeedBoosted || boostPending) {
+                            // A held finger slides the rate, so this drag is not a scrub. A slide
+                            // that sets off inside the hold's own window has waited long enough:
+                            // it starts the boost here rather than a step later.
+                            if (boostPending) startSpeedBoost()
+                            boostResidue = 0f
                         } else if (exoPlayer.duration > 0) {
                             scrubStartMs = exoPlayer.currentPosition
                             scrubTargetMs = scrubStartMs
@@ -1226,26 +1265,44 @@ fun ExoPlayerView(
                     onHorizontalDrag = { change, dragAmount ->
                         change.consume()
                         if (isSpeedBoosted) {
-                            // One step per BOOST_SPEED_STEP_TRAVEL of travel, from where the slide
-                            // started, so the rate follows the finger and comes back with it.
-                            boostTravel += dragAmount
-                            val steps = (boostTravel / BOOST_SPEED_STEP_TRAVEL.toPx()).roundToInt()
-                            val next = (boostSpeedStart + steps * BOOST_SPEED_STEP)
-                                .coerceIn(BOOST_SPEED_MIN, BOOST_SPEED_MAX)
-                            if (next != boostSpeed) {
-                                boostSpeed = next
-                                exoPlayer.setPlaybackParameters(
-                                    exoPlayer.playbackParameters.withSpeed(next)
-                                )
-                                // An end reads as a stop: the rate has stopped following the
-                                // finger, which is worth a different tap than a step is.
-                                haptics.performHapticFeedback(
-                                    if (next <= BOOST_SPEED_MIN || next >= BOOST_SPEED_MAX) {
-                                        HapticFeedbackType.LongPress
-                                    } else {
-                                        HapticFeedbackType.SegmentTick
-                                    }
-                                )
+                            // One step per BOOST_SPEED_STEP_TRAVEL of travel, banked and spent a
+                            // step at a time so a wobble cannot throw the rate and the rate comes
+                            // back with the finger.
+                            boostResidue += dragAmount
+                            val stepTravel = BOOST_SPEED_STEP_TRAVEL.toPx()
+                            var steps = 0
+                            while (boostResidue >= stepTravel) {
+                                steps++
+                                boostResidue -= stepTravel
+                            }
+                            while (boostResidue <= -stepTravel) {
+                                steps--
+                                boostResidue += stepTravel
+                            }
+                            if (steps != 0) {
+                                val stepped = (boostSpeed / BOOST_SPEED_STEP).roundToInt() + steps
+                                val next = (stepped * BOOST_SPEED_STEP)
+                                    .coerceIn(BOOST_SPEED_MIN, BOOST_SPEED_MAX)
+                                // At either end the push outward is dropped, so turning back
+                                // answers at once instead of unwinding an overflow nobody can see.
+                                if (next <= BOOST_SPEED_MIN || next >= BOOST_SPEED_MAX) {
+                                    boostResidue = 0f
+                                }
+                                if (next != boostSpeed) {
+                                    boostSpeed = next
+                                    exoPlayer.setPlaybackParameters(
+                                        exoPlayer.playbackParameters.withSpeed(next)
+                                    )
+                                    // An end reads as a stop: the rate has stopped following the
+                                    // finger, which is worth a different tap than a step is.
+                                    haptics.performHapticFeedback(
+                                        if (next <= BOOST_SPEED_MIN || next >= BOOST_SPEED_MAX) {
+                                            HapticFeedbackType.LongPress
+                                        } else {
+                                            HapticFeedbackType.SegmentTick
+                                        }
+                                    )
+                                }
                             }
                         } else if (isScrubbing) {
                             val duration = exoPlayer.duration.coerceAtLeast(0L)
@@ -1562,7 +1619,15 @@ fun ExoPlayerView(
             seekStepSeconds = seekStepSeconds,
             videoScale = videoScale,
             onVideoScaleClick = {
-                changeVideoScale(videoScale.next())
+                // The cycle has a stop the source cannot take: a fill is only entered when the
+                // picture can spare it, or when nothing has said what shape it is yet - the effect
+                // above decides that case, and gives the fill back if the answer is no.
+                val next = videoScale.next()
+                if (next != VideoScale.ZOOM || videoAspect == null || canZoomToFill()) {
+                    changeVideoScale(next)
+                } else {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                }
                 areControlsVisible = true
             },
             onCastClick = onCastClick,
@@ -1652,13 +1717,17 @@ fun ExoPlayerView(
                 .align(Alignment.TopCenter)
                 .padding(top = 24.dp)
         ) {
-            ScreenUnlockBadge(
-                onUnlock = {
-                    isLocked = false
-                    showUnlockButton = false
-                    areControlsVisible = true
-                }
-            )
+            // Keyed on the reveal: a fresh reveal is a fresh offer, with its own timer.
+            key(unlockButtonSequence) {
+                ScreenUnlockBadge(
+                    onUnlock = {
+                        isLocked = false
+                        showUnlockButton = false
+                        areControlsVisible = true
+                    },
+                    onExpire = { showUnlockButton = false }
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -1939,11 +2008,18 @@ private const val BOOST_SPEED_MAX = 4f
 private const val BOOST_SPEED_STEP = 0.1f
 /** How far a held finger slides for one rate step. */
 private val BOOST_SPEED_STEP_TRAVEL = 20.dp
+/**
+ * How long a press is held before the rate changes. Longer than the platform's long press, which
+ * only triggers it: a tap that lingers a moment too long is not an instruction to hurry.
+ */
+private const val SPEED_BOOST_HOLD_MS = 650L
 
 /** How long the unlock badge is held to open the lock. A tap is what a pocket does. */
 private const val SCREEN_LOCK_HOLD_MS = 1_500L
 /** How long "Screen locked" stays up. */
 private const val SCREEN_LOCK_PILL_MS = 2_000L
+/** How long the unlock badge waits, untouched, before it takes itself away. */
+private const val UNLOCK_BUTTON_VISIBLE_MS = 2_500L
 /** How long the resumed-from chip stays up before it takes itself away. */
 private const val RESUME_CHIP_VISIBLE_MS = 8_000L
 
@@ -1988,7 +2064,11 @@ private fun formatBoostRate(rate: Float): String {
  * instead, since a press-and-hold is not a gesture a screen reader performs.
  */
 @Composable
-private fun ScreenUnlockBadge(onUnlock: () -> Unit, modifier: Modifier = Modifier) {
+private fun ScreenUnlockBadge(
+    onUnlock: () -> Unit,
+    onExpire: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var holding by remember { mutableStateOf(false) }
     val haptics = LocalHapticFeedback.current
     val ring by animateFloatAsState(
@@ -2003,13 +2083,18 @@ private fun ScreenUnlockBadge(onUnlock: () -> Unit, modifier: Modifier = Modifie
         label = "unlockHold"
     )
 
-    // Keyed on the hold alone: releasing re-runs the effect and cancels the delay, so a hold let go
-    // a frame early unlocks nothing.
+    // One clock, two jobs. A hold that is running owns it: a hold let go a frame early unlocks
+    // nothing, and the offer is never taken away mid-ring, which is what would make the lock feel
+    // stuck. The rest of the time it is the offer's own patience, and a release starts that wait
+    // over. The caller keys this composable on the reveal, so a fresh reveal starts it again.
     LaunchedEffect(holding) {
         if (holding) {
             delay(SCREEN_LOCK_HOLD_MS)
             haptics.performHapticFeedback(HapticFeedbackType.Confirm)
             onUnlock()
+        } else {
+            delay(UNLOCK_BUTTON_VISIBLE_MS)
+            onExpire()
         }
     }
 
@@ -2020,6 +2105,9 @@ private fun ScreenUnlockBadge(onUnlock: () -> Unit, modifier: Modifier = Modifie
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = contentColor,
         modifier = modifier.semantics(mergeDescendants = true) {
+            // A hold is not something a screen reader performs, so the label says what the control
+            // does and the action does it.
+            contentDescription = unlockLabel
             customActions = listOf(
                 CustomAccessibilityAction(unlockLabel) {
                     onUnlock()
@@ -2034,8 +2122,13 @@ private fun ScreenUnlockBadge(onUnlock: () -> Unit, modifier: Modifier = Modifie
                     detectTapGestures(
                         onPress = {
                             holding = true
-                            tryAwaitRelease()
-                            holding = false
+                            try {
+                                tryAwaitRelease()
+                            } finally {
+                                // A cancelled press is a press that has gone: run this on the
+                                // way out either way.
+                                holding = false
+                            }
                         }
                     )
                 }

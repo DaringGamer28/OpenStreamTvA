@@ -277,14 +277,17 @@ class PlaybackSession @Inject constructor(
             ) {
                 return@launch
             }
+            val previousSeekParameters = current.seekParameters
             current.setSeekParameters(SeekParameters.EXACT)
             current.seekTo(current.currentPosition)
-            current.setSeekParameters(SeekParameters.DEFAULT)
+            current.setSeekParameters(previousSeekParameters)
         }
     }
 
     /** Created on first use, on the main thread, by whichever surface shows video first. */
-    val player: ExoPlayer by lazy { buildPlayer().also { localPlayerCreated = true } }    // region Media session (notification, lock screen, headset buttons)
+    // region Media session (notification, lock screen, headset buttons)
+
+    val player: ExoPlayer by lazy { buildPlayer().also { localPlayerCreated = true } }
 
     private var mediaSessionInstance: MediaSession? = null
 
