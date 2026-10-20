@@ -447,11 +447,12 @@ fun ExoPlayerView(
 
     /** Starts the hold's rate change, from wherever the held finger's slide has reached. */
     fun startSpeedBoost() {
+        // The request is answered either way, so the guard below leaves nothing pending behind it.
+        boostPending = false
         // Asked by the hold's own clock and by a slide that sets off inside it; a boost already
         // running means the other caller got here first, and re-coercing the rate under a finger
         // that is already sliding would move it.
         if (isSpeedBoosted) return
-        boostPending = false
         // Starts at the rate the setting asks for; sliding the held finger still reaches every
         // other rate, so that is where it begins, not a cap.
         boostSpeed = currentGestures.holdSpeed.coerceIn(BOOST_SPEED_MIN, BOOST_SPEED_MAX)
@@ -2130,7 +2131,8 @@ private fun ScreenUnlockBadge(
     // One clock, two jobs. A hold that is running owns it: a hold let go a frame early unlocks
     // nothing, and the offer is never taken away mid-ring, which is what would make the lock feel
     // stuck. The rest of the time it is the offer's own patience, and a release starts that wait
-    // over. The caller keys this composable on the reveal, so a fresh reveal starts it again.
+    // over. The caller keys this composable on the reveal that brings the badge back, so that
+    // reveal starts it again.
     LaunchedEffect(holding) {
         if (holding) {
             delay(SCREEN_LOCK_HOLD_MS)
