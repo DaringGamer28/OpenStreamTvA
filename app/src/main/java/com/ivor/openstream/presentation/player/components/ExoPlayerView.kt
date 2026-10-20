@@ -447,6 +447,10 @@ fun ExoPlayerView(
 
     /** Starts the hold's rate change, from wherever the held finger's slide has reached. */
     fun startSpeedBoost() {
+        // Asked by the hold's own clock and by a slide that sets off inside it; a boost already
+        // running means the other caller got here first, and re-coercing the rate under a finger
+        // that is already sliding would move it.
+        if (isSpeedBoosted) return
         boostPending = false
         // Starts at the rate the setting asks for; sliding the held finger still reaches every
         // other rate, so that is where it begins, not a cap.
@@ -466,14 +470,27 @@ fun ExoPlayerView(
     LaunchedEffect(boostPending, longPressTimeoutMs) {
         if (boostPending) {
             delay((SPEED_BOOST_HOLD_MS - longPressTimeoutMs).coerceAtLeast(0L))
-            startSpeedBoost()
+            // Read again rather than left to the cancellation above: a release in the delay's last
+            // moment is applied before this suspend resumes, so a boost started off a finger that
+            // is already gone would be a boost nothing is left to end.
+            if (boostPending) startSpeedBoost()
         }
     }
 
     /** Offers the unlock badge. The badge is what takes the offer away again if it goes unused. */
     fun revealUnlockButton() {
+        // Only a reveal that brings the badge back starts its clock again; a second one while it is
+        // already up - a second hand, a key, another tap - leaves the badge, and any hold on it,
+        // exactly where they are.
+        if (!showUnlockButton) unlockButtonSequence++
         showUnlockButton = true
-        unlockButtonSequence++
+    }
+
+    /** Takes the lock off: the badge's ring and the screen reader's action both land here. */
+    fun unlockScreen() {
+        isLocked = false
+        showUnlockButton = false
+        areControlsVisible = true
     }
 
     fun togglePlaybackWithFeedback() {
@@ -1333,8 +1350,12 @@ fun ExoPlayerView(
                             zoom > 1.1f && videoScale != VideoScale.ZOOM -> {
                                 // A fill is refused when it would crop more than the picture can
                                 // spare: a portrait clip in a landscape window keeps its letterbox.
-                                if (isZoomToFillAvailable(
-                                        videoAspect ?: 1f,
+                                // A shape nobody has reported yet is taken on trust here, as the
+                                // HUD takes it; the revocation gives the picture back if the fill
+                                // turns out to be one this clip cannot afford.
+                                val video = videoAspect
+                                if (video == null || isZoomToFillAvailable(
+                                        video,
                                         size.width.toFloat() / size.height
                                     )
                                 ) {
@@ -1717,17 +1738,40 @@ fun ExoPlayerView(
                 .align(Alignment.TopCenter)
                 .padding(top = 24.dp)
         ) {
-            // Keyed on the reveal: a fresh reveal is a fresh offer, with its own timer.
+            // Keyed on the reveal: a fresh reveal is a fresh offer, with its own timer. A reveal
+            // while the badge is up does not change the key, so a hold that is running survives it.
             key(unlockButtonSequence) {
                 ScreenUnlockBadge(
-                    onUnlock = {
-                        isLocked = false
-                        showUnlockButton = false
-                        areControlsVisible = true
-                    },
+                    onUnlock = { unlockScreen() },
                     onExpire = { showUnlockButton = false }
                 )
             }
+        }
+
+        // A screen reader cannot reveal the badge: a tap activates the focused node rather than the
+        // surface, so an offer that is not on screen is an offer it cannot take. While the badge is
+        // away, the same unlock action rides on a node the eye never meets - one point of it, no
+        // looks and nothing to brush - so the way out the tap gives everyone else is there for
+        // TalkBack at any moment.
+        if (isLocked && !showUnlockButton) {
+            val unlockLabel = stringResource(R.string.vp_unlock_screen)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 24.dp)
+                    .size(1.dp)
+                    .semantics {
+                        contentDescription = unlockLabel
+                        customActions = listOf(
+                            CustomAccessibilityAction(unlockLabel) {
+                                // The ring's confirmation is not skipped with the ring.
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                unlockScreen()
+                                true
+                            }
+                        )
+                    }
+            )
         }
 
         AnimatedVisibility(
@@ -2110,6 +2154,8 @@ private fun ScreenUnlockBadge(
             contentDescription = unlockLabel
             customActions = listOf(
                 CustomAccessibilityAction(unlockLabel) {
+                    // The ring's confirmation is not skipped with the ring.
+                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     onUnlock()
                     true
                 }

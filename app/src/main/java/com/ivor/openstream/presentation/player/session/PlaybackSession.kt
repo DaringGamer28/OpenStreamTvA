@@ -284,9 +284,9 @@ class PlaybackSession @Inject constructor(
         }
     }
 
-    /** Created on first use, on the main thread, by whichever surface shows video first. */
     // region Media session (notification, lock screen, headset buttons)
 
+    /** Created on first use, on the main thread, by whichever surface shows video first. */
     val player: ExoPlayer by lazy { buildPlayer().also { localPlayerCreated = true } }
 
     private var mediaSessionInstance: MediaSession? = null
