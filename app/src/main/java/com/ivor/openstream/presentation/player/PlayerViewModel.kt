@@ -19,6 +19,8 @@ import androidx.lifecycle.viewModelScope
 import com.ivor.openstream.data.local.entity.DownloadEntity
 import com.ivor.openstream.domain.repository.SubtitleRepository
 import com.ivor.openstream.data.remote.TmdbApi
+import com.ivor.openstream.data.images.ArtworkPrefetcher
+import com.ivor.openstream.data.images.TmdbImages
 import com.ivor.openstream.data.playback.StreamDataGuard
 import com.ivor.openstream.data.remote.model.AnimeDetailsDto
 import com.ivor.openstream.data.remote.model.EpisodeDto
@@ -81,6 +83,8 @@ private const val KEY_PREFERRED_AUDIO = "preferred_audio_language"
 private const val KEY_PREFERRED_SUBTITLE = "preferred_subtitle_language"
 private const val MAX_AUTOMATIC_FAILOVERS = 3
 private const val STREAM_REFRESH_AGE_MS = 6 * 60 * 60 * 1_000L
+/** Episode stills preloaded behind the player, so the Up Next card and panel have them ready. */
+private const val UP_NEXT_PRELOAD_EPISODES = 3
 
 /** The episode playback continues with, possibly the first episode of the next season. */
 data class NextEpisodeTarget(
@@ -126,6 +130,7 @@ class PlayerViewModel @Inject constructor(
     private val appSettingsStore: AppSettingsStore,
     private val skipTimesRepository: SkipTimesRepository,    private val subtitleFetcher: SubtitleFetcher,
     private val savedSubtitleRepository: SavedSubtitleRepository,
+    private val artworkPrefetcher: ArtworkPrefetcher,
     @ApplicationContext private val context: Context,
     private val streamDataGuard: StreamDataGuard,
     private val localMediaRepository: LocalMediaRepository
@@ -596,6 +601,7 @@ class PlayerViewModel @Inject constructor(
                     return@launch
                 }
                 _isLoadingEpisodes.value = true
+                var nextTarget: NextEpisodeTarget? = null
                 runCatching { tmdbApi.getSeasonDetails(tmdbId, seasonNumber) }
                     .onSuccess { seasonDetails ->
                         _seasonEpisodes.value = seasonDetails.episodes
@@ -603,12 +609,17 @@ class PlayerViewModel @Inject constructor(
                             .find { it.episodeNumber == currentEpisodeNumber }
                         _nextEpisodes.value = seasonDetails.episodes
                             .filter { it.episodeNumber > currentEpisodeNumber }
-                        _nextEpisode.value = findNextEpisode(
+                        nextTarget = findNextEpisode(
                             tmdbId = tmdbId,
                             seasonNumber = seasonNumber,
                             remaining = _nextEpisodes.value
                         )
                     }
+                val target = nextTarget
+                if (target != null) {
+                    _nextEpisode.value = target
+                    warmUpNext(target, seasonNumber, tmdbId)
+                }
                 _isLoadingEpisodes.value = false
             }
 
@@ -675,6 +686,25 @@ class PlayerViewModel @Inject constructor(
     private fun isReleased(airDate: String?): Boolean {
         if (airDate.isNullOrBlank()) return true
         return runCatching { !LocalDate.parse(airDate).isAfter(LocalDate.now()) }.getOrDefault(true)
+    }
+
+    /**
+     * Pre-warms what Up Next will need the moment it counts down, while this episode still plays.
+     * The stills of the episodes ahead go into Coil's disk cache in the background, and when the
+     * target is in the next season ([findNextEpisode] hands that back without a name or still),
+     * that season's page is fetched now so the switch lands on a complete card.
+     */
+    private suspend fun warmUpNext(target: NextEpisodeTarget, seasonNumber: Int, tmdbId: Int) {
+        artworkPrefetcher.prefetch(
+            _nextEpisodes.value.take(UP_NEXT_PRELOAD_EPISODES).map { TmdbImages.url("w300", it.stillPath) }
+        )
+        if (target.season == seasonNumber) return
+        val first = runCatching { tmdbApi.getSeasonDetails(tmdbId, target.season) }
+            .getOrNull()?.episodes?.firstOrNull { it.episodeNumber == target.episode } ?: return
+        // A newer episode load owns the card by now; this fill-in is for the one that asked.
+        if (_nextEpisode.value !== target) return
+        _nextEpisode.value = target.copy(title = first.name, stillPath = first.stillPath)
+        artworkPrefetcher.prefetch(listOf(TmdbImages.url("w300", first.stillPath)))
     }
 
     /** The stream the user switched away from; restored if their pick refuses to play. */

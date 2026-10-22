@@ -8,20 +8,23 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.Cache
+import com.ivor.openstream.data.streaming.IdMappingService
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Every cache the app keeps for speed, as one thing Settings can size and clear: artwork (Coil),
- * TMDB answers (OkHttp), Home's built lists and recently found streams. None of it is user data;
- * downloads, progress and saved subtitles live elsewhere and are never touched here.
+ * TMDB answers (OkHttp), Home's built lists, recently found streams and remembered id mappings.
+ * None of it is user data; downloads, progress and saved subtitles live elsewhere and are never
+ * touched here.
  */
 @Singleton
 class AppCaches @Inject constructor(
     @ApplicationContext private val context: Context,
     private val metadataCache: Cache,
     private val animeRepository: AnimeRepository,
-    private val streamingRepository: StreamingRepository
+    private val streamingRepository: StreamingRepository,
+    private val idMappingService: IdMappingService
 ) {
     /** Bytes on disk across artwork and title info, or null when it can't be read. */
     suspend fun sizeBytes(): Long? = withContext(Dispatchers.IO) {
@@ -40,5 +43,6 @@ class AppCaches @Inject constructor(
         runCatching { metadataCache.evictAll() }
         animeRepository.clearCachedCatalogs()
         streamingRepository.clearResolvedServers()
+        runCatching { idMappingService.clear() }
     }
 }
