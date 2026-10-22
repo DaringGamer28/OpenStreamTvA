@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ivor.openstream.R
 import com.ivor.openstream.data.downloads.DownloadStorageExporter
-import com.ivor.openstream.data.downloads.ExportException
 import com.ivor.openstream.data.downloads.ExportState
 import com.ivor.openstream.data.local.entity.DownloadEntity
 import com.ivor.openstream.data.local.entity.LocalMediaEntity
@@ -182,20 +181,7 @@ class DownloadViewModel @Inject constructor(
         }
     }
 
-    fun exportToStorage(download: DownloadEntity) {
-        viewModelScope.launch {
-            storageExporter.exportToStorage(download)
-                .onSuccess { _events.tryEmit(context.getString(R.string.dl_saved_to_storage)) }
-                .onFailure { error ->
-                    // The exporter's own reason when it has one (protected stream, permission...).
-                    _events.tryEmit((error as? ExportException)?.message ?: context.getString(R.string.dl_save_to_storage_failed))
-                }
-        }
-    }
-
-    fun onStoragePermissionDenied() {
-        _events.tryEmit(context.getString(R.string.dl_storage_permission_needed))
-    }
+    fun saveFinishedToStorage() = repository.saveFinishedToStorage()
 
     /** Takes the file off the list; the file itself stays where the user keeps it. */
     fun removeLocalMedia(id: Long) {

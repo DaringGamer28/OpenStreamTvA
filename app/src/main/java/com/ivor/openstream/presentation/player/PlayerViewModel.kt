@@ -159,6 +159,8 @@ class PlayerViewModel @Inject constructor(
     val videoShaders: StateFlow<VideoShaderCustomization> = playbackSession.videoShaders
 
     /** A slider mid-drag: on the picture at once, stored when the finger lifts. */
+    val shadersApplyNow: Boolean get() = playbackSession.shadersApplyNow
+
     fun previewVideoShaders(settings: VideoShaderCustomization) =
         playbackSession.previewVideoShaders(settings)
 
@@ -468,6 +470,9 @@ class PlayerViewModel @Inject constructor(
 
     suspend fun getPlaybackUri(downloadId: String): String? =
         downloadRepository.getPlaybackUri(downloadId)
+
+    suspend fun getPlaybackMimeType(downloadId: String): String? =
+        downloadRepository.getPlaybackMimeType(downloadId)
 
     fun removeDownload(downloadId: String) {
         viewModelScope.launch { downloadRepository.removeDownload(downloadId) }

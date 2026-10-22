@@ -109,8 +109,6 @@ data class AppSettings(
     val smoothMotionEnabled: Boolean = false,
     /** Output FPS ceiling for Smooth Motion (60 or 120). */
     val smoothMotionMaxFps: Int = 120,
-    /** Automatically export completed downloads to device storage under Downloads/Openstream. */
-    val autoExportDownloadsToStorage: Boolean = false,
     /** Hardware volume boost percentage via LoudnessEnhancer (100% = normal / 0 dB, up to 300%). */
     val volumeBoostPercent: Int = 100,
     /** Disk budget for artwork and title info; takes effect on the next start. */
@@ -189,7 +187,6 @@ class AppSettingsStore @Inject constructor(
             .putInt(KEY_METERED_HEIGHT, updated.meteredMaxHeight)
             .putBoolean(KEY_SMOOTH_MOTION_ENABLED, updated.smoothMotionEnabled)
             .putInt(KEY_SMOOTH_MOTION_MAX_FPS, updated.smoothMotionMaxFps)
-            .putBoolean(KEY_AUTO_EXPORT_DOWNLOADS_TO_STORAGE, updated.autoExportDownloadsToStorage)
             .putInt(KEY_VOLUME_BOOST, updated.volumeBoostPercent)
             .putString(KEY_CACHE_SIZE, updated.cacheSize.name)
             .putBoolean(KEY_PRELOAD_ARTWORK, updated.preloadArtwork)
@@ -234,7 +231,6 @@ class AppSettingsStore @Inject constructor(
             smoothMotionEnabled = prefs.getBoolean(KEY_SMOOTH_MOTION_ENABLED, defaults.smoothMotionEnabled),
             smoothMotionMaxFps = prefs.getInt(KEY_SMOOTH_MOTION_MAX_FPS, defaults.smoothMotionMaxFps)
                 .takeIf { it in AppSettings.SMOOTH_MOTION_FPS_OPTIONS } ?: defaults.smoothMotionMaxFps,
-            autoExportDownloadsToStorage = prefs.getBoolean(KEY_AUTO_EXPORT_DOWNLOADS_TO_STORAGE, defaults.autoExportDownloadsToStorage),
             volumeBoostPercent = prefs.getInt(KEY_VOLUME_BOOST, defaults.volumeBoostPercent)
                 .coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT),
             cacheSize = enumOrDefault(prefs.getString(KEY_CACHE_SIZE, null), defaults.cacheSize),
@@ -283,7 +279,6 @@ class AppSettingsStore @Inject constructor(
     fun setSmoothMotionMaxFps(fps: Int) =
         update { it.copy(smoothMotionMaxFps = fps.takeIf { it in AppSettings.SMOOTH_MOTION_FPS_OPTIONS } ?: 120) }
 
-    fun setAutoExportDownloadsToStorage(enabled: Boolean) = update { it.copy(autoExportDownloadsToStorage = enabled) }
     fun setVolumeBoostPercent(percent: Int) =
         update { it.copy(volumeBoostPercent = percent.coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT)) }
 
@@ -353,7 +348,6 @@ class AppSettingsStore @Inject constructor(
         const val KEY_ACTIVE_PROFILE = "app_active_profile_id"
         const val KEY_PIP_LEFT = "app_pip_left_action"
         const val KEY_PIP_RIGHT = "app_pip_right_action"
-        const val KEY_AUTO_EXPORT_DOWNLOADS_TO_STORAGE = "app_auto_export_downloads_to_storage"
         /** Matches ProfileEntity.DEFAULT_ID, the profile the Room migration seeds. */
         const val DEFAULT_PROFILE_ID = 1L
     }

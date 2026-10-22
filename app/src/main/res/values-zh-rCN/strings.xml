@@ -821,12 +821,8 @@
     <string name="match_rail">最匹配你的推荐</string>
     <string name="match_percent">%1$d%% 匹配</string>
     <string name="match_because">因为你喜欢 %1$s</string>
-    <string name="st_save_to_storage">将下载内容保存到存储空间</string>
-    <string name="st_save_to_storage_summary">把每个已完成的下载复制到 Downloads/Openstream，方便其他应用打开</string>
     <string name="dl_tab_downloads">下载</string>
     <string name="dl_tab_local_files">本地文件</string>
-    <string name="dl_save_to_storage">保存到存储空间</string>
-    <string name="dl_saved_to_storage">已保存到 Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">无法保存到存储空间</string>
     <string name="local_import_files">导入视频</string>
     <string name="local_no_files_title">没有本地视频</string>

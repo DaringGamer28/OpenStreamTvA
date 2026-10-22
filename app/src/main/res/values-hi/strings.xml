@@ -862,12 +862,8 @@
     <string name="match_rail">आपके लिए टॉप मैच</string>
     <string name="match_percent">%1$d%% मैच</string>
     <string name="match_because">क्योंकि आपको %1$s पसंद आया</string>
-    <string name="st_save_to_storage">डाउनलोड स्टोरेज में सेव करें</string>
-    <string name="st_save_to_storage_summary">हर पूरा डाउनलोड Downloads/Openstream में कॉपी करें, जहाँ दूसरे ऐप इसे खोल सकें</string>
     <string name="dl_tab_downloads">डाउनलोड</string>
     <string name="dl_tab_local_files">लोकल फ़ाइलें</string>
-    <string name="dl_save_to_storage">स्टोरेज में सेव करें</string>
-    <string name="dl_saved_to_storage">Downloads/Openstream में सेव हुआ</string>
     <string name="dl_save_to_storage_failed">स्टोरेज में सेव नहीं हो सका</string>
     <string name="local_import_files">वीडियो इंपोर्ट करें</string>
     <string name="local_no_files_title">कोई लोकल वीडियो नहीं</string>

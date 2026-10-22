@@ -924,12 +924,8 @@
     <string name="st_smooth_motion_fps_val">Up to %1$d fps</string>
     <string name="st_smooth_motion_unsupported">Not supported on this device\'s GPU (requires OpenGL ES 3.2).</string>
     <!-- Local media and Storage export -->
-    <string name="st_save_to_storage">Save downloads to storage</string>
-    <string name="st_save_to_storage_summary">Copy each finished download to Downloads/Openstream, where other apps can open it</string>
     <string name="dl_tab_downloads">Downloads</string>
     <string name="dl_tab_local_files">Local files</string>
-    <string name="dl_save_to_storage">Save to storage</string>
-    <string name="dl_saved_to_storage">Saved to Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Could not save to storage</string>
     <string name="local_import_files">Import videos</string>
     <plurals name="local_import_success">
@@ -996,6 +992,7 @@
 
     <!-- Video shaders: the settings page, the player's Shaders page and the sliders -->
     <string name="sp_video_shaders">Video shaders</string>
+    <string name="sp_video_shaders_restart">Close and reopen the app to see looks on videos.</string>
     <string name="sp_video_shaders_sub_off">Give videos a look: film, retro and drawn styles, plus sharpening and colour</string>
     <string name="sp_video_shaders_sub_on">Change the look here, or from the video player\'s settings while you watch</string>
     <string name="sp_video_shaders_note">Takes effect on the next frame. HDR videos play in standard range while this is on.</string>

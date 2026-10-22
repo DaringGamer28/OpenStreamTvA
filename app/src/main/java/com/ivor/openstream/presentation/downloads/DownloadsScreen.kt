@@ -107,7 +107,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.ivor.openstream.R
-import com.ivor.openstream.data.downloads.ExportState
 import com.ivor.openstream.data.local.entity.DownloadEntity
 import com.ivor.openstream.data.local.entity.LocalMediaEntity
 import com.ivor.openstream.domain.model.DownloadStatus
@@ -134,21 +133,14 @@ fun DownloadsScreen(
     var localMediaToDeleteId by rememberSaveable { mutableStateOf<Long?>(null) }
     val localMediaToDelete = localMediaToDeleteId?.let { id -> state.localFiles.firstOrNull { it.id == id } }
 
-    // Android 9 and older need the storage permission before saving to Downloads.
-    var pendingExport by remember { mutableStateOf<DownloadEntity?>(null) }
+    // Finished downloads are saved to the Downloads folder on their own; Android 9 and older need
+    // the storage permission for that, asked once here.
     val storagePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        val download = pendingExport
-        pendingExport = null
-        if (download != null) {
-            if (granted) viewModel.exportToStorage(download) else viewModel.onStoragePermissionDenied()
-        }
+        if (granted) viewModel.saveFinishedToStorage()
     }
-    val exportToStorage: (DownloadEntity) -> Unit = { download ->
-        if (viewModel.storageExporter.needsStoragePermission()) {
-            pendingExport = download
+    LaunchedEffect(state.library.isNotEmpty()) {
+        if (state.library.isNotEmpty() && viewModel.storageExporter.needsStoragePermission()) {
             storagePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        } else {
-            viewModel.exportToStorage(download)
         }
     }
     val subtitlesViewModel: DownloadSubtitlesViewModel = hiltViewModel()
@@ -338,7 +330,6 @@ fun DownloadsScreen(
                 onDownloadClick = onDownloadClick,
                 onDeleteAll = { confirmDeleteAll = true },
                 onSubtitles = { subtitlesForId = it.downloadId },
-                onExport = exportToStorage,
                 onDelete = { pendingDeleteId = it.downloadId },
                 onDeleteGroup = { pendingGroupKey = it.key }
             )
@@ -401,10 +392,8 @@ fun DownloadsScreen(
                             LibraryGroup(
                                 group = group,
                                 subtitleCount = state::subtitleCount,
-                                exportStates = state.exportStates,
                                 onPlay = onDownloadClick,
                                 onSubtitles = { subtitlesForId = it.downloadId },
-                                onExport = exportToStorage,
                                 onDelete = { pendingDeleteId = it.downloadId },
                                 onDeleteAll = { pendingGroupKey = group.key },
                                 modifier = Modifier
@@ -725,7 +714,6 @@ private fun WideDownloads(
     onDownloadClick: (DownloadEntity) -> Unit,
     onDeleteAll: () -> Unit,
     onSubtitles: (DownloadEntity) -> Unit,
-    onExport: (DownloadEntity) -> Unit,
     onDelete: (DownloadEntity) -> Unit,
     onDeleteGroup: (DownloadGroup) -> Unit
 ) {
@@ -788,10 +776,8 @@ private fun WideDownloads(
                 LibraryGroup(
                     group = group,
                     subtitleCount = state::subtitleCount,
-                    exportStates = state.exportStates,
                     onPlay = onDownloadClick,
                     onSubtitles = onSubtitles,
-                    onExport = onExport,
                     onDelete = onDelete,
                     onDeleteAll = { onDeleteGroup(group) },
                     modifier = Modifier.animateItem()
@@ -954,10 +940,8 @@ private fun InProgressRow(
 private fun LibraryGroup(
     group: DownloadGroup,
     subtitleCount: (DownloadEntity) -> Int,
-    exportStates: Map<String, ExportState>,
     onPlay: (DownloadEntity) -> Unit,
     onSubtitles: (DownloadEntity) -> Unit,
-    onExport: (DownloadEntity) -> Unit,
     onDelete: (DownloadEntity) -> Unit,
     onDeleteAll: () -> Unit,
     modifier: Modifier = Modifier
@@ -1021,10 +1005,6 @@ private fun LibraryGroup(
                         FilledTonalIconButton(onClick = { onPlay(movie) }) {
                             Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.details_play))
                         }
-                        ExportButton(
-                            state = exportStates[movie.downloadId],
-                            onClick = { onExport(movie) }
-                        )
                         IconButton(onClick = { onSubtitles(movie) }) {
                             Icon(Icons.Default.ClosedCaption, contentDescription = stringResource(R.string.cd_subtitles_for, group.title))
                         }
@@ -1059,10 +1039,6 @@ private fun LibraryGroup(
                             supportingContent = { Text(formatBytes(item.sizeBytes) + subtitleSuffix(subtitleCount(item))) },
                             trailingContent = {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    ExportButton(
-                                        state = exportStates[item.downloadId],
-                                        onClick = { onExport(item) }
-                                    )
                                     IconButton(onClick = { onSubtitles(item) }) {
                                         Icon(Icons.Default.ClosedCaption, contentDescription = stringResource(R.string.cd_subtitles_episode, item.episode))
                                     }
@@ -1086,37 +1062,6 @@ private fun LibraryGroup(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ExportButton(
-    state: ExportState?,
-    onClick: () -> Unit
-) {
-    when (state) {
-        is ExportState.Progress -> {
-            Box(modifier = Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            }
-        }
-        is ExportState.Success -> {
-            IconButton(onClick = onClick) {
-                Icon(
-                    Icons.Default.Check,
-                    contentDescription = stringResource(R.string.dl_saved_to_storage),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        else -> {
-            IconButton(onClick = onClick) {
-                Icon(
-                    Icons.Default.Folder,
-                    contentDescription = stringResource(R.string.dl_save_to_storage)
-                )
             }
         }
     }
@@ -1206,12 +1151,13 @@ private fun statusLine(download: DownloadEntity): String = when (download.status
 }
 
 @Composable
+// Resources drop a leading space, so the gap after the size is added here.
 private fun subtitleSuffix(count: Int) = if (count == 0) {
     ""
 } else if (count == 1) {
-    stringResource(R.string.dl_subtitle_suffix_one)
+    " " + stringResource(R.string.dl_subtitle_suffix_one).trimStart()
 } else {
-    stringResource(R.string.dl_subtitle_suffix_other, count)
+    " " + stringResource(R.string.dl_subtitle_suffix_other, count).trimStart()
 }
 
 internal fun formatBytes(bytes: Long): String {

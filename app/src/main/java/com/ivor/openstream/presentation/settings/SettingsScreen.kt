@@ -122,10 +122,6 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
     val appSettings by viewModel.appSettings.collectAsState()
     val cacheBytes by viewModel.cacheBytes.collectAsState()
-    // Turning on auto-save asks for storage access first where Android needs it (9 and older).
-    val autoExportPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) viewModel.setAutoExportDownloadsToStorage(true)
-    }
     val hiddenTitleCount by viewModel.hiddenTitleCount.collectAsState()
     val crashCount by viewModel.crashCount.collectAsState()
     val isWorking by viewModel.isWorking.collectAsState()
@@ -526,7 +522,7 @@ fun SettingsScreen(
                 item(key = "downloads") {
                     SettingsGroup(title = stringResource(R.string.dl_title)) {
                         ChoiceRow(
-                            index = 0, count = 6,
+                            index = 0, count = 5,
                             icon = Icons.Default.HighQuality,
                             title = stringResource(R.string.sheet_quality),
                             supporting = stringResource(R.string.dl_highest_quality),
@@ -536,7 +532,7 @@ fun SettingsScreen(
                             onSelect = viewModel::setDownloadMaxHeight
                         )
                         NavigationRow(
-                            index = 1, count = 6,
+                            index = 1, count = 5,
                             icon = Icons.Default.ClosedCaption,
                             title = stringResource(R.string.player_subtitles),
                             supporting = stringResource(
@@ -546,7 +542,7 @@ fun SettingsScreen(
                             onClick = { pickingSubtitleLanguages = true }
                         )
                         SwitchRow(
-                            index = 2, count = 6,
+                            index = 2, count = 5,
                             icon = Icons.Default.Wifi,
                             title = stringResource(R.string.dl_wifi_only),
                             supporting = stringResource(R.string.action_wait_for_unmetered),
@@ -554,7 +550,7 @@ fun SettingsScreen(
                             onCheckedChange = viewModel::setWifiOnlyDownloads
                         )
                         SwitchRow(
-                            index = 3, count = 6,
+                            index = 3, count = 5,
                             icon = Icons.Default.Download,
                             title = stringResource(R.string.st_smart_downloads),
                             supporting = stringResource(R.string.st_smart_hint),
@@ -562,27 +558,13 @@ fun SettingsScreen(
                             onCheckedChange = viewModel::setSmartDownloads
                         )
                         ChoiceRow(
-                            index = 4, count = 6,
+                            index = 4, count = 5,
                             icon = Icons.Default.HighQuality,
                             title = stringResource(R.string.st_smart_ahead),
                             options = AppSettings.SMART_AHEAD_OPTIONS,
                             selected = appSettings.smartKeepAhead,
                             label = { it.toString() },
                             onSelect = viewModel::setSmartKeepAhead
-                        )
-                        SwitchRow(
-                            index = 5, count = 6,
-                            icon = Icons.Default.Folder,
-                            title = stringResource(R.string.st_save_to_storage),
-                            supporting = stringResource(R.string.st_save_to_storage_summary),
-                            checked = appSettings.autoExportDownloadsToStorage,
-                            onCheckedChange = { enabled ->
-                                if (enabled && viewModel.storagePermissionNeeded()) {
-                                    autoExportPermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                } else {
-                                    viewModel.setAutoExportDownloadsToStorage(enabled)
-                                }
-                            }
                         )
                     }
                 }

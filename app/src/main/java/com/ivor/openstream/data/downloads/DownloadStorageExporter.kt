@@ -21,7 +21,6 @@ import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import com.ivor.openstream.R
 import com.ivor.openstream.data.local.entity.DownloadEntity
-import com.ivor.openstream.data.repository.LocalMediaRepository
 import com.ivor.openstream.data.streaming.BROWSER_USER_AGENT
 import com.ivor.openstream.data.streaming.ImagePrefixStrippingDataSource
 import com.ivor.openstream.data.subtitles.SavedSubtitleRepository
@@ -74,8 +73,7 @@ class DownloadStorageExporter @Inject constructor(
     @ApplicationContext private val context: Context,
     private val cache: Cache,
     private val json: Json,
-    private val savedSubtitles: SavedSubtitleRepository,
-    private val localMediaRepository: LocalMediaRepository
+    private val savedSubtitles: SavedSubtitleRepository
 ) {
     private val _exportStates = MutableStateFlow<Map<String, ExportState>>(emptyMap())
     val exportStates: StateFlow<Map<String, ExportState>> = _exportStates.asStateFlow()
@@ -126,7 +124,6 @@ class DownloadStorageExporter @Inject constructor(
             target.finish()
 
             exportSubtitles(download, folder, baseName)
-            localMediaRepository.importUris(listOf(target.uri))
             updateState(downloadId, ExportState.Success(downloadId, download.displayTitle, target.uri))
             Result.success(target.uri)
         } catch (error: Exception) {
@@ -158,6 +155,9 @@ class DownloadStorageExporter @Inject constructor(
         val cached = CacheDataSource.Factory()
             .setCache(cache)
             .setUpstreamDataSourceFactory(http)
+            // Read-only, as for the player: the download cache is never evicted, so bytes fetched
+            // here would stay on the device under no download.
+            .setCacheWriteDataSinkFactory(null)
             .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
             .createDataSource()
         return ImagePrefixStrippingDataSource(cached)

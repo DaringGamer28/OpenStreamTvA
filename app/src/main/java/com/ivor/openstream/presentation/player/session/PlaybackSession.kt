@@ -182,6 +182,10 @@ class PlaybackSession @Inject constructor(
     private var completionRecordedFor: String? = null
 
         private var localPlayerCreated = false
+    private var shaderStageInstalled = true
+
+    /** False once the player was built without the shader stage: a look then waits for a restart. */
+    val shadersApplyNow: Boolean get() = !localPlayerCreated || shaderStageInstalled
 
     var smoothMotion: SmoothMotion? = null
         private set
@@ -957,6 +961,11 @@ class PlaybackSession @Inject constructor(
             )
             .setTrackSelector(trackSelector)
             .build()
+        // Media3 picks the effect pipeline once, on the first prepare. Where Smooth motion runs the
+        // pipeline exists anyway and the shader stage costs one copy pass; elsewhere the pipeline
+        // alone makes every video slow to start and stutter, so it is only added for a look in use.
+        shaderStageInstalled = SmoothMotion.isSupported(context) ||
+            appSettingsStore.current.videoShaders.isEffectActive
         smoothMotion = SmoothMotion.install(
             basePlayer,
             context,
@@ -969,7 +978,7 @@ class PlaybackSession @Inject constructor(
             // switch is off and copies each frame, as Smooth motion itself does, which is what lets
             // the switch in Settings and the panel act on a player that is already open - this
             // app's player is built once and kept for the life of the process.
-            otherEffects = listOf(VideoShaderEffect(videoShaderControl))
+            otherEffects = if (shaderStageInstalled) listOf(VideoShaderEffect(videoShaderControl)) else emptyList()
         )
         volumeBooster.setBoostPercentage(appSettingsStore.current.volumeBoostPercent)
         volumeBooster.attachSession(basePlayer.audioSessionId)

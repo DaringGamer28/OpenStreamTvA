@@ -821,12 +821,8 @@
     <string name="match_rail">Melhores para você</string>
     <string name="match_percent">%1$d%% de compatibilidade</string>
     <string name="match_because">Porque você gostou de %1$s</string>
-    <string name="st_save_to_storage">Guardar transferências no armazenamento</string>
-    <string name="st_save_to_storage_summary">Copia cada transferência terminada para Downloads/Openstream, onde outras apps a podem abrir</string>
     <string name="dl_tab_downloads">Transferências</string>
     <string name="dl_tab_local_files">Ficheiros locais</string>
-    <string name="dl_save_to_storage">Guardar no armazenamento</string>
-    <string name="dl_saved_to_storage">Guardado em Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Não foi possível guardar no armazenamento</string>
     <string name="local_import_files">Importar vídeos</string>
     <string name="local_no_files_title">Sem vídeos locais</string>
