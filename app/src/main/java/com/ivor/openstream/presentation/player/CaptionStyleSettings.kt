@@ -1,5 +1,7 @@
 package com.ivor.openstream.presentation.player
 
+import androidx.annotation.StringRes
+import com.ivor.openstream.R
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,7 +13,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CaptionStyleSettings(
     val textSizeSp: Float = DEFAULT_TEXT_SIZE_SP,
-    val backgroundOpacity: Float = DEFAULT_BACKGROUND_OPACITY
+    val backgroundOpacity: Float = DEFAULT_BACKGROUND_OPACITY,
+    /** The text's own colour; the plate behind it is what keeps either one readable. */
+    val textColor: CaptionTextColor = CaptionTextColor.WHITE
 ) {
     companion object {
         const val DEFAULT_TEXT_SIZE_SP = 16f
@@ -20,4 +24,16 @@ data class CaptionStyleSettings(
         const val MIN_TEXT_SIZE_SP = 12f
         const val MAX_TEXT_SIZE_SP = 32f
     }
+}
+
+/**
+ * Video-safe caption foregrounds, paired with the background plate.
+ *
+ * White is the neutral default; yellow is the colour broadcast captions have always used, and it
+ * holds up better over a bright picture, which is what the plate is there to fix.
+ */
+@Serializable
+enum class CaptionTextColor(val argb: Int, @StringRes val labelRes: Int) {
+    WHITE(0xFFFFFFFF.toInt(), R.string.caption_color_white),
+    YELLOW(0xFFFFEB3B.toInt(), R.string.caption_color_yellow)
 }

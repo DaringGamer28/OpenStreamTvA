@@ -131,6 +131,12 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 import androidx.compose.runtime.key
 
+/**
+ * How far into a title a resume has to be before the chip offers to start over. A few seconds in is
+ * not a decision the viewer made, and a chip for it would only be in the way.
+ */
+private const val RESUME_CHIP_MIN_MS = 15_000L
+
 @androidx.annotation.OptIn(UnstableApi::class)
 @kotlin.OptIn(ExperimentalMaterial3ExpressiveApi::class, androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -159,6 +165,7 @@ fun PlayerScreen(
     val mediaDetails by viewModel.mediaDetails.collectAsState()
     val currentEpisode by viewModel.currentEpisode.collectAsState()
     val captionSettings by viewModel.captionSettings.collectAsState()
+    val videoShaders by viewModel.videoShaders.collectAsState()
     val serversState by viewModel.serversState.collectAsState()
     val activeServer by viewModel.activeServer.collectAsState()
     val currentDownload by viewModel.currentDownload.collectAsState()
@@ -189,6 +196,12 @@ fun PlayerScreen(
     var showServerPicker by rememberSaveable { mutableStateOf(false) }
     var resumePositionMs by rememberSaveable(tmdbId, season, episode, downloadId, localMediaId) {
         mutableLongStateOf(0L)
+    }
+    // The position this session actually resumed from, for the chip that offers to start over. Not
+    // saveable on purpose: after a rotation the chip has had its chance, and the position itself is
+    // kept by [resumePositionMs].
+    var resumedFromMs by remember(tmdbId, season, episode, downloadId, localMediaId) {
+        mutableStateOf<Long?>(null)
     }
     var sessionPlaybackSpeed by rememberSaveable(tmdbId, season, episode, downloadId, localMediaId) {
         mutableFloatStateOf(viewModel.appSettings.value.defaultSpeed)
@@ -223,7 +236,10 @@ fun PlayerScreen(
 
     LaunchedEffect(startPositionMs) {
         val saved = startPositionMs ?: return@LaunchedEffect
-        if (resumePositionMs == 0L && saved > 0L) resumePositionMs = saved
+        if (resumePositionMs == 0L && saved > 0L) {
+            resumePositionMs = saved
+            if (saved >= RESUME_CHIP_MIN_MS) resumedFromMs = saved
+        }
     }
 
     // Fullscreen state
@@ -666,6 +682,17 @@ fun PlayerScreen(
                             keepPlayingInBackground = appSettings.keepPlayingInBackground,
                             volumeBoostPercent = appSettings.volumeBoostPercent,
                             onVolumeBoostChange = viewModel::setVolumeBoostPercent,
+                            videoShaders = videoShaders,
+                            onPreviewVideoShaders = viewModel::previewVideoShaders,
+                            onVideoShadersChange = viewModel::setVideoShaders,
+                            videoGestures = appSettings.videoGestures,
+                            resumedFromMs = resumedFromMs,
+                            onPlayFromStart = {
+                                resumedFromMs = null
+                                resumePositionMs = 0L
+                                viewModel.player.seekTo(0L)
+                                viewModel.player.play()
+                            },
                             // Downloads and local files have no stream another app could open.
                             onOpenExternalPlayer = if (activeServer != null) {
                                 { viewModel.openInExternalPlayer(context) }

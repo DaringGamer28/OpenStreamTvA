@@ -665,6 +665,10 @@
     <string name="misc_more_options">More options</string>
     <string name="misc_more_releases">More releases</string>
     <string name="misc_off">Off</string>
+    <string name="misc_on">On</string>
+    <string name="sheet_caption_color">Text colour</string>
+    <string name="caption_color_white">White</string>
+    <string name="caption_color_yellow">Yellow</string>
     <string name="misc_saving">Saving…</string>
     <string name="misc_save_count">Save %1$d</string>
     <string name="misc_open_title">Open %1$s</string>
@@ -989,4 +993,93 @@
     <string name="st_stream_cap">Quality limit</string>
     <string name="st_stream_cap_hint">Highest quality a stream may use. Default 1080p.</string>
     <string name="st_stream_cap_none">No limit</string>
+
+    <!-- Video shaders: the settings page, the player's Shaders page and the sliders -->
+    <string name="sp_video_shaders">Video shaders</string>
+    <string name="sp_video_shaders_sub_off">Give videos a look: film, retro and drawn styles, plus sharpening and colour</string>
+    <string name="sp_video_shaders_sub_on">Change the look here, or from the video player\'s settings while you watch</string>
+    <string name="sp_video_shaders_note">Takes effect on the next frame. HDR videos play in standard range while this is on.</string>
+    <string name="sp_video_shaders_presets">Preset</string>
+    <string name="sp_video_shaders_picture">Picture</string>
+    <string name="sp_video_shaders_custom">Custom shader</string>
+    <string name="sp_video_shaders_custom_sub">Write a GLSL ES fragment shader or start from an example. Applying it makes it the Custom preset.</string>
+    <string name="sp_video_shaders_custom_guide">Read the frame from uTex at vTexCoord and write the colour to gl_FragColor. uResolution is the frame size in pixels and uTime a clock in seconds.</string>
+    <string name="sp_video_shaders_custom_template">Start from</string>
+    <string name="sp_video_shaders_custom_field">Fragment shader</string>
+    <string name="sp_video_shaders_custom_compile">Apply</string>
+    <string name="sp_video_shaders_custom_ready">Compiled. Custom is now the preset.</string>
+    <string name="sp_video_shaders_custom_error">This shader did not compile</string>
+    <string name="cz_video_shaders_off">Off</string>
+    <string name="vs_sharpen">Sharpen</string>
+    <string name="vs_brightness">Brightness</string>
+    <string name="vs_contrast">Contrast</string>
+    <string name="vs_saturation">Saturation</string>
+    <string name="vs_off">Off</string>
+    <string name="vs_not_used">Not used by this preset</string>
+    <string name="vs_reset_picture">Reset picture</string>
+    <string name="vpc_shaders">Shaders</string>
+    <string name="vpc_shaders_adjusted">Adjusted</string>
+    <string name="vsp_preset_none">Original</string>
+    <string name="vsp_preset_none_sub">The video as it is</string>
+    <string name="vsp_preset_vivid">Vivid</string>
+    <string name="vsp_preset_vivid_sub">Richer colour that leaves skin tones alone</string>
+    <string name="vsp_preset_clarity">Clarity</string>
+    <string name="vsp_preset_clarity_sub">More depth and punch in every shape</string>
+    <string name="vsp_preset_film">Film</string>
+    <string name="vsp_preset_film_sub">Teal shadows, warm light and fine grain</string>
+    <string name="vsp_preset_noir">Noir</string>
+    <string name="vsp_preset_noir_sub">High-contrast black and white</string>
+    <string name="vsp_preset_anime">Anime</string>
+    <string name="vsp_preset_anime_sub">Crisper, darker line art for animation</string>
+    <string name="vsp_preset_neon">Neon</string>
+    <string name="vsp_preset_neon_sub">Violet, magenta and cyan glow</string>
+    <string name="vsp_preset_dream">Dream</string>
+    <string name="vsp_preset_dream_sub">Soft bloom around everything bright</string>
+    <string name="vsp_preset_vintage">Vintage</string>
+    <string name="vsp_preset_vintage_sub">Faded, flickering home-movie film</string>
+    <string name="vsp_preset_vhs">VHS</string>
+    <string name="vsp_preset_vhs_sub">Tape wobble, colour bleed and tracking</string>
+    <string name="vsp_preset_crt">CRT</string>
+    <string name="vsp_preset_crt_sub">Curved glass and scanlines</string>
+    <string name="vsp_preset_pixel">Pixel</string>
+    <string name="vsp_preset_pixel_sub">Chunky blocks in a short palette</string>
+    <string name="vsp_preset_comic">Comic</string>
+    <string name="vsp_preset_comic_sub">Flat colour, ink lines and print dots</string>
+    <string name="vsp_preset_sketch">Sketch</string>
+    <string name="vsp_preset_sketch_sub">Pencil lines and hatching on paper</string>
+    <string name="vsp_preset_night">Night vision</string>
+    <string name="vsp_preset_night_sub">Green glow with sensor noise</string>
+    <string name="vsp_preset_custom">Custom</string>
+    <string name="vsp_preset_custom_sub">The shader you wrote below</string>
+    <string name="vst_vignette">Warm vignette</string>
+    <string name="vst_invert">Invert</string>
+    <string name="vst_sepia">Sepia</string>
+    <string name="vst_edge_glow">Edge glow</string>
+    <string name="vst_wobble">Wobble</string>
+
+    <!-- The player's optional gestures -->
+    <string name="cz_video_player">Video player</string>
+    <string name="cz_video_hold_speed">Hold to speed up</string>
+    <string name="cz_video_hold_speed_sub">Touch and hold the video to play it faster until you let go</string>
+    <string name="cz_video_brightness">Swipe for brightness</string>
+    <string name="cz_video_brightness_sub">Swipe up or down on the left side in fullscreen</string>
+    <string name="cz_video_volume">Swipe for volume</string>
+    <string name="cz_video_volume_sub">Swipe up or down on the right side in fullscreen</string>
+    <string name="cz_video_hold_rate">Hold speed</string>
+    <string name="cz_video_hold_rate_sub">Where a hold starts. Slide the held finger left or right to change it</string>
+    <string name="cz_video_hold_rate_value">%1$dx</string>
+    <string name="cz_video_controls_hide">Hide controls after</string>
+    <string name="cz_video_controls_hide_sub">How long the buttons stay over a playing video</string>
+    <string name="cz_video_controls_hide_value">%1$d s</string>
+    <string name="cz_video_gestures_note">Double-tap to seek, pinch to fill the screen and the swipes in and out of fullscreen always stay on.</string>
+
+    <!-- Screen lock and zoom to fill -->
+    <string name="vp_screen_locked">Screen locked</string>
+    <string name="vp_unlock_screen">Unlock screen</string>
+    <string name="vp_unlock_hint">Touch and hold to unlock</string>
+    <string name="vp_zoom_to_fill">Zoom to fill</string>
+
+    <!-- Resume chip -->
+    <string name="vp_resumed_from">Resumed from %1$s</string>
+    <string name="vp_play_from_start">Play from start</string>
 </resources>

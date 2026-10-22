@@ -7,6 +7,7 @@ import com.ivor.openstream.data.playback.VolumeBooster
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -115,7 +116,11 @@ data class AppSettings(
     /** Disk budget for artwork and title info; takes effect on the next start. */
     val cacheSize: CacheSize = CacheSize.STANDARD,
     /** Load artwork for rows not on screen yet, only on unmetered networks. */
-    val preloadArtwork: Boolean = true
+    val preloadArtwork: Boolean = true,
+    /** The look the video picture is drawn in, and the sliders that tune it. */
+    val videoShaders: VideoShaderCustomization = VideoShaderCustomization(),
+    /** Which of the player's optional gestures are on. */
+    val videoGestures: VideoGestureCustomization = VideoGestureCustomization()
 ) {
     companion object {
         val SEEK_STEPS = listOf(5, 10, 15, 30)
@@ -139,6 +144,9 @@ class AppSettingsStore @Inject constructor(
     val settings: StateFlow<AppSettings> = _settings.asStateFlow()
 
     val current: AppSettings get() = _settings.value
+
+    /** The two settings that are stored as one JSON value each rather than field by field. */
+    private val json = Json { ignoreUnknownKeys = true }
 
     private val _activeProfileId = MutableStateFlow(prefs.getLong(KEY_ACTIVE_PROFILE, DEFAULT_PROFILE_ID))
 
@@ -185,6 +193,8 @@ class AppSettingsStore @Inject constructor(
             .putInt(KEY_VOLUME_BOOST, updated.volumeBoostPercent)
             .putString(KEY_CACHE_SIZE, updated.cacheSize.name)
             .putBoolean(KEY_PRELOAD_ARTWORK, updated.preloadArtwork)
+            .putString(KEY_VIDEO_SHADERS, json.encodeToString(updated.videoShaders))
+            .putString(KEY_VIDEO_GESTURES, json.encodeToString(updated.videoGestures))
             .apply()
     }
 
@@ -228,9 +238,21 @@ class AppSettingsStore @Inject constructor(
             volumeBoostPercent = prefs.getInt(KEY_VOLUME_BOOST, defaults.volumeBoostPercent)
                 .coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT),
             cacheSize = enumOrDefault(prefs.getString(KEY_CACHE_SIZE, null), defaults.cacheSize),
-            preloadArtwork = prefs.getBoolean(KEY_PRELOAD_ARTWORK, defaults.preloadArtwork)
+            preloadArtwork = prefs.getBoolean(KEY_PRELOAD_ARTWORK, defaults.preloadArtwork),
+            videoShaders = jsonOrDefault(
+                prefs.getString(KEY_VIDEO_SHADERS, null),
+                defaults.videoShaders
+            ),
+            videoGestures = jsonOrDefault(
+                prefs.getString(KEY_VIDEO_GESTURES, null),
+                defaults.videoGestures
+            )
         )
     }
+
+    /** A JSON-stored value, or [default] when it is absent or no longer parses. */
+    private inline fun <reified T> jsonOrDefault(stored: String?, default: T): T =
+        stored?.let { runCatching { json.decodeFromString<T>(it) }.getOrNull() } ?: default
 
     fun setCacheSize(size: CacheSize) = update { it.copy(cacheSize = size) }
 
@@ -264,6 +286,10 @@ class AppSettingsStore @Inject constructor(
     fun setAutoExportDownloadsToStorage(enabled: Boolean) = update { it.copy(autoExportDownloadsToStorage = enabled) }
     fun setVolumeBoostPercent(percent: Int) =
         update { it.copy(volumeBoostPercent = percent.coerceIn(VolumeBooster.MIN_PERCENT, VolumeBooster.MAX_PERCENT)) }
+
+    fun setVideoShaders(settings: VideoShaderCustomization) = update { it.copy(videoShaders = settings) }
+
+    fun setVideoGestures(settings: VideoGestureCustomization) = update { it.copy(videoGestures = settings) }
 
     // region Profile PIN lockout (attempt counting survives restarts)
 
@@ -312,6 +338,8 @@ class AppSettingsStore @Inject constructor(
         const val KEY_VOLUME_BOOST = "app_volume_boost_percent"
         const val KEY_CACHE_SIZE = "app_cache_size"
         const val KEY_PRELOAD_ARTWORK = "app_preload_artwork"
+        const val KEY_VIDEO_SHADERS = "app_video_shaders"
+        const val KEY_VIDEO_GESTURES = "app_video_gestures"
         const val KEY_THEME = "app_theme_mode"
         const val KEY_DYNAMIC_COLOR = "app_dynamic_color"
         const val KEY_DNS = "app_dns_provider"

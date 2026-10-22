@@ -49,7 +49,11 @@ import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.VolumeUp
+import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
@@ -97,6 +101,7 @@ import com.ivor.openstream.data.settings.AppLocale
 import com.ivor.openstream.data.settings.CacheSize
 import com.ivor.openstream.data.settings.DnsProvider
 import com.ivor.openstream.data.settings.ThemeMode
+import com.ivor.openstream.data.settings.VideoGestureCustomization
 import com.ivor.openstream.presentation.components.ConnectedChoiceGroup
 import com.ivor.openstream.presentation.components.ExpressiveBackButton
 import com.ivor.openstream.ui.theme.ExpressiveShapes
@@ -111,6 +116,7 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     onOpenMarketplace: () -> Unit,
     onOpenProfiles: () -> Unit = {},
+    onOpenVideoShaders: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -330,6 +336,90 @@ fun SettingsScreen(
                             supporting = stringResource(R.string.st_background_playback_hint),
                             checked = appSettings.keepPlayingInBackground,
                             onCheckedChange = viewModel::setKeepPlayingInBackground
+                        )
+                    }
+                }
+
+                item(key = "video-player") {
+                    // The looks, and which of the player's own gestures answer: all of it belongs to
+                    // the picture rather than to the app, so it sits under one heading.
+                    val gestures = appSettings.videoGestures
+                    val holdOn = gestures.holdToSpeedUp
+                    val count = if (holdOn) 6 else 5
+                    val rateIndex = 2
+                    val brightnessIndex = if (holdOn) 3 else 2
+                    SettingsGroup(
+                        title = stringResource(R.string.cz_video_player),
+                        footer = stringResource(R.string.cz_video_gestures_note)
+                    ) {
+                        NavigationRow(
+                            index = 0, count = count,
+                            icon = Icons.Default.Palette,
+                            title = stringResource(R.string.sp_video_shaders),
+                            supporting = stringResource(
+                                if (appSettings.videoShaders.masterEnabled) {
+                                    R.string.sp_video_shaders_sub_on
+                                } else {
+                                    R.string.sp_video_shaders_sub_off
+                                }
+                            ),
+                            onClick = onOpenVideoShaders
+                        )
+                        SwitchRow(
+                            index = 1, count = count,
+                            icon = Icons.Default.FastForward,
+                            title = stringResource(R.string.cz_video_hold_speed),
+                            supporting = stringResource(R.string.cz_video_hold_speed_sub),
+                            checked = holdOn,
+                            onCheckedChange = { enabled ->
+                                viewModel.setVideoGestures(gestures.copy(holdToSpeedUp = enabled))
+                            }
+                        )
+                        if (holdOn) {
+                            ChoiceRow(
+                                index = rateIndex, count = count,
+                                icon = Icons.Default.Speed,
+                                title = stringResource(R.string.cz_video_hold_rate),
+                                supporting = stringResource(R.string.cz_video_hold_rate_sub),
+                                options = VideoGestureCustomization.HOLD_SPEEDS,
+                                selected = gestures.holdSpeed,
+                                label = { stringResource(R.string.cz_video_hold_rate_value, it.toInt()) },
+                                onSelect = { speed ->
+                                    viewModel.setVideoGestures(gestures.copy(holdSpeed = speed))
+                                }
+                            )
+                        }
+                        SwitchRow(
+                            index = brightnessIndex, count = count,
+                            icon = Icons.Default.BrightnessMedium,
+                            title = stringResource(R.string.cz_video_brightness),
+                            supporting = stringResource(R.string.cz_video_brightness_sub),
+                            checked = gestures.brightnessSwipe,
+                            onCheckedChange = { enabled ->
+                                viewModel.setVideoGestures(gestures.copy(brightnessSwipe = enabled))
+                            }
+                        )
+                        SwitchRow(
+                            index = brightnessIndex + 1, count = count,
+                            icon = Icons.Default.VolumeUp,
+                            title = stringResource(R.string.cz_video_volume),
+                            supporting = stringResource(R.string.cz_video_volume_sub),
+                            checked = gestures.volumeSwipe,
+                            onCheckedChange = { enabled ->
+                                viewModel.setVideoGestures(gestures.copy(volumeSwipe = enabled))
+                            }
+                        )
+                        ChoiceRow(
+                            index = brightnessIndex + 2, count = count,
+                            icon = Icons.Default.Visibility,
+                            title = stringResource(R.string.cz_video_controls_hide),
+                            supporting = stringResource(R.string.cz_video_controls_hide_sub),
+                            options = VideoGestureCustomization.CONTROLS_HIDE_SECONDS,
+                            selected = gestures.controlsHideSeconds,
+                            label = { stringResource(R.string.cz_video_controls_hide_value, it) },
+                            onSelect = { seconds ->
+                                viewModel.setVideoGestures(gestures.copy(controlsHideSeconds = seconds))
+                            }
                         )
                     }
                 }
@@ -653,7 +743,7 @@ fun SettingsScreen(
 /** A titled group of segmented rows with an optional explanatory footer. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SettingsGroup(
+internal fun SettingsGroup(
     title: String,
     footer: String? = null,
     busy: Boolean = false,
@@ -741,7 +831,7 @@ private fun NavigationRow(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SwitchRow(
+internal fun SwitchRow(
     index: Int,
     count: Int,
     icon: ImageVector,

@@ -7,6 +7,7 @@ import com.ivor.openstream.R
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.ivor.openstream.presentation.player.CaptionTextColor
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -31,6 +32,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -41,17 +44,22 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ClosedCaption
+import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.HighQuality
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.RecordVoiceOver
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import com.ivor.openstream.data.playback.VolumeBooster
+import com.ivor.openstream.data.settings.VideoShaderCustomization
+import com.ivor.openstream.data.settings.VideoShaderPreset
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
@@ -173,6 +181,7 @@ enum class PlayerSettingsPage(val title: String, @StringRes val titleRes: Int) {
     AUDIO("Audio", R.string.sheet_audio),
     VOLUME_BOOST("Volume boost", R.string.sheet_volume_boost),
     QUALITY("Quality", R.string.sheet_quality),
+    SHADERS("Shaders", R.string.vpc_shaders),
     SPEED("Speed", R.string.sheet_speed),
     SUBTITLES("Subtitles", R.string.sheet_subtitles),
     CAPTIONS("Caption style", R.string.sheet_caption_style),
@@ -206,7 +215,13 @@ class PlayerSettingsModel(
     val currentEpisode: Int = 0,
     val episodeProgress: Map<Pair<Int, Int>, WatchProgress> = emptyMap(),
     val smoothMotion: SmoothMotion? = null,
-    val volumeBoostPercent: Int = 100
+    val volumeBoostPercent: Int = 100,
+    /** The look the picture is drawn in; the master switch lives in Settings. */
+    val videoShaders: VideoShaderCustomization = VideoShaderCustomization(),
+    /** Whether the picture fills the screen, cropping the small band that does not fit. */
+    val zoomToFill: Boolean = false,
+    /** False when a fill would crop more of the picture than is worth losing, which hides the row. */
+    val zoomToFillAvailable: Boolean = false
 )
 
 class PlayerSettingsActions(
@@ -221,7 +236,11 @@ class PlayerSettingsActions(
     val onEpisodeSelected: (EpisodeDto) -> Unit = {},
     val onSmoothMotionToggle: ((Boolean) -> Unit)? = null,
     val onVolumeBoostChange: (Int) -> Unit = {},
-    val onOpenExternalPlayer: (() -> Unit)? = null
+    val onOpenExternalPlayer: (() -> Unit)? = null,
+    /** A shader slider mid-drag: on the picture now, stored on release. */
+    val onPreviewVideoShaders: (VideoShaderCustomization) -> Unit = {},
+    val onVideoShadersChange: (VideoShaderCustomization) -> Unit = {},
+    val onZoomToFillChange: (Boolean) -> Unit = {}
 )
 
 /**
@@ -319,6 +338,7 @@ private fun ColumnScope.SettingsContent(
                     onOpenSources = { page = PlayerSettingsPage.SOURCES }
                 )
                 PlayerSettingsPage.SPEED -> speedPage(model, actions)
+                PlayerSettingsPage.SHADERS -> shadersPage(model, actions)
                 PlayerSettingsPage.SUBTITLES -> subtitlesPage(model, actions, onDone = goHome)
                 PlayerSettingsPage.CAPTIONS -> captionsPage(model, actions)
                 PlayerSettingsPage.SLEEP -> sleepPage(model, actions, onDone = goHome)
@@ -423,6 +443,38 @@ private fun LazyListScope.mainPage(
                         else stringResource(R.string.misc_off)
                     },
                     onClick = { actions.onSmoothMotionToggle?.invoke(!sm.enabled) }
+                )
+            )
+        }
+        if (model.videoShaders.masterEnabled) {
+            add(
+                MainRow(
+                    icon = Icons.Default.Palette,
+                    key = "shaders",
+                    title = { stringResource(R.string.vpc_shaders) },
+                    value = {
+                        val shaders = model.videoShaders
+                        when {
+                            shaders.activePreset != VideoShaderPreset.NONE ->
+                                stringResource(shaders.activePreset.titleRes)
+                            !shaders.isPictureNeutral -> stringResource(R.string.vpc_shaders_adjusted)
+                            else -> stringResource(R.string.cz_video_shaders_off)
+                        }
+                    },
+                    onClick = { onNavigate(PlayerSettingsPage.SHADERS) }
+                )
+            )
+        }
+        if (model.zoomToFillAvailable) {
+            add(
+                MainRow(
+                    icon = Icons.Default.CropFree,
+                    key = "zoom-to-fill",
+                    title = { stringResource(R.string.vp_zoom_to_fill) },
+                    value = {
+                        stringResource(if (model.zoomToFill) R.string.misc_on else R.string.misc_off)
+                    },
+                    onClick = { actions.onZoomToFillChange(!model.zoomToFill) }
                 )
             )
         }
@@ -983,7 +1035,7 @@ private fun LazyListScope.captionsPage(
         ) {
             Text(
                 text = stringResource(R.string.pf_where_going),
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = androidx.compose.ui.graphics.Color(settings.textColor.argb),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = settings.textSizeSp.sp,
                 textAlign = TextAlign.Center,
@@ -991,6 +1043,48 @@ private fun LazyListScope.captionsPage(
                     .background(MaterialTheme.colorScheme.scrim.copy(alpha = settings.backgroundOpacity), ExpressiveShapes.extraSmall)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             )
+        }
+    }
+    item(key = "caption-color") {
+        Column(modifier = Modifier.padding(bottom = 8.dp)) {
+            Text(
+                text = stringResource(R.string.sheet_caption_color),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CaptionTextColor.entries.forEach { option ->
+                    Surface(
+                        selected = option == settings.textColor,
+                        onClick = {
+                            actions.onCaptionSettingsChange(settings.copy(textColor = option))
+                        },
+                        shape = ExpressiveShapes.medium,
+                        color = if (option == settings.textColor) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
+                        contentColor = if (option == settings.textColor) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = stringResource(option.labelRes),
+                            style = MaterialTheme.typography.labelLarge,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        )
+                    }
+                }
+            }
         }
     }
     item(key = "caption-size") {
@@ -1012,6 +1106,127 @@ private fun LazyListScope.captionsPage(
         )
     }
 }
+
+// region Video shaders
+
+/**
+ * The panel's Shaders page: the looks, the sliders that tune every built-in one, and a way back to
+ * a neutral picture.
+ *
+ * The master switch is in Settings rather than here, so this page is only offered while it is on:
+ * the stage costs a little battery on every video, and that is not a choice to make by accident
+ * while watching.
+ */
+private fun LazyListScope.shadersPage(
+    model: PlayerSettingsModel,
+    actions: PlayerSettingsActions
+) {
+    val settings = model.videoShaders
+    item(key = "shader-presets") {
+        // Four to a row: the names are one or two words on purpose, so a wider cell would only
+        // stretch them.
+        Column(
+            modifier = Modifier.padding(bottom = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            VideoShaderPreset.entries.chunked(4).forEach { row ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    row.forEach { preset ->
+                        PresetCell(
+                            preset = preset,
+                            selected = settings.activePreset == preset,
+                            onClick = {
+                                actions.onVideoShadersChange(settings.copy(activePreset = preset))
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    // A last row of one keeps its cell the width of a full row's.
+                    repeat(4 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                }
+            }
+        }
+    }
+    item(key = "shader-picture") {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+            ShaderPictureSliders(
+                settings = settings,
+                onPreview = actions.onPreviewVideoShaders,
+                onChange = actions.onVideoShadersChange
+            )
+        }
+    }
+    if (!settings.isPictureNeutral) {
+        item(key = "shader-reset") {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = { actions.onVideoShadersChange(settings.withNeutralPicture()) }) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.vs_reset_picture))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A preset in the panel's grid: its icon over its name, filled with the accent while it is the one
+ * on the picture. Rounded off, the cell is a chip; chosen, it squares up - the same pair of shapes
+ * the sheet's own list items use.
+ */
+@Composable
+private fun PresetCell(
+    preset: VideoShaderPreset,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        selected = selected,
+        onClick = onClick,
+        shape = RoundedCornerShape(if (selected) 18.dp else 26.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = preset.icon,
+                contentDescription = null,
+                modifier = Modifier.size(22.dp)
+            )
+            Text(
+                text = stringResource(preset.titleRes),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// endregion
 
 @Composable
 private fun LabeledSlider(

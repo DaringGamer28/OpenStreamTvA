@@ -24,6 +24,8 @@ import com.ivor.openstream.data.settings.CacheSize
 import com.ivor.openstream.data.settings.DnsProvider
 import com.ivor.openstream.data.settings.PipAction
 import com.ivor.openstream.data.settings.ThemeMode
+import com.ivor.openstream.data.settings.VideoGestureCustomization
+import com.ivor.openstream.data.settings.VideoShaderCustomization
 import com.ivor.openstream.di.downloadRequirements
 import com.ivor.openstream.domain.repository.ExtensionRepository
 import com.ivor.openstream.domain.repository.WatchProgressRepository
@@ -218,6 +220,8 @@ class SettingsViewModel @Inject constructor(
     val isSmoothMotionSupported: Boolean = SmoothMotion.isSupported(context)
     fun setSmoothMotionEnabled(enabled: Boolean) = appSettingsStore.setSmoothMotionEnabled(enabled)
     fun setSmoothMotionMaxFps(fps: Int) = appSettingsStore.setSmoothMotionMaxFps(fps)
+    fun setVideoShaders(shaders: VideoShaderCustomization) = appSettingsStore.setVideoShaders(shaders)
+    fun setVideoGestures(gestures: VideoGestureCustomization) = appSettingsStore.setVideoGestures(gestures)
 
     fun setWarnBeforeMeteredStream(enabled: Boolean) = appSettingsStore.setWarnBeforeMeteredStream(enabled)
 
