@@ -15,6 +15,8 @@ data class ExternalSubtitle(
 /** What another player app needs to play the current stream: where, from when, and how. */
 data class ExternalPlayerRequest(
     val mediaUri: Uri,
+    /** HLS links often lack `.m3u8`; without the type some players guess the wrong format. */
+    val mimeType: String = "video/*",
     val title: String,
     val positionMs: Long = 0L,
     val headers: Map<String, String> = emptyMap(),
@@ -45,7 +47,7 @@ object ExternalPlayer {
 
     fun createIntent(request: ExternalPlayerRequest): Intent =
         Intent(Intent.ACTION_VIEW).apply {
-            setDataAndTypeAndNormalize(request.mediaUri, "video/*")
+            setDataAndTypeAndNormalize(request.mediaUri, request.mimeType)
             putExtra("title", request.title)
             val position = request.positionMs.coerceIn(0L, Int.MAX_VALUE.toLong())
             putExtra("position", position.toInt())

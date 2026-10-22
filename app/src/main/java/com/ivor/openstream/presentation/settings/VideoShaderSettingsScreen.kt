@@ -139,6 +139,14 @@ fun VideoShaderSettingsScreen(
                             checked = shaders.masterEnabled,
                             onCheckedChange = { save(shaders.copy(masterEnabled = it)) }
                         )
+                        if (shaders.masterEnabled && !viewModel.shadersApplyNow) {
+                            Text(
+                                text = stringResource(R.string.sp_video_shaders_restart),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
                         Text(
                             text = stringResource(R.string.sp_video_shaders_note),
                             style = MaterialTheme.typography.bodySmall,

@@ -862,12 +862,8 @@
     <string name="match_rail">나를 위한 추천작</string>
     <string name="match_percent">%1$d%% 일치</string>
     <string name="match_because">%1$s을(를) 좋아해서</string>
-    <string name="st_save_to_storage">다운로드를 저장소에 저장</string>
-    <string name="st_save_to_storage_summary">완료된 다운로드를 Downloads/Openstream에 복사해 다른 앱에서도 열 수 있게 해요</string>
     <string name="dl_tab_downloads">다운로드</string>
     <string name="dl_tab_local_files">로컬 파일</string>
-    <string name="dl_save_to_storage">저장소에 저장</string>
-    <string name="dl_saved_to_storage">Downloads/Openstream에 저장했어요</string>
     <string name="dl_save_to_storage_failed">저장소에 저장하지 못했어요</string>
     <string name="local_import_files">동영상 가져오기</string>
     <string name="local_no_files_title">로컬 동영상이 없어요</string>

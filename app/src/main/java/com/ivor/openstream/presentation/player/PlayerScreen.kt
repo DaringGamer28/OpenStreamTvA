@@ -192,6 +192,7 @@ fun PlayerScreen(
 
     val isLocalOrDownloaded = downloadId != null || localMediaId != null
     var localVideoUrl by rememberSaveable { mutableStateOf<String?>(null) }
+    var downloadMimeType by rememberSaveable { mutableStateOf<String?>(null) }
     var isResolvingLocalUri by remember { mutableStateOf(isLocalOrDownloaded) }
     var showServerPicker by rememberSaveable { mutableStateOf(false) }
     var resumePositionMs by rememberSaveable(tmdbId, season, episode, downloadId, localMediaId) {
@@ -292,6 +293,7 @@ fun PlayerScreen(
             if (downloadId != null) {
                 isResolvingLocalUri = true
                 val uri = viewModel.getPlaybackUri(downloadId)
+                downloadMimeType = viewModel.getPlaybackMimeType(downloadId)
                 if (uri != null) {
                     localVideoUrl = uri
                 }
@@ -682,7 +684,8 @@ fun PlayerScreen(
                             keepPlayingInBackground = appSettings.keepPlayingInBackground,
                             volumeBoostPercent = appSettings.volumeBoostPercent,
                             onVolumeBoostChange = viewModel::setVolumeBoostPercent,
-                            videoShaders = videoShaders,
+                            // No shader stage in this player: the row would change nothing until a restart.
+                            videoShaders = if (viewModel.shadersApplyNow) videoShaders else videoShaders.copy(masterEnabled = false),
                             onPreviewVideoShaders = viewModel::previewVideoShaders,
                             onVideoShadersChange = viewModel::setVideoShaders,
                             videoGestures = appSettings.videoGestures,
@@ -702,7 +705,7 @@ fun PlayerScreen(
                             dpadControls = tvControls,
                             artworkUri = (currentEpisode?.stillPath ?: mediaDetails?.backdropPath)
                                 ?.let { "https://image.tmdb.org/t/p/w1280$it" },
-                            mimeType = activeServer?.mimeType.takeIf { !isLocalOrDownloaded }
+                            mimeType = if (isLocalOrDownloaded) downloadMimeType else activeServer?.mimeType
                         )
                     }
                 } else {

@@ -1488,6 +1488,14 @@ private fun EpisodeDownloadAction(
         }
         else -> {
             val isRetry = download?.status == DownloadStatus.FAILED
+            val isPaused = download?.status == DownloadStatus.PAUSED
+            val label = stringResource(
+                when {
+                    isRetry -> R.string.action_retry_download
+                    isPaused -> R.string.cd_resume
+                    else -> R.string.action_download
+                }
+            )
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -1499,16 +1507,18 @@ private fun EpisodeDownloadAction(
                             haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                             onDownloadLongPress()
                         },
-                        onClickLabel = stringResource(
-                            if (isRetry) R.string.action_retry_download else R.string.action_download
-                        ),
+                        onClickLabel = label,
                         onLongClickLabel = stringResource(R.string.dl_hold_options),
                         role = Role.Button
                     )
             ) {
                 Icon(
-                    if (isRetry) Icons.Default.Refresh else Icons.Default.Download,
-                    contentDescription = null
+                    when {
+                        isRetry -> Icons.Default.Refresh
+                        isPaused -> Icons.Default.PlayArrow
+                        else -> Icons.Default.Download
+                    },
+                    contentDescription = label
                 )
             }
         }

@@ -14,7 +14,7 @@ import javax.inject.Singleton
  * expiry such a correction could never reach a title the app already mapped. The lifetime matches
  * the HTTP cache's freshness for external_ids answers. A refresh that fails (offline) keeps
  * serving the old mapping — asking the sources with an empty id would be worse than a month-old
- * one. Expired rows are swept once per process, so the table doesn't only grow.
+ * one. Rows older than six lifetimes are swept once per process, so the table doesn't only grow.
  */
 @Singleton
 class IdMappingService @Inject constructor(
@@ -27,13 +27,14 @@ class IdMappingService @Inject constructor(
     suspend fun enrich(identity: MediaIdentity): MediaIdentity {
         if (!sweptExpired) {
             sweptExpired = true
-            runCatching { mappingDao.deleteOlderThan(now() - TTL_MS) }
+            // Only rows long past their lifetime: an expired one is still the offline fallback below.
+            runCatching { mappingDao.deleteOlderThan(now() - SWEEP_AFTER_MS) }
         }
         if (!identity.imdbId.isNullOrBlank()) return identity
 
         val cacheKey = "tmdb-external:${identity.tmdbType}:${identity.tmdbId}"
-        val cached = mappingDao.get(cacheKey)?.takeIf { isFresh(it.resolvedAt, now()) }
-        if (cached != null) {
+        val cached = mappingDao.get(cacheKey)
+        if (cached != null && isFresh(cached.resolvedAt, now())) {
             return identity.copy(imdbId = cached.providerMediaId)
         }
 
@@ -62,6 +63,9 @@ class IdMappingService @Inject constructor(
     internal companion object {
         /** How long a remembered mapping is trusted, as long as the HTTP cache keeps external_ids fresh. */
         internal const val TTL_MS = 30L * 24 * 60 * 60 * 1000
+
+        /** When an expired mapping is deleted rather than kept for offline use. */
+        private const val SWEEP_AFTER_MS = 6 * TTL_MS
 
         /** [resolvedAt] within [TTL_MS] of [now], and not from the future. */
         internal fun isFresh(resolvedAt: Long, now: Long): Boolean =

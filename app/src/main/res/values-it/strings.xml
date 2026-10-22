@@ -821,12 +821,8 @@
     <string name="match_rail">Top match per te</string>
     <string name="match_percent">%1$d%% di affinità</string>
     <string name="match_because">Perché ti è piaciuto %1$s</string>
-    <string name="st_save_to_storage">Salva i download in memoria</string>
-    <string name="st_save_to_storage_summary">Copia ogni download finito in Downloads/Openstream, dove altre app possono aprirlo</string>
     <string name="dl_tab_downloads">Download</string>
     <string name="dl_tab_local_files">File locali</string>
-    <string name="dl_save_to_storage">Salva in memoria</string>
-    <string name="dl_saved_to_storage">Salvato in Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Impossibile salvare in memoria</string>
     <string name="local_import_files">Importa video</string>
     <string name="local_no_files_title">Nessun video locale</string>
