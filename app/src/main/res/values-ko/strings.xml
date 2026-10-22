@@ -152,6 +152,7 @@
     <string name="details_play">재생</string>
     <string name="details_trailer">예고편</string>
     <string name="details_episodes">에피소드</string>
+    <string name="details_latest">최신</string>
     <string name="details_more_like_this">비슷한 작품</string>
     <string name="details_known_for">대표작</string>
     <string name="details_first_aired">첫 방송</string>
@@ -925,4 +926,9 @@
     <string name="st_stream_cap">화질 제한</string>
     <string name="st_stream_cap_hint">스트림이 사용할 수 있는 최고 화질입니다. 기본값은 1080p입니다.</string>
     <string name="st_stream_cap_none">제한 없음</string>
+    <string name="tv_hold_to_delete">OK를 길게 눌러 삭제</string>
+    <string name="tv_st_network">네트워크</string>
+    <string name="tv_st_storage">저장공간</string>
+    <string name="tv_hold_to_remove">OK를 길게 눌러 제거</string>
+    <string name="tv_key_space">스페이스</string>
 </resources>

@@ -11,6 +11,7 @@ import com.ivor.openstream.data.remote.model.AnimeDetailsDto
 import com.ivor.openstream.data.local.entity.WatchLaterEntity
 import com.ivor.openstream.data.local.entity.ReminderEntity
 import com.ivor.openstream.data.remote.model.SeasonDetailsDto
+import com.ivor.openstream.data.remote.model.AiringEpisodeDto
 import com.ivor.openstream.data.remote.model.EpisodeDto
 import com.ivor.openstream.data.remote.model.toAnimeDto
 import com.ivor.openstream.data.local.entity.DownloadEntity
@@ -124,6 +125,31 @@ class DetailsViewModel @Inject constructor(
     val resumeTarget: StateFlow<WatchProgress?> = titleProgress
         .map { rows -> rows.firstOrNull()?.takeUnless { it.completed } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** The newest aired episode, for the Latest shortcut; null for movies or when TMDB has none. */
+    val latestEpisode: StateFlow<AiringEpisodeDto?> = _uiState
+        .map { state ->
+            (state as? DetailsUiState.Success)?.details?.lastEpisodeToAir
+                ?.takeIf { it.seasonNumber > 0 && it.episodeNumber > 0 }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private val _episodeJump = MutableStateFlow<Pair<Int, Int>?>(null)
+
+    /** An episode (season to episode) the screen should scroll to once its season is shown. */
+    val episodeJump: StateFlow<Pair<Int, Int>?> = _episodeJump.asStateFlow()
+
+    /** Opens the season with the newest aired episode and asks the screen to bring it into view. */
+    fun jumpToLatest() {
+        val latest = latestEpisode.value ?: return
+        _episodeJump.value = latest.seasonNumber to latest.episodeNumber
+        val shown = (_uiState.value as? DetailsUiState.Success)?.selectedSeasonDetails?.seasonNumber
+        if (shown != latest.seasonNumber) loadSeason(latest.seasonNumber)
+    }
+
+    fun consumeEpisodeJump() {
+        _episodeJump.value = null
+    }
 
     init {
         loadDetails()

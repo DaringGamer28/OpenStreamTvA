@@ -139,6 +139,7 @@
     <string name="details_play">播放</string>
     <string name="details_trailer">预告片</string>
     <string name="details_episodes">剧集</string>
+    <string name="details_latest">最新</string>
     <string name="details_more_like_this">相似推荐</string>
     <string name="details_known_for">代表作</string>
     <string name="details_first_aired">首播</string>
@@ -884,4 +885,9 @@
     <string name="st_stream_cap">画质上限</string>
     <string name="st_stream_cap_hint">流媒体可使用的最高画质。默认 1080p。</string>
     <string name="st_stream_cap_none">不限制</string>
+    <string name="tv_hold_to_delete">长按 OK 键删除</string>
+    <string name="tv_st_network">网络</string>
+    <string name="tv_st_storage">存储</string>
+    <string name="tv_hold_to_remove">长按 OK 键移除</string>
+    <string name="tv_key_space">空格</string>
 </resources>

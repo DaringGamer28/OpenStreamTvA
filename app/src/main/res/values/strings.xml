@@ -152,6 +152,7 @@
     <string name="details_play">Play</string>
     <string name="details_trailer">Trailer</string>
     <string name="details_episodes">Episodes</string>
+    <string name="details_latest">Latest</string>
     <string name="details_more_like_this">More like this</string>
     <string name="details_known_for">Known for</string>
     <string name="details_first_aired">First aired</string>
@@ -1082,4 +1083,9 @@
     <!-- Resume chip -->
     <string name="vp_resumed_from">Resumed from %1$s</string>
     <string name="vp_play_from_start">Play from start</string>
+    <string name="tv_hold_to_delete">Hold OK to delete</string>
+    <string name="tv_st_network">Network</string>
+    <string name="tv_st_storage">Storage</string>
+    <string name="tv_hold_to_remove">Hold OK to remove</string>
+    <string name="tv_key_space">Space</string>
 </resources>

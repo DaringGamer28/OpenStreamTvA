@@ -11,6 +11,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -49,15 +50,23 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ivor.openstream.ui.theme.ExpressiveShapes
 import com.ivor.openstream.presentation.components.ExpressiveMotion
+import kotlinx.coroutines.delay
 
 /**
  * The shared surface for player sheets (settings, sources). Inline, it is a bottom sheet below the
@@ -85,6 +94,20 @@ fun PlayerPanelHost(
         // Panel motion follows the theme (instant with reduced motion).
         val panelFade = ExpressiveMotion.finiteEffectsSpec()
         val panelSlide = ExpressiveMotion.finiteSpatialSpec()
+        // TV: nothing else moves the remote into the panel, so it would stay on the video and the
+        // D-pad would seek. The panel takes focus when it opens, and again whenever it loses it
+        // while open (switching pages removes the focused row).
+        val panelFocus = remember { FocusRequester() }
+        var panelHasFocus by remember { mutableStateOf(false) }
+        LaunchedEffect(visible, panelHasFocus, tvControls) {
+            if (!tvControls || !visible || panelHasFocus) return@LaunchedEffect
+            // The page may still be entering; keep asking for a moment.
+            repeat(20) {
+                delay(50)
+                runCatching { panelFocus.requestFocus() }
+                if (panelHasFocus) return@LaunchedEffect
+            }
+        }
         Box(modifier = Modifier.fillMaxSize()) {
             AnimatedVisibility(visible = visible, enter = fadeIn(panelFade), exit = fadeOut(panelFade)) {
                 Box(
@@ -115,6 +138,9 @@ fun PlayerPanelHost(
                     modifier = Modifier
                         .fillMaxHeight()
                         .width(400.dp)
+                        .focusRequester(panelFocus)
+                        .onFocusChanged { panelHasFocus = it.hasFocus }
+                        .focusGroup()
                 ) {
                     Column(
                         modifier = Modifier
