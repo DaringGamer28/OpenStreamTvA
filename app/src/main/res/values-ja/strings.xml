@@ -139,6 +139,7 @@
     <string name="details_play">再生</string>
     <string name="details_trailer">予告編</string>
     <string name="details_episodes">エピソード</string>
+    <string name="details_latest">最新</string>
     <string name="details_more_like_this">関連作品</string>
     <string name="details_known_for">代表作</string>
     <string name="details_first_aired">初回放送</string>
@@ -880,4 +881,9 @@
     <string name="st_stream_cap">画質の上限</string>
     <string name="st_stream_cap_hint">ストリームが使用できる最高画質。初期設定は1080pです。</string>
     <string name="st_stream_cap_none">上限なし</string>
+    <string name="tv_hold_to_delete">OKを長押しで削除</string>
+    <string name="tv_st_network">ネットワーク</string>
+    <string name="tv_st_storage">ストレージ</string>
+    <string name="tv_hold_to_remove">OKを長押しで削除</string>
+    <string name="tv_key_space">スペース</string>
 </resources>

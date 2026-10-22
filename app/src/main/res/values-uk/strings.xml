@@ -139,6 +139,7 @@
     <string name="details_play">Дивитися</string>
     <string name="details_trailer">Трейлер</string>
     <string name="details_episodes">Серії</string>
+    <string name="details_latest">Остання</string>
     <string name="details_more_like_this">Схоже</string>
     <string name="details_known_for">Відомий за</string>
     <string name="details_first_aired">Дата виходу</string>
@@ -892,4 +893,9 @@
     <string name="st_stream_cap">Обмеження якості</string>
     <string name="st_stream_cap_hint">Найвища якість, яку може використовувати потік. Типово 1080p.</string>
     <string name="st_stream_cap_none">Без обмежень</string>
+    <string name="tv_hold_to_delete">Утримуйте OK, щоб видалити</string>
+    <string name="tv_st_network">Мережа</string>
+    <string name="tv_st_storage">Сховище</string>
+    <string name="tv_hold_to_remove">Утримуйте OK, щоб прибрати</string>
+    <string name="tv_key_space">Пробіл</string>
 </resources>

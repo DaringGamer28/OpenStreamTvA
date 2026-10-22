@@ -152,6 +152,7 @@
     <string name="details_play">चलाएं</string>
     <string name="details_trailer">ट्रेलर</string>
     <string name="details_episodes">एपिसोड</string>
+    <string name="details_latest">नवीनतम</string>
     <string name="details_more_like_this">इसी तरह के और</string>
     <string name="details_known_for">जाने जाते हैं</string>
     <string name="details_first_aired">पहली बार प्रसारित</string>
@@ -925,4 +926,9 @@
     <string name="st_stream_cap">गुणवत्ता सीमा</string>
     <string name="st_stream_cap_hint">स्ट्रीम जिस उच्चतम गुणवत्ता तक उपयोग कर सकती है। डिफ़ॉल्ट 1080p.</string>
     <string name="st_stream_cap_none">कोई सीमा नहीं</string>
+    <string name="tv_hold_to_delete">हटाने के लिए OK दबाकर रखें</string>
+    <string name="tv_st_network">नेटवर्क</string>
+    <string name="tv_st_storage">स्टोरेज</string>
+    <string name="tv_hold_to_remove">हटाने के लिए OK दबाकर रखें</string>
+    <string name="tv_key_space">स्पेस</string>
 </resources>

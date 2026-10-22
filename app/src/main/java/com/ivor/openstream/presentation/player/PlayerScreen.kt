@@ -73,6 +73,9 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import com.ivor.openstream.presentation.tv.TvButton
 import com.ivor.openstream.presentation.tv.TvOutlinedButton
+import com.ivor.openstream.presentation.tv.TV_BACKDROP_BASE
+import com.ivor.openstream.presentation.tv.TvPlayerLoading
+import com.ivor.openstream.presentation.tv.TvPlayerLoadingStatus
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
@@ -248,7 +251,8 @@ fun PlayerScreen(
     var isRotationLocked by rememberSaveable { mutableStateOf(false) }
     val isInPictureInPicture = rememberIsInPictureInPicture()
     // Picture-in-picture shows the bare video, exactly like fullscreen minus the chrome.
-    val isImmersive = isFullscreen || isInPictureInPicture
+    // A TV never shows the phone's info panel under the video, not even while a source is found.
+    val isImmersive = isFullscreen || isInPictureInPicture || tvControls
     var isVideoPlaying by remember { mutableStateOf(false) }
     var togglePlaybackSignal by remember { mutableIntStateOf(0) }
 
@@ -389,8 +393,8 @@ fun PlayerScreen(
     }
 
     // On a TV the player opens immersive: a 10-foot screen has no use for the surrounding chrome.
-    LaunchedEffect(tvControls, videoUrl) {
-        if (tvControls && videoUrl != null && !isFullscreen) enterFullscreen()
+    LaunchedEffect(tvControls) {
+        if (tvControls && !isFullscreen) enterFullscreen()
     }
 
     // Handle back press in fullscreen -- exit fullscreen instead of navigating back
@@ -708,6 +712,44 @@ fun PlayerScreen(
                             mimeType = if (isLocalOrDownloaded) downloadMimeType else activeServer?.mimeType
                         )
                     }
+                } else if (tvControls) {
+                    val isMovie = mediaType == "movie" || localMediaId != null
+                    val runtime = if (isMovie) mediaDetails?.runtime else currentEpisode?.runtime
+                    val rating = (if (isMovie) mediaDetails?.voteAverage else currentEpisode?.voteAverage)
+                        ?.takeIf { it > 0 }
+                    TvPlayerLoading(
+                        showName = mediaDetails?.name.takeIf { !isMovie },
+                        title = if (isMovie) playerTitle else {
+                            currentEpisode?.name ?: stringResource(R.string.misc_episode_number, episode)
+                        },
+                        meta = listOfNotNull(
+                            if (isMovie) mediaDetails?.date?.take(4)?.takeIf { it.isNotBlank() }
+                            else stringResource(R.string.li_episode_code, season, episode),
+                            runtime?.let { stringResource(R.string.misc_runtime_min, it) },
+                            rating?.let { "★ %.1f".format(it) }
+                        ).joinToString("  ·  "),
+                        overview = (if (isMovie) mediaDetails?.overview else currentEpisode?.overview)
+                            ?.takeIf { it.isNotBlank() } ?: mediaDetails?.overview,
+                        imageUrl = (currentEpisode?.stillPath?.takeIf { !isMovie } ?: mediaDetails?.backdropPath)
+                            ?.let { "$TV_BACKDROP_BASE$it" },
+                        status = if (isResolvingLocalUri) TvPlayerLoadingStatus.OpeningOffline else when (val state = serversState) {
+                            is ServersState.Resolving -> TvPlayerLoadingStatus.Searching(
+                                found = state.servers.size,
+                                checked = state.completedProviders,
+                                total = state.totalProviders
+                            )
+                            // A picked source is only waiting for the saved position.
+                            is ServersState.Ready -> if (activeServer == null) {
+                                TvPlayerLoadingStatus.ChooseSource
+                            } else {
+                                TvPlayerLoadingStatus.Preparing
+                            }
+                            is ServersState.Empty -> TvPlayerLoadingStatus.NothingFound
+                            ServersState.Idle -> TvPlayerLoadingStatus.Preparing
+                        },
+                        onChooseSource = { showServerPicker = true },
+                        onRetry = viewModel::retryResolution
+                    )
                 } else {
                     Box(Modifier.fillMaxSize()) {
                         // Resolution / Loading Overlay (Cinematic)

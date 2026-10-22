@@ -399,14 +399,14 @@ private fun TransportControls(
 }
 
 /** Material has numbered icons for 5, 10 and 30 seconds; other steps use the plain arrows. */
-private fun rewindIcon(seconds: Int): ImageVector = when (seconds) {
+internal fun rewindIcon(seconds: Int): ImageVector = when (seconds) {
     5 -> Icons.Default.Replay5
     10 -> Icons.Default.Replay10
     30 -> Icons.Default.Replay30
     else -> Icons.Default.FastRewind
 }
 
-private fun forwardIcon(seconds: Int): ImageVector = when (seconds) {
+internal fun forwardIcon(seconds: Int): ImageVector = when (seconds) {
     5 -> Icons.Default.Forward5
     10 -> Icons.Default.Forward10
     30 -> Icons.Default.Forward30

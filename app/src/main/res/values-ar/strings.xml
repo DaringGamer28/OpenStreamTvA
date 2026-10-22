@@ -152,6 +152,7 @@
     <string name="details_play">تشغيل</string>
     <string name="details_trailer">إعلان</string>
     <string name="details_episodes">الحلقات</string>
+    <string name="details_latest">الأحدث</string>
     <string name="details_more_like_this">المزيد مثل هذا</string>
     <string name="details_known_for">مشهور بـ</string>
     <string name="details_first_aired">تاريخ العرض الأول</string>
@@ -941,4 +942,9 @@
     <string name="st_stream_cap">حد الجودة</string>
     <string name="st_stream_cap_hint">أعلى جودة يمكن أن يستخدمها البث. الافتراضي 1080p.</string>
     <string name="st_stream_cap_none">بلا حد</string>
+    <string name="tv_hold_to_delete">اضغط مطولًا على OK للحذف</string>
+    <string name="tv_st_network">الشبكة</string>
+    <string name="tv_st_storage">التخزين</string>
+    <string name="tv_hold_to_remove">اضغط مطولًا على OK للإزالة</string>
+    <string name="tv_key_space">مسافة</string>
 </resources>

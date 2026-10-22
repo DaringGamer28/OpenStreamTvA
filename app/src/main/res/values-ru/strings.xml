@@ -139,6 +139,7 @@
     <string name="details_play">Смотреть</string>
     <string name="details_trailer">Трейлер</string>
     <string name="details_episodes">Серии</string>
+    <string name="details_latest">Последняя</string>
     <string name="details_more_like_this">Похожее</string>
     <string name="details_known_for">Известен по</string>
     <string name="details_first_aired">Дата выхода</string>
@@ -892,4 +893,9 @@
     <string name="st_stream_cap">Ограничение качества</string>
     <string name="st_stream_cap_hint">Максимальное качество потока. По умолчанию 1080p.</string>
     <string name="st_stream_cap_none">Без ограничения</string>
+    <string name="tv_hold_to_delete">Удерживайте OK, чтобы удалить</string>
+    <string name="tv_st_network">Сеть</string>
+    <string name="tv_st_storage">Хранилище</string>
+    <string name="tv_hold_to_remove">Удерживайте OK, чтобы убрать</string>
+    <string name="tv_key_space">Пробел</string>
 </resources>

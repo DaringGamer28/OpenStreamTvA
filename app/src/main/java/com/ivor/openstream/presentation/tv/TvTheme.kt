@@ -33,11 +33,47 @@ fun TvTheme(content: @Composable () -> Unit) {
     val density = LocalDensity.current
     val pinned = Density(density = density.density, fontScale = 1f)
     CompositionLocalProvider(LocalDensity provides pinned) {
+        val colors = MaterialTheme.colorScheme
         MaterialTheme(
-            colorScheme = MaterialTheme.colorScheme,
+            colorScheme = colors,
             typography = TvTypography,
-            shapes = MaterialTheme.shapes,
-            content = content
-        )
+            shapes = MaterialTheme.shapes
+        ) {
+            // Compose for TV components (drawer, cards, buttons) read their own theme: same colors.
+            androidx.tv.material3.MaterialTheme(
+                colorScheme = androidx.tv.material3.darkColorScheme(
+                    primary = colors.primary,
+                    onPrimary = colors.onPrimary,
+                    primaryContainer = colors.primaryContainer,
+                    onPrimaryContainer = colors.onPrimaryContainer,
+                    inversePrimary = colors.inversePrimary,
+                    secondary = colors.secondary,
+                    onSecondary = colors.onSecondary,
+                    secondaryContainer = colors.secondaryContainer,
+                    onSecondaryContainer = colors.onSecondaryContainer,
+                    tertiary = colors.tertiary,
+                    onTertiary = colors.onTertiary,
+                    tertiaryContainer = colors.tertiaryContainer,
+                    onTertiaryContainer = colors.onTertiaryContainer,
+                    background = colors.background,
+                    onBackground = colors.onBackground,
+                    surface = colors.surfaceContainer,
+                    onSurface = colors.onSurface,
+                    surfaceVariant = colors.surfaceContainerHigh,
+                    onSurfaceVariant = colors.onSurfaceVariant,
+                    surfaceTint = colors.surfaceTint,
+                    inverseSurface = colors.inverseSurface,
+                    inverseOnSurface = colors.inverseOnSurface,
+                    error = colors.error,
+                    onError = colors.onError,
+                    errorContainer = colors.errorContainer,
+                    onErrorContainer = colors.onErrorContainer,
+                    border = colors.outline,
+                    borderVariant = colors.outlineVariant,
+                    scrim = colors.scrim
+                ),
+                content = content
+            )
+        }
     }
 }

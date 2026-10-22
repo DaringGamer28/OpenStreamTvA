@@ -282,6 +282,8 @@ fun ExoPlayerView(
 
     // UI State
     var areControlsVisible by remember { mutableStateOf(true) }
+    // Bumped by every remote key press on the TV chrome, to restart its hide countdown.
+    var controlsInteraction by remember { mutableIntStateOf(0) }
     var showSettingsDialog by remember { mutableStateOf(false) }
     var settingsInitialPage by remember { mutableStateOf(PlayerSettingsPage.MAIN) }
 
@@ -971,11 +973,11 @@ fun ExoPlayerView(
         }
     }
 
-    // Auto-hide controls. A TV leaves them up far longer: a D-pad moves through them one stop at a
-    // time, and a phone's own three seconds is not enough to reach the far end of the bar.
-    LaunchedEffect(areControlsVisible, isPlaying, videoGestures.controlsHideSeconds) {
+    // Auto-hide controls. On a TV each remote key press while the chrome is up restarts the
+    // countdown, so moving through the bar one stop at a time never races it.
+    LaunchedEffect(areControlsVisible, isPlaying, videoGestures.controlsHideSeconds, controlsInteraction) {
         if (areControlsVisible && isPlaying) {
-            delay(if (dpadControls) 11000 else videoGestures.controlsHideSeconds * 1_000L)
+            delay(if (dpadControls) 6000 else videoGestures.controlsHideSeconds * 1_000L)
             areControlsVisible = false
         }
     }
@@ -1096,18 +1098,26 @@ fun ExoPlayerView(
     }
 
     // Android TV: the remote's D-pad and media keys drive playback when the surface is focused.
+    // While a control inside has focus, the D-pad and OK belong to that control; only the
+    // remote's media keys still go to the player.
     val videoHasFocus = remember { mutableStateOf(false) }
+    val videoIsFocused = remember { mutableStateOf(false) }
     val videoFocusRequester = remember { FocusRequester() }
     val controlsFocusRequester = remember { FocusRequester() }
     val dpadModifier = if (dpadControls) {
         Modifier
             .focusRequester(videoFocusRequester)
-            .onFocusChanged { videoHasFocus.value = it.hasFocus }
+            .onFocusChanged {
+                videoHasFocus.value = it.hasFocus
+                videoIsFocused.value = it.isFocused
+            }
             .focusable()
             .onPreviewKeyEvent { event ->
                 if (!videoHasFocus.value) return@onPreviewKeyEvent false
+                if (!videoIsFocused.value && !event.isMediaKey()) return@onPreviewKeyEvent false
                 handleDpadKey(event)
-            }    } else {
+            }
+    } else {
         Modifier
     }
     // The video surface takes the focus when a new stream starts (a TV never leaves it orphaned).
@@ -1118,8 +1128,12 @@ fun ExoPlayerView(
         }
     }
     // Controls showing on a TV hands the focus to the control bar so D-pad navigates it.
-    LaunchedEffect(areControlsVisible, dpadControls) {
-        if (dpadControls && areControlsVisible) runCatching { controlsFocusRequester.requestFocus() }
+    // Hidden again, the focus returns to the video so the next key press still reaches the player.
+    LaunchedEffect(areControlsVisible, dpadControls, showSettingsDialog) {
+        if (!dpadControls || showSettingsDialog) return@LaunchedEffect
+        runCatching {
+            if (areControlsVisible) controlsFocusRequester.requestFocus() else videoFocusRequester.requestFocus()
+        }
     }
 
     Box(
@@ -1414,9 +1428,16 @@ fun ExoPlayerView(
             visible = showResumeChip && !isLocked,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 16.dp, bottom = if (isFullscreen) 96.dp else 72.dp)
+            // TV: top left, since the TV controls fill the lower third. Up from the controls reaches it.
+            modifier = if (dpadControls) {
+                Modifier
+                    .align(Alignment.TopStart)
+                    .padding(start = 56.dp, top = 32.dp)
+            } else {
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 16.dp, bottom = if (isFullscreen) 96.dp else 72.dp)
+            }
         ) {
             // One small pill: the whole thing is the button. The resumed time is in the spoken label
             // rather than on screen, where the seek bar already shows it.
@@ -1569,7 +1590,58 @@ fun ExoPlayerView(
             }
         }
 
-        PlayerControls(
+        if (dpadControls) TvPlayerControls(
+            isVisible = areControlsVisible && !isInPictureInPicture,
+            isPlaying = isPlaying,
+            isBuffering = isBuffering,
+            title = title,
+            subtitle = subtitle,
+            sourceLabel = sourceLabel,
+            qualityLabel = qualityDisplayLabel(selectedQuality, activeVideoHeight),
+            hasSubtitles = subtitleOptions.isNotEmpty(),
+            subtitlesEnabled = selectedSubtitle?.isDisabled == false,
+            currentTime = currentTime,
+            totalTime = totalTime,
+            seekStepSeconds = seekStepSeconds,
+            videoScale = videoScale,
+            onPauseToggle = {
+                if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play()
+            },
+            onForward = { seekStep(1) },
+            onRewind = { seekStep(-1) },
+            onNextClick = onNextClick,
+            onSubtitlesClick = {
+                settingsInitialPage = PlayerSettingsPage.SUBTITLES
+                showSettingsDialog = true
+                areControlsVisible = false
+            },
+            onSourcesClick = {
+                settingsInitialPage = PlayerSettingsPage.SOURCES
+                showSettingsDialog = true
+                areControlsVisible = false
+            },
+            onQualityClick = {
+                settingsInitialPage = PlayerSettingsPage.QUALITY
+                showSettingsDialog = true
+                areControlsVisible = false
+            },
+            onSettingsClick = {
+                settingsInitialPage = PlayerSettingsPage.MAIN
+                showSettingsDialog = true
+                areControlsVisible = false
+            },
+            onVideoScaleClick = {
+                // Same rule as the phone: a fill is only entered when the picture can spare it.
+                val next = videoScale.next()
+                if (next != VideoScale.ZOOM || videoAspect == null || canZoomToFill()) {
+                    changeVideoScale(next)
+                } else {
+                    changeVideoScale(next.next())
+                }
+            },
+            onInteraction = { controlsInteraction++ },
+            playFocusRequester = controlsFocusRequester
+        ) else PlayerControls(
             isVisible = areControlsVisible && !isInPictureInPicture && !isLocked,
             isPlaying = isPlaying,
             isBuffering = isBuffering,
@@ -2326,3 +2398,14 @@ private fun SubtitleDto.isSideloadOnly(): Boolean =
 
 /** Caption size in picture-in-picture relative to the user's chosen size. */
 private const val PIP_CAPTION_SCALE = 0.55f
+
+/** A remote's playback keys, which reach the player wherever the focus is. */
+private fun KeyEvent.isMediaKey(): Boolean = when (nativeKeyEvent.keyCode) {
+    android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+    android.view.KeyEvent.KEYCODE_MEDIA_PLAY,
+    android.view.KeyEvent.KEYCODE_MEDIA_PAUSE,
+    android.view.KeyEvent.KEYCODE_MEDIA_NEXT,
+    android.view.KeyEvent.KEYCODE_MEDIA_FAST_FORWARD,
+    android.view.KeyEvent.KEYCODE_MEDIA_REWIND -> true
+    else -> false
+}

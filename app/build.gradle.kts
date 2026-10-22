@@ -146,6 +146,7 @@ dependencies {
 
     // Image Loading
     implementation(libs.coil.compose)
+    implementation(libs.androidx.tv.material)
     implementation(libs.coil.network.okhttp)
 
     // Networking

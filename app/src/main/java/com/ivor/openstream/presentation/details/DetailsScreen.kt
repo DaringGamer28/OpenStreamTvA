@@ -56,6 +56,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.NewReleases
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
@@ -88,6 +89,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import com.ivor.openstream.data.remote.model.AiringEpisodeDto
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -175,6 +178,8 @@ fun DetailsScreen(
     LaunchedEffect(Unit) {
         viewModel.messages.collect { snackbar.showSnackbar(it) }
     }
+    val latestEpisode by viewModel.latestEpisode.collectAsState()
+    val episodeJump by viewModel.episodeJump.collectAsState()
     val listState = rememberLazyListState()
     val collapsed by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
     val pullToClose = rememberPullToClose(onClose = onBackClick)
@@ -337,7 +342,9 @@ fun DetailsScreen(
                             SeasonPicker(
                                 details = details,
                                 selected = state.selectedSeasonDetails?.seasonNumber,
-                                onSelect = viewModel::loadSeason
+                                onSelect = viewModel::loadSeason,
+                                latest = latestEpisode,
+                                onLatest = viewModel::jumpToLatest
                             )
                         }
                         if (state.isLoadingEpisodes) {
@@ -420,6 +427,21 @@ fun DetailsScreen(
                     val wide = maxWidth >= WIDE_MIN_WIDTH
                     val episodeColumns = if (maxWidth >= TWO_COLUMN_EPISODES_MIN_WIDTH) 2 else 1
                     val heroMinHeight = (maxHeight * 0.72f).coerceIn(420.dp, 640.dp)
+                    // Latest: once its season is on screen, scroll to the episode. The header row
+                    // holding the chip that asked is on screen, which gives the list position.
+                    LaunchedEffect(episodeJump, state.selectedSeasonDetails?.seasonNumber, state.isLoadingEpisodes) {
+                        val jump = episodeJump ?: return@LaunchedEffect
+                        val season = state.selectedSeasonDetails ?: return@LaunchedEffect
+                        if (state.isLoadingEpisodes || season.seasonNumber != jump.first) return@LaunchedEffect
+                        val header = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "episodes-header" }
+                        if (header != null) {
+                            val columns = if (wide) episodeColumns else 1
+                            val position = season.episodes.indexOfFirst { it.episodeNumber == jump.second }.coerceAtLeast(0)
+                            val watchedRow = if (season.episodes.any { it.isReleased() }) 1 else 0
+                            listState.animateScrollToItem(header.index + 1 + watchedRow + position / columns)
+                        }
+                        viewModel.consumeEpisodeJump()
+                    }
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
@@ -1250,7 +1272,9 @@ private fun rememberPullToClose(onClose: () -> Unit): PullToClose {
 private fun SeasonPicker(
     details: AnimeDetailsDto,
     selected: Int?,
-    onSelect: (Int) -> Unit
+    onSelect: (Int) -> Unit,
+    latest: AiringEpisodeDto?,
+    onLatest: () -> Unit
 ) {
     val seasons = details.orderedSeasons()
     val rowState = rememberLazyListState()
@@ -1265,6 +1289,22 @@ private fun SeasonPicker(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(bottom = 12.dp)
     ) {
+        // A shortcut past many seasons or a long one, straight to what aired last.
+        if (latest != null && (seasons.size > 1 || latest.episodeNumber > 12)) {
+            item(key = "latest") {
+                AssistChip(
+                    onClick = onLatest,
+                    label = {
+                        Text(
+                            stringResource(R.string.details_latest) + " · " +
+                                stringResource(R.string.li_episode_code, latest.seasonNumber, latest.episodeNumber)
+                        )
+                    },
+                    leadingIcon = { Icon(Icons.Default.NewReleases, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                    shape = ExpressiveShapes.small
+                )
+            }
+        }
         items(seasons, key = { it.seasonNumber }) { season ->
             FilterChip(
                 selected = season.seasonNumber == selected,

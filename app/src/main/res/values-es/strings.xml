@@ -139,6 +139,7 @@
     <string name="details_play">Reproducir</string>
     <string name="details_trailer">Tráiler</string>
     <string name="details_episodes">Episodios</string>
+    <string name="details_latest">Más reciente</string>
     <string name="details_more_like_this">Más como esto</string>
     <string name="details_known_for">Conocido por</string>
     <string name="details_first_aired">Primera emisión</string>
@@ -888,4 +889,9 @@
     <string name="st_stream_cap">Límite de calidad</string>
     <string name="st_stream_cap_hint">Calidad máxima que puede usar una emisión. Por defecto 1080p.</string>
     <string name="st_stream_cap_none">Sin límite</string>
+    <string name="tv_hold_to_delete">Mantén pulsado OK para eliminar</string>
+    <string name="tv_st_network">Red</string>
+    <string name="tv_st_storage">Almacenamiento</string>
+    <string name="tv_hold_to_remove">Mantén pulsado OK para quitar</string>
+    <string name="tv_key_space">Espacio</string>
 </resources>

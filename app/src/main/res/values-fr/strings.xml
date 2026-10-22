@@ -139,6 +139,7 @@
     <string name="details_play">Lecture</string>
     <string name="details_trailer">Bande-annonce</string>
     <string name="details_episodes">Épisodes</string>
+    <string name="details_latest">Dernier</string>
     <string name="details_more_like_this">Dans le même genre</string>
     <string name="details_known_for">Connu pour</string>
     <string name="details_first_aired">Première diffusion</string>
@@ -888,4 +889,9 @@
     <string name="st_stream_cap">Limite de qualité</string>
     <string name="st_stream_cap_hint">Qualité maximale qu\'un flux peut utiliser. Par défaut 1080p.</string>
     <string name="st_stream_cap_none">Sans limite</string>
+    <string name="tv_hold_to_delete">Maintenez OK pour supprimer</string>
+    <string name="tv_st_network">Réseau</string>
+    <string name="tv_st_storage">Stockage</string>
+    <string name="tv_hold_to_remove">Maintenez OK pour retirer</string>
+    <string name="tv_key_space">Espace</string>
 </resources>

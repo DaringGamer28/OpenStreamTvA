@@ -12,6 +12,7 @@ composeBom = "2026.09.00"
 material3 = "1.5.0-alpha29"
 navigationCompose = "2.8.0-alpha08" # Required for Shared Element Transitions
 coil = "3.0.0-rc01"
+tvMaterial = "1.1.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
 serialization = "1.10.0"
@@ -53,6 +54,7 @@ material-motion-compose-material3 = { group = "io.github.fornewid", name = "mate
 
 
 # Image Loading (Coil 3)
+androidx-tv-material = { group = "androidx.tv", name = "tv-material", version.ref = "tvMaterial" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 
