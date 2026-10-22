@@ -632,12 +632,13 @@ class PlayerViewModel @Inject constructor(
                             remaining = _nextEpisodes.value
                         )
                     }
+                _isLoadingEpisodes.value = false
                 val target = nextTarget
                 if (target != null) {
                     _nextEpisode.value = target
+                    // After the list is shown: offline, the next season's request only times out.
                     warmUpNext(target, seasonNumber, tmdbId)
                 }
-                _isLoadingEpisodes.value = false
             }
 
             launch {
