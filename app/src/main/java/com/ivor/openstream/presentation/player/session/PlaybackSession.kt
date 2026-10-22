@@ -984,7 +984,8 @@ class PlaybackSession @Inject constructor(
         volumeBooster.attachSession(basePlayer.audioSessionId)
         return basePlayer.apply {
                 playWhenReady = true
-                applyNetworkConstraints()                // Debug builds log load errors, format switches and dropped frames under "EventLogger".
+                applyNetworkConstraints()
+                // Debug builds log load errors, format switches and dropped frames under "EventLogger".
                 if (BuildConfig.DEBUG) addAnalyticsListener(EventLogger())
                 addAnalyticsListener(object : AnalyticsListener {
                     override fun onAudioSessionIdChanged(

@@ -99,6 +99,7 @@ class DownloadRepositoryImpl @Inject constructor(
         scope.launch {
             runCatching { reconcileWithMedia3() }.onFailure { Log.w(TAG, "Could not reconcile downloads", it) }
             recoverInterruptedResolutions()
+            storageExporter.deleteAbandonedSaves()
             saveFinishedToStorage()
         }
     }
@@ -127,6 +128,11 @@ class DownloadRepositoryImpl @Inject constructor(
             scope.launch {
                 val existing = dao.getDownloadById(target.id)
                 if (existing != null && (existing.status == DownloadStatus.COMPLETED || DownloadStatus.isActive(existing.status))) {
+                    return@launch
+                }
+                // Paused: carry on from where it stopped instead of starting over.
+                if (existing?.status == DownloadStatus.PAUSED) {
+                    resume(existing.downloadId)
                     return@launch
                 }
                 dao.insertDownload(placeholder(target))
@@ -219,13 +225,7 @@ class DownloadRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun deleteSavedFile(uri: String) {
-        runCatching {
-            val parsed = Uri.parse(uri)
-            if (parsed.scheme == "file") java.io.File(parsed.path.orEmpty()).delete()
-            else context.contentResolver.delete(parsed, null, null)
-        }.onFailure { Log.w(TAG, "Could not delete $uri", it) }
-    }
+    private fun deleteSavedFile(uri: String) = storageExporter.deleteSaved(uri)
 
     // region Starting downloads
 

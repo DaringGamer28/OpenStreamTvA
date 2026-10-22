@@ -190,6 +190,7 @@ class PlayerViewModel @Inject constructor(
             .map { (url, name) -> ExternalSubtitle(uri = Uri.parse(url), name = name) }
         val request = ExternalPlayerRequest(
             mediaUri = Uri.parse(server.url),
+            mimeType = if (server.isHls) "application/x-mpegURL" else "video/*",
             title = title,
             positionMs = player.currentPosition.coerceAtLeast(0L),
             headers = server.headers,

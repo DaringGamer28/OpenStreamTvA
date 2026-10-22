@@ -136,6 +136,72 @@ class DownloadStorageExporter @Inject constructor(
         }
     }
 
+    /** Deletes a saved video and the subtitle files saved next to it. */
+    fun deleteSaved(uri: String) {
+        runCatching {
+            val parsed = Uri.parse(uri)
+            if (parsed.scheme == "file") {
+                val file = File(parsed.path ?: return)
+                val base = file.nameWithoutExtension
+                file.delete()
+                file.parentFile?.listFiles { sibling -> sibling.name.startsWith("$base.") }?.forEach { it.delete() }
+                file.parentFile?.takeIf { it.list().isNullOrEmpty() }?.delete()
+                return
+            }
+            val resolver = context.contentResolver
+            var folder: String? = null
+            var name: String? = null
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                resolver.query(
+                    parsed,
+                    arrayOf(MediaStore.MediaColumns.RELATIVE_PATH, MediaStore.MediaColumns.DISPLAY_NAME),
+                    null, null, null
+                )?.use { if (it.moveToFirst()) { folder = it.getString(0); name = it.getString(1) } }
+            }
+            resolver.delete(parsed, null, null)
+            val base = name?.substringBeforeLast('.') ?: return
+            val relativePath = folder ?: return
+            // Subtitles were saved as "<video name>.<language>.<ext>" in the same folder.
+            val escaped = base.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            resolver.delete(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                "${MediaStore.MediaColumns.RELATIVE_PATH} = ? AND ${MediaStore.MediaColumns.DISPLAY_NAME} LIKE ? ESCAPE '\\'",
+                arrayOf(relativePath, "$escaped.%")
+            )
+        }.onFailure { Log.w(TAG, "Could not delete $uri", it) }
+    }
+
+    /**
+     * Removes half-written saves a killed process left behind; Android would otherwise keep them,
+     * hidden, for a week. Only this app's own pending files are visible to it.
+     */
+    fun deleteAbandonedSaves() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || inFlight.isNotEmpty()) return
+        runCatching {
+            val resolver = context.contentResolver
+            val args = android.os.Bundle().apply {
+                putInt(MediaStore.QUERY_ARG_MATCH_PENDING, MediaStore.MATCH_ONLY)
+                putString(
+                    android.content.ContentResolver.QUERY_ARG_SQL_SELECTION,
+                    "${MediaStore.MediaColumns.RELATIVE_PATH} LIKE ?"
+                )
+                putStringArray(
+                    android.content.ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS,
+                    arrayOf("${Environment.DIRECTORY_DOWNLOADS}/Openstream/%")
+                )
+            }
+            resolver.query(MediaStore.Downloads.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.MediaColumns._ID), args, null)
+                ?.use { cursor ->
+                    while (cursor.moveToNext()) {
+                        resolver.delete(
+                            android.content.ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, cursor.getLong(0)),
+                            null, null
+                        )
+                    }
+                }
+        }.onFailure { Log.w(TAG, "Could not clear unfinished saves", it) }
+    }
+
     private fun updateState(downloadId: String, state: ExportState) {
         _exportStates.update { it + (downloadId to state) }
     }
