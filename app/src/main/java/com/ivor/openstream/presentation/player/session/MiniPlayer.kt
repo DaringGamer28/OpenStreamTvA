@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.player.session
 
+import com.ivor.openstream.ui.theme.onScrim
 import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.rememberCoroutineScope
@@ -185,7 +186,7 @@ fun MiniPlayer(
                             Icons.Default.CastConnected,
                             // Decorative: the row text already says where it's casting to.
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.inverseOnSurface,
+                            tint = MaterialTheme.colorScheme.onScrim,
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .background(

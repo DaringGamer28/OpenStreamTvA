@@ -262,6 +262,7 @@ private fun HiddenTitleEntity.toBackup() = BackupHidden(tmdbId, mediaType, title
 private data class BackupSettings(
     val themeMode: String? = null,
     val dynamicColor: Boolean? = null,
+    val amoledBlack: Boolean? = null,
     val dnsProvider: String? = null,
     val wifiOnlyDownloads: Boolean? = null,
     val seekStepSeconds: Int? = null,
@@ -282,6 +283,7 @@ private data class BackupSettings(
     fun applyTo(current: AppSettings) = current.copy(
         themeMode = ThemeMode.entries.firstOrNull { it.name == themeMode } ?: current.themeMode,
         dynamicColor = dynamicColor ?: current.dynamicColor,
+        amoledBlack = amoledBlack ?: current.amoledBlack,
         dnsProvider = DnsProvider.entries.firstOrNull { it.name == dnsProvider } ?: current.dnsProvider,
         wifiOnlyDownloads = wifiOnlyDownloads ?: current.wifiOnlyDownloads,
         seekStepSeconds = seekStepSeconds?.takeIf { it in AppSettings.SEEK_STEPS } ?: current.seekStepSeconds,
@@ -304,6 +306,7 @@ private data class BackupSettings(
 private fun AppSettings.toBackup() = BackupSettings(
     themeMode = themeMode.name,
     dynamicColor = dynamicColor,
+    amoledBlack = amoledBlack,
     dnsProvider = dnsProvider.name,
     wifiOnlyDownloads = wifiOnlyDownloads,
     seekStepSeconds = seekStepSeconds,

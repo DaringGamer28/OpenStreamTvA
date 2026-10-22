@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.player
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.lists.AddToListSheet
 import com.ivor.openstream.presentation.player.components.PlayerInfoSections
 import androidx.compose.ui.unit.min
@@ -807,7 +808,7 @@ fun PlayerScreen(
                                     }
                                     Text(
                                         text = playerTitle,
-                                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                                        color = MaterialTheme.colorScheme.onScrim,
                                         style = if (isFullscreen) {
                                             MaterialTheme.typography.headlineSmall
                                         } else {
@@ -821,7 +822,7 @@ fun PlayerScreen(
                                     if (playerSubtitle.isNotEmpty()) {
                                         Text(
                                             text = playerSubtitle,
-                                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.7f),
+                                            color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.7f),
                                             style = if (isFullscreen) {
                                                 MaterialTheme.typography.titleSmall
                                             } else {
@@ -849,7 +850,7 @@ fun PlayerScreen(
                                                 stringResource(R.string.player_preparing_sources)
                                             }
                                         },
-                                        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.6f),
+                                        color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.6f),
                                         style = MaterialTheme.typography.labelMedium,
                                         textAlign = TextAlign.Center
                                     )
@@ -878,7 +879,7 @@ fun PlayerScreen(
                                     ExpressiveBackButton(
                                         onClick = onBackClick,
                                         containerColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.1f),
-                                        contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                                        contentColor = MaterialTheme.colorScheme.onScrim
                                     )
                                 }
                             }

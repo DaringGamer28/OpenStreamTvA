@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.home
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.components.SkeletonBox
 import com.ivor.openstream.presentation.components.AnimeCard
 import com.ivor.openstream.presentation.components.bottomContentPadding
@@ -335,7 +336,7 @@ private fun CarouselItemScope.HeroCard(
                 text = anime.name,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Black,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = MaterialTheme.colorScheme.onScrim,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -364,13 +365,13 @@ private fun MetaLine(anime: AnimeDto) {
             Text(
                 text = String.format(Locale.US, " %.1f", rating) + if (parts.isNotEmpty()) "  ·  " else "",
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.inverseOnSurface
+                color = MaterialTheme.colorScheme.onScrim
             )
         }
         Text(
             text = parts.joinToString("  ·  "),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+            color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.8f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -458,7 +459,7 @@ private fun LandscapeRail(items: List<AnimeDto>, onOpen: (AnimeDto) -> Unit, onH
                 text = anime.name,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = MaterialTheme.colorScheme.onScrim,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

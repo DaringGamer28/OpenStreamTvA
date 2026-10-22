@@ -1,4 +1,5 @@
 package com.ivor.openstream.presentation.player.components
+import com.ivor.openstream.ui.theme.onScrim
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -276,7 +277,7 @@ private fun TopBar(
         ExpressiveBackButton(
             onClick = onBackClick,
             containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.inverseOnSurface
+            contentColor = MaterialTheme.colorScheme.onScrim
         )
         Column(
             modifier = Modifier
@@ -286,7 +287,7 @@ private fun TopBar(
             Text(
                 text = title,
                 style = if (isFullscreen) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = MaterialTheme.colorScheme.onScrim,
                 fontWeight = FontWeight.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -295,7 +296,7 @@ private fun TopBar(
                 Text(
                     text = subtitle,
                     style = if (isFullscreen) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.72f),
+                    color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.72f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -467,7 +468,7 @@ private fun Timeline(
     val colors = SliderDefaults.colors(
         thumbColor = MaterialTheme.colorScheme.primary,
         activeTrackColor = MaterialTheme.colorScheme.primary,
-        inactiveTrackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.28f)
+        inactiveTrackColor = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.28f)
     )
     val interactionSource = remember { MutableInteractionSource() }
     val sliderState = rememberSliderState()
@@ -489,7 +490,7 @@ private fun Timeline(
         Text(
             text = "${formatTime(shownTime)} / ${formatTime(duration)}",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.inverseOnSurface,
+            color = MaterialTheme.colorScheme.onScrim,
             fontWeight = FontWeight.Bold,
             maxLines = 1
         )

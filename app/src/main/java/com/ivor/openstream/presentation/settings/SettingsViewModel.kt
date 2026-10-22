@@ -180,6 +180,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setDynamicColor(enabled: Boolean) = appSettingsStore.update { it.copy(dynamicColor = enabled) }
 
+    fun setAmoledBlack(enabled: Boolean) = appSettingsStore.update { it.copy(amoledBlack = enabled) }
+
     fun setDnsProvider(provider: DnsProvider) = appSettingsStore.update { it.copy(dnsProvider = provider) }
 
     fun setSeekStep(seconds: Int) = appSettingsStore.update { it.copy(seekStepSeconds = seconds) }

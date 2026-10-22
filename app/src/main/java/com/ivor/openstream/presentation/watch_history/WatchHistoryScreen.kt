@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.watch_history
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.components.isCompactWidth
 import com.ivor.openstream.R
 import androidx.compose.ui.graphics.Brush
@@ -364,7 +365,7 @@ private fun HistoryCard(
                 Surface(
                     shape = ExpressiveShapes.small,
                     color = if (entry.completed) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
-                    contentColor = if (entry.completed) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.inverseOnSurface,
+                    contentColor = if (entry.completed) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onScrim,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(10.dp)
@@ -386,7 +387,7 @@ private fun HistoryCard(
                 if (!entry.completed && entry.fraction > 0f) {
                     LinearWavyProgressIndicator(
                         progress = { entry.fraction },
-                        trackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.25f),
+                        trackColor = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.25f),
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                             .fillMaxWidth()

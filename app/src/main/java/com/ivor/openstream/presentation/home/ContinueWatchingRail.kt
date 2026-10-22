@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.home
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.components.byWidth
 import com.ivor.openstream.R
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -135,7 +136,7 @@ private fun ContinueWatchingCard(
                 text = item.badge(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = MaterialTheme.colorScheme.onScrim,
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(start = 14.dp, bottom = if (item.fraction > 0f) 16.dp else 12.dp)
@@ -144,7 +145,7 @@ private fun ContinueWatchingCard(
                 LinearWavyProgressIndicator(
                     progress = { item.fraction },
                     color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.3f),
+                    trackColor = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.3f),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxWidth()

@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.player.components
 
+import com.ivor.openstream.ui.theme.onScrim
 import androidx.compose.animation.AnimatedContent
 import com.ivor.openstream.R
 import androidx.compose.foundation.background
@@ -181,7 +182,7 @@ fun CastPlaybackView(
                 ExpressiveBackButton(
                     onClick = onBackClick,
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.inverseOnSurface
+                    contentColor = MaterialTheme.colorScheme.onScrim
                 )
                 Column(
                     modifier = Modifier
@@ -191,7 +192,7 @@ fun CastPlaybackView(
                     Text(
                         text = stringResource(R.string.player_playing_on, deviceName),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        color = MaterialTheme.colorScheme.onScrim,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -199,7 +200,7 @@ fun CastPlaybackView(
                         text = if (subtitle.isNotBlank()) "$title · $subtitle" else title,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
+                        color = MaterialTheme.colorScheme.onScrim,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.semantics { heading() }
@@ -214,7 +215,7 @@ fun CastPlaybackView(
                             Icon(
                                 if (subtitles.activeId != null) Icons.Default.ClosedCaption else Icons.Default.ClosedCaptionDisabled,
                                 contentDescription = stringResource(R.string.player_subtitles_on_tv),
-                                tint = MaterialTheme.colorScheme.inverseOnSurface
+                                tint = MaterialTheme.colorScheme.onScrim
                             )
                         }
                         DropdownMenu(expanded = showSubtitleMenu, onDismissRequest = { showSubtitleMenu = false }) {
@@ -233,7 +234,7 @@ fun CastPlaybackView(
                 }
                 if (onCastClick != null) {
                     IconButton(onClick = onCastClick) {
-                        Icon(Icons.Default.CastConnected, contentDescription = stringResource(R.string.cd_cast_device, deviceName), tint = MaterialTheme.colorScheme.inverseOnSurface)
+                        Icon(Icons.Default.CastConnected, contentDescription = stringResource(R.string.cd_cast_device, deviceName), tint = MaterialTheme.colorScheme.onScrim)
                     }
                 }
             }
@@ -249,14 +250,14 @@ fun CastPlaybackView(
                         Text(
                             text = error.message,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.inverseOnSurface,
+                            color = MaterialTheme.colorScheme.onScrim,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                             Button(onClick = onRetry, shape = ExpressiveShapes.medium) { Text(stringResource(R.string.action_retry)) }
                             if (onChooseSource != null && error.fromStream) {
                                 OutlinedButton(onClick = onChooseSource, shape = ExpressiveShapes.medium) {
-                                    Text(stringResource(R.string.player_other_source), color = MaterialTheme.colorScheme.inverseOnSurface)
+                                    Text(stringResource(R.string.player_other_source), color = MaterialTheme.colorScheme.onScrim)
                                 }
                             }
                         }
@@ -326,7 +327,7 @@ fun CastPlaybackView(
                 Text(
                     text = formatTime(if (scrubbing) (scrubValue * duration).toLong() else position),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface
+                    color = MaterialTheme.colorScheme.onScrim
                 )
                 // Playback drives the slider except while the user is scrubbing it.
                 val castSliderState = rememberSliderState()
@@ -353,7 +354,7 @@ fun CastPlaybackView(
                     colors = SliderDefaults.colors(
                         thumbColor = MaterialTheme.colorScheme.primary,
                         activeTrackColor = MaterialTheme.colorScheme.primary,
-                        inactiveTrackColor = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.3f)
+                        inactiveTrackColor = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.3f)
                     ),
                     modifier = Modifier
                         .weight(1f)
@@ -362,7 +363,7 @@ fun CastPlaybackView(
                 Text(
                     text = formatTime(duration),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.inverseOnSurface
+                    color = MaterialTheme.colorScheme.onScrim
                 )
             }
         }

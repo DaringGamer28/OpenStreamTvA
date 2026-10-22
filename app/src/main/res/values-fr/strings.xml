@@ -320,6 +320,8 @@
     <string name="st_theme_system">Système</string>
     <string name="st_theme_light">Clair</string>
     <string name="st_theme_dark">Sombre</string>
+    <string name="st_amoled_black">Noir AMOLED</string>
+    <string name="st_amoled_black_hint">Des surfaces vraiment noires lorsque l\'app est sombre.</string>
     <string name="st_dynamic_color">Couleurs dynamiques</string>
     <string name="st_dynamic_hint">Accorder les couleurs à votre fond d’écran</string>
     <string name="st_language">Langue</string>

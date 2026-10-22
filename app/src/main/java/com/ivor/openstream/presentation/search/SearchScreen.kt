@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.search
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.R
 import com.ivor.openstream.presentation.components.bottomContentPadding
 import com.ivor.openstream.presentation.components.isCompactWidth
@@ -736,17 +737,17 @@ private fun TopResultCard(item: AnimeDto, onClick: () -> Unit) {
                     text = item.name,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
-                    color = MaterialTheme.colorScheme.inverseOnSurface,
+                    color = MaterialTheme.colorScheme.onScrim,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 8.dp)
                 )
-                Text(metaLine(item), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.85f))
+                Text(metaLine(item), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.85f))
                 if (!compact && !item.overview.isNullOrBlank()) {
                     Text(
                         text = item.overview,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.onScrim.copy(alpha = 0.8f),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(top = 8.dp)

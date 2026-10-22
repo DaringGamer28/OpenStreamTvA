@@ -64,6 +64,25 @@ class MainActivity : ComponentActivity() {
             }
         )
 
+        // AMOLED's page is true black, so the window behind Compose must be black too; otherwise
+        // the charcoal DayNight surface shows through during the first frame and in transient
+        // gaps such as rotation. The setting only changes dark surfaces, so light themes keep
+        // their normal window color.
+        val startsDark = when (appSettings.current.themeMode) {
+            ThemeMode.LIGHT -> false
+            ThemeMode.DARK -> true
+            ThemeMode.SYSTEM -> {
+                val nightMode = resources.configuration.uiMode and
+                    android.content.res.Configuration.UI_MODE_NIGHT_MASK
+                nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+            }
+        }
+        if (appSettings.current.amoledBlack && startsDark) {
+            window.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(android.graphics.Color.BLACK)
+            )
+        }
+
         // First launch only; re-asking on every rotation while the user decides is a bug.
         if (savedInstanceState == null &&
             android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
@@ -85,12 +104,17 @@ class MainActivity : ComponentActivity() {
             val windowSizeClass = calculateWindowSizeClass(this)
             val settings by appSettings.settings.collectAsState()
             val tvMode = rememberTvMode()
+            val amoled = settings.amoledBlack
             val darkTheme = if (tvMode) true else when (settings.themeMode) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
-            OpenStreamTheme(darkTheme = darkTheme, dynamicColor = if (tvMode) false else settings.dynamicColor) {
+            OpenStreamTheme(
+                darkTheme = darkTheme,
+                dynamicColor = if (tvMode) false else settings.dynamicColor,
+                amoled = amoled
+            ) {
                 // Most screens draw their own background without a Scaffold, so this root
                 // Surface is what gives un-styled Text the theme's onBackground color.
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {

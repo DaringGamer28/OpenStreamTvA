@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.watch_later
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.components.bottomContentPadding
 import com.ivor.openstream.R
 import com.ivor.openstream.presentation.components.byWidth
@@ -315,7 +316,7 @@ private fun SavedCard(
                 ) {
                     if (entry.mediaType == "movie") Badge(stringResource(R.string.details_movie))
                     if (entry.voteAverage > 0) {
-                        Surface(shape = ExpressiveShapes.extraSmall, color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f), contentColor = MaterialTheme.colorScheme.inverseOnSurface) {
+                        Surface(shape = ExpressiveShapes.extraSmall, color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f), contentColor = MaterialTheme.colorScheme.onScrim) {
                             Row(modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(12.dp))
                                 Text(String.format(Locale.US, " %.1f", entry.voteAverage), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)

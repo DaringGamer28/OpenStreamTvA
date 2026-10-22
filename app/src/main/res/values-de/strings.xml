@@ -320,6 +320,8 @@
     <string name="st_theme_system">System</string>
     <string name="st_theme_light">Hell</string>
     <string name="st_theme_dark">Dunkel</string>
+    <string name="st_amoled_black">AMOLED-Schwarz</string>
+    <string name="st_amoled_black_hint">Echtes Schwarz für Flächen, solange die App dunkel ist.</string>
     <string name="st_dynamic_color">Dynamische Farben</string>
     <string name="st_dynamic_hint">Farben an Ihr Hintergrundbild anpassen</string>
     <string name="st_language">Sprache</string>

@@ -1,5 +1,6 @@
 package com.ivor.openstream.presentation.details
 
+import com.ivor.openstream.ui.theme.onScrim
 import com.ivor.openstream.presentation.components.bottomContentPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.animation.core.animate
@@ -1455,7 +1456,7 @@ private fun BoxScope.EpisodeThumbnailOverlay(number: Int, progress: WatchProgres
     Surface(
         shape = ExpressiveShapes.extraSmall,
         color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.65f),
-        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+        contentColor = MaterialTheme.colorScheme.onScrim,
         modifier = Modifier
             .align(Alignment.TopStart)
             .padding(6.dp)

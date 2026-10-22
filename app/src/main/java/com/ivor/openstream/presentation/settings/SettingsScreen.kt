@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
@@ -256,7 +257,11 @@ fun SettingsScreen(
 
                 item(key = "appearance") {
                     val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                    val count = if (dynamicAvailable) 3 else 2
+                    // AMOLED only changes dark surfaces, so the option hides when Light is forced.
+                    val amoledAvailable = appSettings.themeMode != ThemeMode.LIGHT
+                    val count = 2 +
+                        (if (dynamicAvailable) 1 else 0) +
+                        (if (amoledAvailable) 1 else 0)
                     SettingsGroup(title = stringResource(R.string.st_appearance)) {
                         ChoiceRow(
                             index = 0, count = count,
@@ -283,6 +288,16 @@ fun SettingsScreen(
                                 supporting = stringResource(R.string.st_dynamic_hint),
                                 checked = appSettings.dynamicColor,
                                 onCheckedChange = viewModel::setDynamicColor
+                            )
+                        }
+                        if (amoledAvailable) {
+                            SwitchRow(
+                                index = if (dynamicAvailable) 3 else 2, count = count,
+                                icon = Icons.Default.Contrast,
+                                title = stringResource(R.string.st_amoled_black),
+                                supporting = stringResource(R.string.st_amoled_black_hint),
+                                checked = appSettings.amoledBlack,
+                                onCheckedChange = viewModel::setAmoledBlack
                             )
                         }
                     }

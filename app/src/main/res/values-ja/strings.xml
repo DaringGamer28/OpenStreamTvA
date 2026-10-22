@@ -320,6 +320,8 @@
     <string name="st_theme_system">システム</string>
     <string name="st_theme_light">ライト</string>
     <string name="st_theme_dark">ダーク</string>
+    <string name="st_amoled_black">AMOLEDブラック</string>
+    <string name="st_amoled_black_hint">ダーク表示中は純黒の背景を使います。</string>
     <string name="st_dynamic_color">ダイナミックカラー</string>
     <string name="st_dynamic_hint">壁紙に合わせて色を変更</string>
     <string name="st_language">言語</string>
