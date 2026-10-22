@@ -159,6 +159,8 @@ class PlayerViewModel @Inject constructor(
     val videoShaders: StateFlow<VideoShaderCustomization> = playbackSession.videoShaders
 
     /** A slider mid-drag: on the picture at once, stored when the finger lifts. */
+    val shadersApplyNow: Boolean get() = playbackSession.shadersApplyNow
+
     fun previewVideoShaders(settings: VideoShaderCustomization) =
         playbackSession.previewVideoShaders(settings)
 
@@ -188,6 +190,7 @@ class PlayerViewModel @Inject constructor(
             .map { (url, name) -> ExternalSubtitle(uri = Uri.parse(url), name = name) }
         val request = ExternalPlayerRequest(
             mediaUri = Uri.parse(server.url),
+            mimeType = if (server.isHls) "application/x-mpegURL" else "video/*",
             title = title,
             positionMs = player.currentPosition.coerceAtLeast(0L),
             headers = server.headers,
@@ -469,6 +472,9 @@ class PlayerViewModel @Inject constructor(
     suspend fun getPlaybackUri(downloadId: String): String? =
         downloadRepository.getPlaybackUri(downloadId)
 
+    suspend fun getPlaybackMimeType(downloadId: String): String? =
+        downloadRepository.getPlaybackMimeType(downloadId)
+
     fun removeDownload(downloadId: String) {
         viewModelScope.launch { downloadRepository.removeDownload(downloadId) }
     }
@@ -626,12 +632,13 @@ class PlayerViewModel @Inject constructor(
                             remaining = _nextEpisodes.value
                         )
                     }
+                _isLoadingEpisodes.value = false
                 val target = nextTarget
                 if (target != null) {
                     _nextEpisode.value = target
+                    // After the list is shown: offline, the next season's request only times out.
                     warmUpNext(target, seasonNumber, tmdbId)
                 }
-                _isLoadingEpisodes.value = false
             }
 
             launch {

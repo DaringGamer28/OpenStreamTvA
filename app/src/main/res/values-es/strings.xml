@@ -822,12 +822,8 @@
     <string name="match_rail">Tus mejores coincidencias</string>
     <string name="match_percent">%1$d%% de coincidencia</string>
     <string name="match_because">Porque te gustó %1$s</string>
-    <string name="st_save_to_storage">Guardar descargas en el almacenamiento</string>
-    <string name="st_save_to_storage_summary">Copia cada descarga terminada en Downloads/Openstream, donde otras apps pueden abrirla</string>
     <string name="dl_tab_downloads">Descargas</string>
     <string name="dl_tab_local_files">Archivos locales</string>
-    <string name="dl_save_to_storage">Guardar en el almacenamiento</string>
-    <string name="dl_saved_to_storage">Guardado en Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">No se pudo guardar en el almacenamiento</string>
     <string name="local_import_files">Importar vídeos</string>
     <string name="local_no_files_title">No hay vídeos locales</string>

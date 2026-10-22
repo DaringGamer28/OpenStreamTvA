@@ -822,12 +822,8 @@
     <string name="match_rail">Найкращі збіги для вас</string>
     <string name="match_percent">%1$d%% збіг</string>
     <string name="match_because">Бо вам сподобалося %1$s</string>
-    <string name="st_save_to_storage">Зберігати завантаження в пам’ять</string>
-    <string name="st_save_to_storage_summary">Копіювати кожне готове завантаження в Downloads/Openstream, де його зможуть відкрити інші застосунки</string>
     <string name="dl_tab_downloads">Завантаження</string>
     <string name="dl_tab_local_files">Локальні файли</string>
-    <string name="dl_save_to_storage">Зберегти в пам’ять</string>
-    <string name="dl_saved_to_storage">Збережено в Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Не вдалося зберегти в пам’ять</string>
     <string name="local_import_files">Імпортувати відео</string>
     <string name="local_no_files_title">Немає локальних відео</string>

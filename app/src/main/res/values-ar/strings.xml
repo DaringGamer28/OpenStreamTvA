@@ -863,12 +863,8 @@
     <string name="match_rail">أفضل الترشيحات لك</string>
     <string name="match_percent">تطابق %1$d%%</string>
     <string name="match_because">لأن %1$s أعجبك</string>
-    <string name="st_save_to_storage">حفظ التنزيلات في وحدة التخزين</string>
-    <string name="st_save_to_storage_summary">نسخ كل تنزيل مكتمل إلى Downloads/Openstream حيث يمكن للتطبيقات الأخرى فتحه</string>
     <string name="dl_tab_downloads">التنزيلات</string>
     <string name="dl_tab_local_files">الملفات المحلية</string>
-    <string name="dl_save_to_storage">حفظ في وحدة التخزين</string>
-    <string name="dl_saved_to_storage">تم الحفظ في Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">تعذّر الحفظ في وحدة التخزين</string>
     <string name="local_import_files">استيراد فيديوهات</string>
     <string name="local_no_files_title">لا توجد فيديوهات محلية</string>

@@ -822,12 +822,8 @@
     <string name="match_rail">Vos meilleures correspondances</string>
     <string name="match_percent">%1$d%% de correspondance</string>
     <string name="match_because">Parce que vous avez aimé %1$s</string>
-    <string name="st_save_to_storage">Enregistrer les téléchargements</string>
-    <string name="st_save_to_storage_summary">Copier chaque téléchargement terminé dans Downloads/Openstream, où d’autres applis peuvent l’ouvrir</string>
     <string name="dl_tab_downloads">Téléchargements</string>
     <string name="dl_tab_local_files">Fichiers locaux</string>
-    <string name="dl_save_to_storage">Enregistrer dans le stockage</string>
-    <string name="dl_saved_to_storage">Enregistré dans Downloads/Openstream</string>
     <string name="dl_save_to_storage_failed">Impossible d’enregistrer dans le stockage</string>
     <string name="local_import_files">Importer des vidéos</string>
     <string name="local_no_files_title">Aucune vidéo locale</string>

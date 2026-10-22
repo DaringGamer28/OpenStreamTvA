@@ -822,12 +822,8 @@
     <string name="match_rail">Top-Treffer für Sie</string>
     <string name="match_percent">%1$d%% Treffer</string>
     <string name="match_because">Weil Ihnen %1$s gefallen hat</string>
-    <string name="st_save_to_storage">Downloads im Speicher sichern</string>
-    <string name="st_save_to_storage_summary">Jeden fertigen Download nach Downloads/Openstream kopieren, wo andere Apps ihn öffnen können</string>
     <string name="dl_tab_downloads">Downloads</string>
     <string name="dl_tab_local_files">Lokale Dateien</string>
-    <string name="dl_save_to_storage">Im Speicher sichern</string>
-    <string name="dl_saved_to_storage">In Downloads/Openstream gesichert</string>
     <string name="dl_save_to_storage_failed">Konnte nicht im Speicher gesichert werden</string>
     <string name="local_import_files">Videos importieren</string>
     <string name="local_no_files_title">Keine lokalen Videos</string>

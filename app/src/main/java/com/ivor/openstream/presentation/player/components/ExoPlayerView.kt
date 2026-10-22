@@ -98,6 +98,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -414,10 +415,11 @@ fun ExoPlayerView(
     }
 
     // The chip offering to skip a resumed position. It goes as soon as it is used, and on its own
-    // after a while, since it is an offer rather than part of the player.
+    // after a while, since it is an offer rather than part of the player. The clock only runs while
+    // the video plays, so a slow start does not use up the time it is on screen.
     var showResumeChip by remember(resumedFromMs) { mutableStateOf(resumedFromMs != null) }
-    LaunchedEffect(showResumeChip) {
-        if (showResumeChip) {
+    LaunchedEffect(showResumeChip, isPlaying, isBuffering) {
+        if (showResumeChip && isPlaying && !isBuffering) {
             delay(RESUME_CHIP_VISIBLE_MS)
             showResumeChip = false
         }
@@ -1437,31 +1439,33 @@ fun ExoPlayerView(
                     .padding(start = 16.dp, bottom = if (isFullscreen) 96.dp else 72.dp)
             }
         ) {
+            // One small pill: the whole thing is the button. The resumed time is in the spoken label
+            // rather than on screen, where the seek bar already shows it.
+            val resumedLabel = stringResource(R.string.vp_resumed_from, formatTime(resumedFromMs ?: 0L))
+            val playFromStart = stringResource(R.string.vp_play_from_start)
             Surface(
+                onClick = {
+                    showResumeChip = false
+                    onPlayFromStart()
+                },
                 shape = ExpressiveShapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
-                contentColor = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .heightIn(min = 48.dp)
+                    .semantics { contentDescription = "$resumedLabel. $playFromStart" }
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(start = 16.dp, end = 6.dp, top = 4.dp, bottom = 4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text(
-                        text = stringResource(
-                            R.string.vp_resumed_from,
-                            formatTime(resumedFromMs ?: 0L)
-                        ),
-                        style = MaterialTheme.typography.labelLarge
+                    Icon(
+                        imageVector = Icons.Default.Replay,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
                     )
-                    TextButton(
-                        onClick = {
-                            showResumeChip = false
-                            onPlayFromStart()
-                        }
-                    ) {
-                        Text(stringResource(R.string.vp_play_from_start))
-                    }
+                    Text(playFromStart, style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
@@ -2138,7 +2142,7 @@ private const val SCREEN_LOCK_PILL_MS = 2_000L
 /** How long the unlock badge waits, untouched, before it takes itself away. */
 private const val UNLOCK_BUTTON_VISIBLE_MS = 2_500L
 /** How long the resumed-from chip stays up before it takes itself away. */
-private const val RESUME_CHIP_VISIBLE_MS = 8_000L
+private const val RESUME_CHIP_VISIBLE_MS = 5_000L
 
 /**
  * How much of the picture filling the screen may crop away before the fill is refused.

@@ -822,12 +822,8 @@
     <string name="match_rail">あなたへのトップマッチ</string>
     <string name="match_percent">%1$d%%マッチ</string>
     <string name="match_because">%1$sがお好きなので</string>
-    <string name="st_save_to_storage">ダウンロードをストレージに保存</string>
-    <string name="st_save_to_storage_summary">完了したダウンロードを Downloads/Openstream にコピーし、他のアプリでも開けるようにします</string>
     <string name="dl_tab_downloads">ダウンロード</string>
     <string name="dl_tab_local_files">ローカルファイル</string>
-    <string name="dl_save_to_storage">ストレージに保存</string>
-    <string name="dl_saved_to_storage">Downloads/Openstream に保存しました</string>
     <string name="dl_save_to_storage_failed">ストレージに保存できませんでした</string>
     <string name="local_import_files">動画をインポート</string>
     <string name="local_no_files_title">ローカル動画はありません</string>

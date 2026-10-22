@@ -10,6 +10,7 @@ import com.ivor.openstream.data.local.entity.LocalMediaEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
@@ -118,14 +119,11 @@ class LocalMediaRepository @Inject constructor(
         imported
     }
 
+    /** The folder above the file; document ids like `primary:Movies` lose their volume prefix. */
     private fun extractFolderName(uri: Uri): String? {
-        return try {
-            val path = uri.path ?: return null
-            val segments = path.split('/').filter { it.isNotEmpty() }
-            if (segments.size >= 2) segments[segments.size - 2] else null
-        } catch (_: Exception) {
-            null
-        }
+        val segments = uri.path?.split('/')?.filter { it.isNotEmpty() } ?: return null
+        val folder = segments.getOrNull(segments.size - 2)?.substringAfterLast(':') ?: return null
+        return folder.takeIf { it.isNotBlank() && it != "document" && it != "tree" }
     }
 
     /**
@@ -143,5 +141,15 @@ class LocalMediaRepository @Inject constructor(
         dao.deleteById(id)
     }
 
-    suspend fun deleteAll() = dao.deleteAll()
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
+        dao.getAllLocalMedia().first().forEach { item ->
+            val uri = Uri.parse(item.uri)
+            if (uri.scheme == "content") {
+                runCatching {
+                    context.contentResolver.releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+            }
+        }
+        dao.deleteAll()
+    }
 }
