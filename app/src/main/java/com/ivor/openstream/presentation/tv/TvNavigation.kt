@@ -92,11 +92,14 @@ private fun TvAppScaffold(navController: NavHostController) {
             restoreState = true
         }
     }
-
+    
     val background = MaterialTheme.colorScheme.background
+    val scrimBrush = remember(background) {
+        Brush.horizontalGradient(listOf(background, background.copy(alpha = 0.6f), Color.Transparent))
+    }
     ModalNavigationDrawer(
         drawerState = drawerState,
-        scrimBrush = Brush.horizontalGradient(listOf(background, background.copy(alpha = 0.6f), Color.Transparent)),
+        scrimBrush = scrimBrush,
         drawerContent = {
             if (showDrawer) {
                 Column(
