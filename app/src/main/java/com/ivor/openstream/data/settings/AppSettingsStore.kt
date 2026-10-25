@@ -95,14 +95,14 @@ data class AppSettings(
     val sourceSearchMode: SourceSearchMode = SourceSearchMode.ALL_AT_ONCE,
     /** BCP-47 app language tag, or null to follow the system locale. */
     val appLanguage: String? = null,
-    /** Daily check of followed shows for newly aired episodes. */
-    val episodeNotifications: Boolean = true,
+    /** Daily check of followed shows for newly aired episodes. (Turned OFF for TV RAM) */
+    val episodeNotifications: Boolean = false,
     /** Auto-download the next unwatched episodes and delete watched ones. */
     val smartDownloads: Boolean = false,
     /** How many episodes ahead Smart Downloads keeps (1..3). */
     val smartKeepAhead: Int = 2,
-    /** Playback keeps going when the app leaves the foreground, with a media notification. */
-    val keepPlayingInBackground: Boolean = true,
+    /** Playback keeps going when the app leaves the foreground, with a media notification. (Turned OFF for TV RAM) */
+    val keepPlayingInBackground: Boolean = false,
     /** Ask before a stream runs on a metered network (once per app run). */
     val warnBeforeMeteredStream: Boolean = true,
     /** Tallest rendition allowed while streaming on a metered network; 0 means no limit. */
@@ -115,8 +115,8 @@ data class AppSettings(
     val volumeBoostPercent: Int = 100,
     /** Disk budget for artwork and title info; takes effect on the next start. */
     val cacheSize: CacheSize = CacheSize.STANDARD,
-    /** Load artwork for rows not on screen yet, only on unmetered networks. */
-    val preloadArtwork: Boolean = true,
+    /** Load artwork for rows not on screen yet, only on unmetered networks. (Turned OFF for TV RAM) */
+    val preloadArtwork: Boolean = false,
     /** The look the video picture is drawn in, and the sliders that tune it. */
     val videoShaders: VideoShaderCustomization = VideoShaderCustomization(),
     /** Which of the player's optional gestures are on. */
@@ -129,8 +129,8 @@ data class AppSettings(
         val SMART_AHEAD_OPTIONS = listOf(1, 2, 3)
         /** Quality caps offered for metered networks: 720p, 480p and no limit. */
         val METERED_CAPS = listOf(720, 480, 0)
-    /** Quality caps offered for streaming: 1080p, 720p, 4K and no limit. */
-    val STREAM_CAPS = listOf(1080, 720, 2160, 0)
+        /** Quality caps offered for streaming: 1080p, 720p, 4K and no limit. */
+        val STREAM_CAPS = listOf(1080, 720, 2160, 0)
         val SMOOTH_MOTION_FPS_OPTIONS = listOf(60, 120)
     }
 }
