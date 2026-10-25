@@ -108,7 +108,7 @@ data class TvDimens(
                 buttonHeight = v(48f),
                 chipHeight = v(40f),
                 focusRingWidth = v(3f),
-                focusScale = 1.09f,
+                focusScale = 1.04f, // Lowered from 1.09 to stop GPU lag on TV
                 minTarget = v(48f),
                 navRailWidth = v(104f),
                 navRailItemHeight = v(64f),
@@ -118,7 +118,7 @@ data class TvDimens(
                 paddingSmall = v(8f),
                 paddingMedium = v(16f),
                 paddingLarge = v(24f),
-                cardElevation = v(16f),
+                cardElevation = v(0f), // Disabled heavy 3D shadow effects
                 keyboardKeyWidth = v(64f),
                 keyboardKeyHeight = v(52f),
                 progressBarHeight = v(4f),
