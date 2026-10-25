@@ -21,6 +21,8 @@ fun OpenStreamTheme(
     dynamicColor: Boolean = true,
     /** True-black surfaces; dark themes only. */
     amoled: Boolean = false,
+    /** Plainer, cheaper animations; used on TV so weak hardware doesn't struggle. */
+    reducedMotion: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -56,7 +58,7 @@ fun OpenStreamTheme(
         colorScheme = colorScheme,
         typography = Typography,
         shapes = ExpressiveShapes,
-        motionScheme = MotionScheme.expressive(),
+        motionScheme = if (reducedMotion) MotionScheme.standard() else MotionScheme.expressive(),
         content = content
     )
 }
