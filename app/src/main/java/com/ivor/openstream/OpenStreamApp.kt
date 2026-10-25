@@ -9,8 +9,6 @@ import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.ivor.openstream.data.cache.CacheBudget
 import com.ivor.openstream.data.diagnostics.Diagnostics
-import com.ivor.openstream.data.downloads.SmartDownloads
-import com.ivor.openstream.data.notifications.EpisodeAlarm
 import com.ivor.openstream.data.settings.AppDns
 import com.ivor.openstream.data.settings.AppLocale
 import com.ivor.openstream.data.settings.AppSettingsStore
@@ -30,9 +28,6 @@ class OpenStreamApp : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var appSettingsStore: AppSettingsStore
 
-    @Inject
-    lateinit var smartDownloads: SmartDownloads
-
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(AppLocale.wrap(base, AppLocale.savedTag(base)))
     }
@@ -40,13 +35,7 @@ class OpenStreamApp : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         Diagnostics.installCrashRecorder(this)
-        // Daily episode check, only while the toggle is on.
-        if (appSettingsStore.current.episodeNotifications &&
-            !EpisodeAlarm.isScheduled(this)
-        ) {
-            EpisodeAlarm.schedule(this)
-        }
-        smartDownloads.start()
+        // Background tasks (EpisodeAlarm and smartDownloads) removed to save TV RAM
     }
 
     /**
@@ -60,6 +49,7 @@ class OpenStreamApp : Application(), SingletonImageLoader.Factory {
         // Hilt injects in onCreate; nothing should ask for images before that, but never crash on it.
         val wanted = (if (::appSettingsStore.isInitialized) appSettingsStore.current.cacheSize else CacheSize.STANDARD).imageBytes
         return ImageLoader.Builder(context)
+            .bitmapConfig(android.graphics.Bitmap.Config.RGB_565) // Halves image memory usage
             .components { add(OkHttpNetworkFetcherFactory(client)) }
             .diskCache {
                 DiskCache.Builder()
