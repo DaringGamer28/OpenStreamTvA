@@ -49,7 +49,6 @@ class OpenStreamApp : Application(), SingletonImageLoader.Factory {
         // Hilt injects in onCreate; nothing should ask for images before that, but never crash on it.
         val wanted = (if (::appSettingsStore.isInitialized) appSettingsStore.current.cacheSize else CacheSize.STANDARD).imageBytes
         return ImageLoader.Builder(context)
-            .bitmapConfig(android.graphics.Bitmap.Config.RGB_565) // Halves image memory usage
             .components { add(OkHttpNetworkFetcherFactory(client)) }
             .diskCache {
                 DiskCache.Builder()
